@@ -4,7 +4,7 @@ ZSH=$HOME/.oh-my-zsh
 ZSH_THEME="robbyrussell"
 
 # Useful oh-my-zsh plugins for Le Wagon bootcamps
-plugins=(git gitfast last-working-dir common-aliases zsh-syntax-highlighting history-substring-search)
+plugins=(git gitfast last-working-dir common-aliases zsh-syntax-highlighting history-substring-search zsh-autosuggestions)
 
 # (macOS-only) Prevent Homebrew from reporting - https://github.com/Homebrew/brew/blob/master/docs/Analytics.md
 export HOMEBREW_NO_ANALYTICS=1
@@ -65,8 +65,19 @@ export PATH="./bin:./node_modules/.bin:${PATH}:/usr/local/sbin"
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
-export BUNDLER_EDITOR=code
-export EDITOR=code
+# Zed comme éditeur par défaut
+export BUNDLER_EDITOR="zed --wait"
+export EDITOR="zed --wait"
+export VISUAL="zed --wait"
 
 # Set ipdb as the default Python debugger
 export PYTHONBREAKPOINT=ipdb.set_trace
+export SSL_CERT_FILE=/opt/homebrew/etc/openssl@3/cert.pem
+export SSL_CERT_DIR=/opt/homebrew/etc/openssl@3/certs
+export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
+
+# Load environment variables from local .env (not versioned)
+[[ -f "$HOME/.env" ]] && source "$HOME/.env"
+
+# Répertoire de travail par défaut
+cd ~/Code

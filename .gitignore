@@ -1,0 +1,8 @@
+# Secrets (ne jamais versionner)
+.env
+secrets
+*.secret
+.secrets
+
+# OS files
+.DS_Store
