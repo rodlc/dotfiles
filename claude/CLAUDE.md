@@ -32,7 +32,7 @@
 
 - Confirm before loading full project context
 - Minimal changes, close to original code
-- Git: branch per story, commit per subtask
+- Git: team repos → branch per story, commit per subtask | personal repos → direct to master
 - Rails TDD: test → route → controller → model → view
 
 ## Commands

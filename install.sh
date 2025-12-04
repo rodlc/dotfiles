@@ -5,13 +5,13 @@ DOTFILES_DIR="$PWD"
 
 backup() {
   local target="$1"
-  [ -e "$target" ] && [ ! -L "$target" ] && mv "$target" "$target.backup" && echo "-----> Backed up $target"
+  [ -e "$target" ] && [ ! -L "$target" ] && mv "$target" "$target.backup" && echo "-----> Backed up $target" || true
 }
 
 symlink() {
   local source="$1" link="$2"
-  [ ! -e "$source" ] && echo "Warning: $source not found" && return
-  [ ! -e "$link" ] && ln -s "$source" "$link" && echo "-----> Linked $link"
+  [ ! -e "$source" ] && echo "Warning: $source not found" && return 0
+  [ ! -e "$link" ] && ln -s "$source" "$link" && echo "-----> Linked $link" || true
 }
 
 # Shell config
