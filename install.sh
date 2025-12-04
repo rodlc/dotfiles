@@ -28,7 +28,7 @@ fi
 
 # Install Homebrew packages
 echo "=====> Installing Homebrew packages"
-brew install --quiet pyenv rbenv nvm git 2>/dev/null || true
+brew install --quiet pyenv rbenv nvm git pre-commit 2>/dev/null || true
 brew install --cask --quiet zed 2>/dev/null || true
 
 # Install oh-my-zsh if not present
@@ -80,6 +80,14 @@ backup "$HOME/.claude/CLAUDE.md"
 symlink "$DOTFILES_DIR/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
 backup "$HOME/.claude/commands/notion.md"
 symlink "$DOTFILES_DIR/claude/commands/notion.md" "$HOME/.claude/commands/notion.md"
+
+# Install pre-commit hooks
+if [ -f "$DOTFILES_DIR/.pre-commit-config.yaml" ]; then
+  echo "=====> Installing pre-commit hooks"
+  pre-commit install
+else
+  echo "Warning: .pre-commit-config.yaml not found"
+fi
 
 echo "✓ Done"
 exec zsh

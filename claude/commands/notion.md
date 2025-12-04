@@ -46,8 +46,6 @@ Save a structured summary of this conversation to Notion Tasks.
 
 ### 🔍 Research (Comparisons, financial analysis)
 ```markdown
-[Raycast link if external context]
-
 ## 📁 TITLE (CAPS + Context)
 
 ### Audit / Hypotheses
@@ -106,18 +104,18 @@ Save a structured summary of this conversation to Notion Tasks.
 - 🔍 = Research, Exploration
 - 🔬 = Analysis, Strategy, Experiments
 - 💻 = Learning, Code, Technical notes
-- 📋 = Tasks, Checklists, User stories
-- 🌐 = External meetings, PER (personal)
-- 📊 📁 = Data analysis
+- 🔖 = Tasks, Checklists, User stories
+- 🌐 = Online research
+- 📞 = Phone call
+- 🤝 = In-person meeting
+- 📧 = Email/Message
+- 🧮 = Data analysis
 
 **When to use tables:**
 - Comparing options (≥2 alternatives)
 - Structured data (budgets, timelines, specs)
 - Risk assessment
 - Benchmarks
-
-**Raycast link:**
-- Add `raycast://extensions/...` at top if conversation came from external AI chat
 
 **Closing:**
 - Research/Analysis: Add impactful quote or one-sentence summary

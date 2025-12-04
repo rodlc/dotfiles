@@ -44,10 +44,20 @@ dotfiles/
 ## Security
 
 - **Secrets**: API keys and tokens are stored in `~/.env` (not versioned)
-- **Pre-commit hooks**: Gitleaks scans for secrets before each commit
+- **Pre-commit hooks**: [Gitleaks](https://github.com/gitleaks/gitleaks) scans for secrets before each commit
 - **SSH keys**: `config` file references keys, but keys themselves stay in `~/.ssh/`
 
-See [dotfiles security best practices](https://medium.com/@instatunnel/why-your-public-dotfiles-are-a-security-minefield-fc9bdff62403).
+### Setup Pre-commit Hooks
+
+After cloning the repo:
+```bash
+cd ~/Code/rodlc/dotfiles
+pre-commit install  # Installs git hook
+```
+
+The hook runs automatically on `git commit`. To skip temporarily: `SKIP=gitleaks git commit -m "message"`
+
+See [dotfiles security best practices](https://medium.com/@instatunnel/why-your-public-dotfiles-are-a-security-minefield-fc9bdff62403) and [Gitleaks pre-commit guide](https://medium.com/@ibm_ptc_security/securing-your-repositories-with-gitleaks-and-pre-commit-27691eca478d).
 
 ## Notion Integration
 
