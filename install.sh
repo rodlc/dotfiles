@@ -3,6 +3,9 @@ set -e
 
 DOTFILES_DIR="$PWD"
 
+echo "=====> Installing dotfiles"
+
+# Helper functions
 backup() {
   local target="$1"
   [ -e "$target" ] && [ ! -L "$target" ] && mv "$target" "$target.backup" && echo "-----> Backed up $target" || true
@@ -13,6 +16,38 @@ symlink() {
   [ ! -e "$source" ] && echo "Warning: $source not found" && return 0
   [ ! -e "$link" ] && ln -s "$source" "$link" && echo "-----> Linked $link" || true
 }
+
+# Install Homebrew if not present
+if ! command -v brew &> /dev/null; then
+  echo "=====> Installing Homebrew"
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+else
+  echo "=====> Homebrew already installed"
+fi
+
+# Install Homebrew packages
+echo "=====> Installing Homebrew packages"
+brew install --quiet pyenv rbenv nvm git 2>/dev/null || true
+brew install --cask --quiet zed 2>/dev/null || true
+
+# Install oh-my-zsh if not present
+if [ ! -d "$HOME/.oh-my-zsh" ]; then
+  echo "=====> Installing oh-my-zsh"
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+else
+  echo "=====> oh-my-zsh already installed"
+fi
+
+# Install Claude Code if not present
+if ! command -v claude &> /dev/null; then
+  echo "=====> Installing Claude Code"
+  curl -fsSL https://claude.ai/install.sh | bash
+else
+  echo "=====> Claude Code already installed"
+fi
+
+echo "=====> Creating symlinks"
 
 # Shell config
 for name in aliases gitconfig irbrc pryrc rspec zprofile zshrc; do
