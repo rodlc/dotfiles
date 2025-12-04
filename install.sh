@@ -1,75 +1,50 @@
 #!/bin/zsh
+set -e
 
-# Define a function which rename a `target` file to `target.backup` if the file
-# exists and if it's a 'real' file, ie not a symlink
+DOTFILES_DIR="$PWD"
+
 backup() {
-  target=$1
-  if [ -e "$target" ]; then
-    if [ ! -L "$target" ]; then
-      mv "$target" "$target.backup"
-      echo "-----> Moved your old $target config file to $target.backup"
-    fi
-  fi
+  local target="$1"
+  [ -e "$target" ] && [ ! -L "$target" ] && mv "$target" "$target.backup" && echo "-----> Backed up $target"
 }
 
 symlink() {
-  file=$1
-  link=$2
-  if [ ! -e "$link" ]; then
-    echo "-----> Symlinking your new $link"
-    ln -s $file $link
-  fi
+  local source="$1" link="$2"
+  [ ! -e "$source" ] && echo "Warning: $source not found" && return
+  [ ! -e "$link" ] && ln -s "$source" "$link" && echo "-----> Linked $link"
 }
 
-# For all files `$name` in the present folder except `*.sh`, `README.md`, `settings.json`,
-# and `config`, backup the target file located at `~/.$name` and symlink `$name` to `~/.$name`
+# Shell config
 for name in aliases gitconfig irbrc pryrc rspec zprofile zshrc; do
-  if [ ! -d "$name" ]; then
-    target="$HOME/.$name"
-    backup $target
-    symlink $PWD/$name $target
-  fi
+  backup "$HOME/.$name"
+  symlink "$DOTFILES_DIR/$name" "$HOME/.$name"
 done
 
-# Install zsh-syntax-highlighting plugin
-CURRENT_DIR=`pwd`
+# Zsh plugins
 ZSH_PLUGINS_DIR="$HOME/.oh-my-zsh/custom/plugins"
-mkdir -p "$ZSH_PLUGINS_DIR" && cd "$ZSH_PLUGINS_DIR"
-if [ ! -d "$ZSH_PLUGINS_DIR/zsh-syntax-highlighting" ]; then
-  echo "-----> Installing zsh plugin 'zsh-syntax-highlighting'..."
-  git clone https://github.com/zsh-users/zsh-autosuggestions
-  git clone https://github.com/zsh-users/zsh-syntax-highlighting
-fi
-cd "$CURRENT_DIR"
+mkdir -p "$ZSH_PLUGINS_DIR"
+[ ! -d "$ZSH_PLUGINS_DIR/zsh-autosuggestions" ] && git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_PLUGINS_DIR/zsh-autosuggestions"
+[ ! -d "$ZSH_PLUGINS_DIR/zsh-syntax-highlighting" ] && git clone https://github.com/zsh-users/zsh-syntax-highlighting "$ZSH_PLUGINS_DIR/zsh-syntax-highlighting"
 
-# Symlink VS Code settings and keybindings to the present `settings.json` and `keybindings.json` files
-# If it's a macOS
-if [[ `uname` =~ "Darwin" ]]; then
-  CODE_PATH=~/Library/Application\ Support/Code/User
-# Else, it's a Linux
-else
-  CODE_PATH=~/.config/Code/User
-  # If this folder doesn't exist, it's a WSL
-  if [ ! -e $CODE_PATH ]; then
-    CODE_PATH=~/.vscode-server/data/Machine
-  fi
-fi
+# SSH
+backup "$HOME/.ssh/config"
+symlink "$DOTFILES_DIR/config" "$HOME/.ssh/config"
+ssh-add --apple-use-keychain ~/.ssh/id_ed25519 2>/dev/null || true
 
-for name in settings.json keybindings.json; do
-  target="$CODE_PATH/$name"
-  backup $target
-  symlink $PWD/$name $target
-done
+# Zed
+ZED_DIR="$HOME/.config/zed"
+mkdir -p "$ZED_DIR"
+backup "$ZED_DIR/settings.json"
+symlink "$DOTFILES_DIR/zed/settings.json" "$ZED_DIR/settings.json"
+backup "$ZED_DIR/keymap.json"
+symlink "$DOTFILES_DIR/zed/keymap.json" "$ZED_DIR/keymap.json"
 
-# Symlink SSH config file to the present `config` file for macOS and add SSH passphrase to the keychain
-if [[ `uname` =~ "Darwin" ]]; then
-  target=~/.ssh/config
-  backup $target
-  symlink $PWD/config $target
-  ssh-add --apple-use-keychain ~/.ssh/id_ed25519
-fi
+# Claude Code
+mkdir -p "$HOME/.claude/commands"
+backup "$HOME/.claude/CLAUDE.md"
+symlink "$DOTFILES_DIR/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
+backup "$HOME/.claude/commands/notion.md"
+symlink "$DOTFILES_DIR/claude/commands/notion.md" "$HOME/.claude/commands/notion.md"
 
-# Refresh the current terminal with the newly installed configuration
+echo "✓ Done"
 exec zsh
-
-echo "👌 Carry on with git setup!"

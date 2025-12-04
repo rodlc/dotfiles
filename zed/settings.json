@@ -1,0 +1,53 @@
+{
+  "theme": "Nord Dark",
+  "ui_font_size": 16,
+  "buffer_font_size": 15,
+  "buffer_font_family": "JetBrains Mono",
+  "scrollbar": {
+    "show": "never"
+  },
+  "tab_bar": {
+    "show_nav_history_buttons": false
+  },
+  "base_keymap": "VSCode",
+  "vim_mode": false,
+  "relative_line_numbers": "disabled",
+  "cursor_blink_mode": "terminal",
+  "agent": {
+    "default_model": {
+      "provider": "copilot_chat",
+      "model": "gpt-5-mini"
+    },
+    "use_modifier_to_send": true,
+    "always_allow_tool_actions": false
+  },
+  "agent_servers": {
+    "claude": {
+      "default_mode": "acceptEdits",
+      "settings": {
+        "model": "sonnet",
+        "edit_mode": "accept"
+      }
+    }
+  },
+  "languages": {
+    "Ruby": {
+      "formatter": "language_server",
+      "format_on_save": "on",
+      "tab_size": 2
+    },
+    "Erb": {
+      "formatter": "language_server",
+      "format_on_save": "on",
+      "tab_size": 2
+    }
+  },
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false
+  },
+  "terminal": {
+    "dock": "bottom",
+    "font_size": 14
+  }
+}

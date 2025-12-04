@@ -44,12 +44,15 @@
 
   # Removes a file from the index
   unstage = reset HEAD --
+	cleanup = !git checkout master && git pull origin master && git fetch -p && git branch --merged | grep -v \"\\*\" | grep -v \"master\" | xargs -n 1 git branch -d
+	sync = !git pull --rebase && git fetch -p
 
 [help]
   autocorrect = 1
 
 [push]
   default = simple
+	autoSetupRemote = true
 
 [branch "master"]
   mergeoptions = --no-edit
@@ -58,7 +61,7 @@
   rebase = false
 
 [init]
-  defaultBranch = master
+	defaultBranch = main
 [user]
 	email = 63702959+rodlc@users.noreply.github.com
 	name = Rod Lc

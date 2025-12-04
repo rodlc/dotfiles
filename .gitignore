@@ -1,8 +1,12 @@
-# Secrets (ne jamais versionner)
+# Secrets
 .env
 secrets
 *.secret
 .secrets
 
-# OS files
+# OS
 .DS_Store
+
+# Not personal config
+check_modified.rb
+package.json
