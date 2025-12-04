@@ -6,7 +6,3 @@ secrets
 
 # OS
 .DS_Store
-
-# Not personal config
-check_modified.rb
-package.json

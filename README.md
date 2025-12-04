@@ -27,63 +27,19 @@ After installation:
 
 ```
 dotfiles/
-├── install.sh              # Installation script (idempotent)
-├── .env.template           # Environment variables template (copied to ~/.env)
-├── .pre-commit-config.yaml # Gitleaks security config
-├── aliases                 # Shell aliases
-├── zshrc                   # Zsh configuration
-├── zprofile                # Zsh profile (PATH setup)
-├── gitconfig               # Git configuration
-├── irbrc                   # Ruby IRB config
-├── pryrc                   # Pry config
-├── rspec                   # RSpec config
-├── config                  # SSH config
-├── zed/
-│   ├── settings.json       # Zed editor settings
-│   └── keymap.json         # Zed keybindings
-└── claude/
-    ├── CLAUDE.md           # Claude Code global instructions
-    └── commands/
-        └── notion.md       # /notion slash command
+├── install.sh              # Auto-install all tools + configs
+├── .env.template           # Secrets template (→ ~/.env)
+├── .git-hooks/             # Global git hook (dotfiles reminder)
+├── aliases, zshrc, gitconfig, irbrc, pryrc, rspec, config
+├── zed/                    # Zed editor configs
+└── claude/                 # Claude Code configs + commands
 ```
 
 ## Security
 
-### Secrets Management
+**Secrets**: `.env.template` (versioned) → auto-copied to `~/.env` (gitignored). Edit `~/.env` with real API keys. SSH keys stay in `~/.ssh/`.
 
-**Workflow**:
-1. `.env.template` is **versioned** (safe placeholders only)
-2. `install.sh` copies it to `~/.env` (local, not versioned)
-3. You edit `~/.env` with real API keys
-4. Git **ignores** `~/.env` automatically (see `.gitignore`)
-
-**Why this approach?**
-- ✅ No manual copy: `install.sh` does it for you
-- ✅ Template shows what's needed: clear documentation
-- ✅ Never commit secrets: `.gitignore` protects `.env`, `secrets`, `*.secret`
-- ✅ Idempotent: won't overwrite existing `~/.env`
-
-**SSH keys**: `config` file references keys, but keys themselves stay in `~/.ssh/` (never versioned)
-
-### Pre-commit Hooks
-
-[Gitleaks](https://github.com/gitleaks/gitleaks) scans for hardcoded secrets before each commit (auto-installed by `install.sh`).
-
-To skip temporarily: `SKIP=gitleaks git commit -m "message"`
-
-**References**:
-- [Dotfiles security best practices](https://medium.com/@instatunnel/why-your-public-dotfiles-are-a-security-minefield-fc9bdff62403)
-- [Gitleaks pre-commit guide](https://medium.com/@ibm_ptc_security/securing-your-repositories-with-gitleaks-and-pre-commit-27691eca478d)
-- [Beyond .env files (2025)](https://medium.com/@instatunnel/beyond-env-files-the-new-best-practices-for-managing-secrets-in-development-b4b05e0a3055)
-
-## Notion Integration
-
-Claude Code connects to Notion for task management. Configuration in `claude/CLAUDE.md` includes:
-- Tasks database ID
-- Projects database ID
-- Areas database ID
-
-Use `/notion` command in Claude Code to save session summaries.
+**Pre-commit**: [Gitleaks](https://github.com/gitleaks/gitleaks) scans for secrets before each commit. Skip with `SKIP=gitleaks git commit -m "msg"`.
 
 ## Daily Workflow
 
@@ -98,29 +54,16 @@ The global git hook will remind you if dotfiles have uncommitted changes when yo
 
 ## Customization
 
-Fork this repo and edit configs:
-- `zshrc`: Add personal aliases and PATH modifications
-- `zed/settings.json`: Adjust editor theme, fonts, keybindings
-- `claude/CLAUDE.md`: Update Notion IDs and coding preferences
-- `~/.env`: Store secrets (ANTHROPIC_API_KEY, GITHUB_TOKEN, etc.)
+Edit configs directly (via symlinks):
+- `~/.zshrc` → aliases, PATH
+- `~/.config/zed/settings.json` → theme, fonts
+- `~/.claude/CLAUDE.md` → Notion IDs, preferences
+- `~/.env` → API keys
 
-## Testing
-
-On a fresh machine or after major changes:
-```bash
-cd ~/Code/rodlc/dotfiles
-./install.sh
-```
-
-The script is **idempotent** - safe to run multiple times without duplicating work.
-
-Check symlinks: `ls -la ~/.zshrc ~/.config/zed/settings.json ~/.claude/CLAUDE.md`
+Re-run `./install.sh` anytime (idempotent).
 
 ## References
 
-- [Zed via Homebrew](https://formulae.brew.sh/cask/zed)
-- [Claude Code native installer](https://docs.anthropic.com/en/docs/claude-code/troubleshooting)
-- [oh-my-zsh installation](https://ohmyz.sh/)
-- [pyenv on macOS](https://github.com/pyenv/pyenv)
-- [Thoughtbot dotfiles](https://github.com/thoughtbot/dotfiles)
-- [Awesome dotfiles](https://github.com/webpro/awesome-dotfiles)
+- [Thoughtbot dotfiles](https://github.com/thoughtbot/dotfiles) - Inspiration
+- [Awesome dotfiles](https://github.com/webpro/awesome-dotfiles) - Curated list
+- [Dotfiles security](https://medium.com/@instatunnel/why-your-public-dotfiles-are-a-security-minefield-fc9bdff62403) - Best practices
