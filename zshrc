@@ -79,5 +79,11 @@ export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
 # Load environment variables from local .env (not versioned)
 [[ -f "$HOME/.env" ]] && source "$HOME/.env"
 
+# Claude Code monitoring aliases
+alias cc-usage='npx ccusage@latest'
+alias cc-live='npx ccusage blocks --live'
+alias cc-daily='npx ccusage daily'
+alias cc-monthly='npx ccusage monthly'
+
 # Répertoire de travail par défaut
 cd ~/Code
