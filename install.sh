@@ -81,6 +81,15 @@ symlink "$DOTFILES_DIR/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
 backup "$HOME/.claude/commands/notion.md"
 symlink "$DOTFILES_DIR/claude/commands/notion.md" "$HOME/.claude/commands/notion.md"
 
+# Environment variables
+if [ ! -f "$HOME/.env" ] && [ -f "$DOTFILES_DIR/.env.template" ]; then
+  echo "=====> Creating ~/.env from template"
+  cp "$DOTFILES_DIR/.env.template" "$HOME/.env"
+  echo "-----> Edit ~/.env with your API keys"
+else
+  echo "=====> ~/.env already exists (not overwriting)"
+fi
+
 # Install pre-commit hooks
 if [ -f "$DOTFILES_DIR/.pre-commit-config.yaml" ]; then
   echo "=====> Installing pre-commit hooks"

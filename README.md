@@ -15,15 +15,21 @@ The script will automatically:
 1. **Install tools** (Homebrew, Zed, Claude Code, pyenv, rbenv, nvm, oh-my-zsh)
 2. **Backup** existing config files as `*.backup`
 3. **Create symlinks** from `~/.config` to this repo
-4. **Install plugins** (zsh-autosuggestions, zsh-syntax-highlighting)
+4. **Setup environment** (create `~/.env` from template if not exists)
+5. **Install plugins** (zsh-autosuggestions, zsh-syntax-highlighting)
+6. **Install security hooks** (Gitleaks pre-commit)
 
-After installation, restart your terminal or run `source ~/.zshrc`.
+After installation:
+1. Edit `~/.env` with your API keys
+2. Restart your terminal or run `source ~/.zshrc`
 
 ## Structure
 
 ```
 dotfiles/
 ├── install.sh              # Installation script (idempotent)
+├── .env.template           # Environment variables template (copied to ~/.env)
+├── .pre-commit-config.yaml # Gitleaks security config
 ├── aliases                 # Shell aliases
 ├── zshrc                   # Zsh configuration
 ├── zprofile                # Zsh profile (PATH setup)
@@ -43,21 +49,32 @@ dotfiles/
 
 ## Security
 
-- **Secrets**: API keys and tokens are stored in `~/.env` (not versioned)
-- **Pre-commit hooks**: [Gitleaks](https://github.com/gitleaks/gitleaks) scans for secrets before each commit
-- **SSH keys**: `config` file references keys, but keys themselves stay in `~/.ssh/`
+### Secrets Management
 
-### Setup Pre-commit Hooks
+**Workflow**:
+1. `.env.template` is **versioned** (safe placeholders only)
+2. `install.sh` copies it to `~/.env` (local, not versioned)
+3. You edit `~/.env` with real API keys
+4. Git **ignores** `~/.env` automatically (see `.gitignore`)
 
-After cloning the repo:
-```bash
-cd ~/Code/rodlc/dotfiles
-pre-commit install  # Installs git hook
-```
+**Why this approach?**
+- ✅ No manual copy: `install.sh` does it for you
+- ✅ Template shows what's needed: clear documentation
+- ✅ Never commit secrets: `.gitignore` protects `.env`, `secrets`, `*.secret`
+- ✅ Idempotent: won't overwrite existing `~/.env`
 
-The hook runs automatically on `git commit`. To skip temporarily: `SKIP=gitleaks git commit -m "message"`
+**SSH keys**: `config` file references keys, but keys themselves stay in `~/.ssh/` (never versioned)
 
-See [dotfiles security best practices](https://medium.com/@instatunnel/why-your-public-dotfiles-are-a-security-minefield-fc9bdff62403) and [Gitleaks pre-commit guide](https://medium.com/@ibm_ptc_security/securing-your-repositories-with-gitleaks-and-pre-commit-27691eca478d).
+### Pre-commit Hooks
+
+[Gitleaks](https://github.com/gitleaks/gitleaks) scans for hardcoded secrets before each commit (auto-installed by `install.sh`).
+
+To skip temporarily: `SKIP=gitleaks git commit -m "message"`
+
+**References**:
+- [Dotfiles security best practices](https://medium.com/@instatunnel/why-your-public-dotfiles-are-a-security-minefield-fc9bdff62403)
+- [Gitleaks pre-commit guide](https://medium.com/@ibm_ptc_security/securing-your-repositories-with-gitleaks-and-pre-commit-27691eca478d)
+- [Beyond .env files (2025)](https://medium.com/@instatunnel/beyond-env-files-the-new-best-practices-for-managing-secrets-in-development-b4b05e0a3055)
 
 ## Notion Integration
 
