@@ -85,6 +85,17 @@ Claude Code connects to Notion for task management. Configuration in `claude/CLA
 
 Use `/notion` command in Claude Code to save session summaries.
 
+## Daily Workflow
+
+**Save config changes**:
+```bash
+df-save        # Commit and push all dotfiles changes
+df-status      # Check uncommitted changes
+dotfiles       # cd to dotfiles repo
+```
+
+The global git hook will remind you if dotfiles have uncommitted changes when you commit in other repos.
+
 ## Customization
 
 Fork this repo and edit configs:
