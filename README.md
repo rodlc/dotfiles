@@ -28,7 +28,7 @@ After installation:
 ```
 dotfiles/
 ├── install.sh              # Auto-install all tools + configs
-├── .env.template           # Secrets template (→ ~/.env)
+├── .env.example            # Secrets example (→ ~/.env)
 ├── .git-hooks/             # Global git hook (dotfiles reminder)
 ├── aliases, zshrc, gitconfig, irbrc, pryrc, rspec, config
 ├── zed/                    # Zed editor configs
@@ -37,7 +37,7 @@ dotfiles/
 
 ## Security
 
-**Secrets**: `.env.template` (versioned) → auto-copied to `~/.env` (gitignored). Edit `~/.env` with real API keys. SSH keys stay in `~/.ssh/`.
+**Secrets**: `.env.example` (versioned) → auto-copied to `~/.env` (gitignored). Edit `~/.env` with real API keys. SSH keys stay in `~/.ssh/`.
 
 **Pre-commit**: [Gitleaks](https://github.com/gitleaks/gitleaks) scans for secrets before each commit. Skip with `SKIP=gitleaks git commit -m "msg"`.
 

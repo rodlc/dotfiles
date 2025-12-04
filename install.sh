@@ -82,9 +82,9 @@ backup "$HOME/.claude/commands/notion.md"
 symlink "$DOTFILES_DIR/claude/commands/notion.md" "$HOME/.claude/commands/notion.md"
 
 # Environment variables
-if [ ! -f "$HOME/.env" ] && [ -f "$DOTFILES_DIR/.env.template" ]; then
-  echo "=====> Creating ~/.env from template"
-  cp "$DOTFILES_DIR/.env.template" "$HOME/.env"
+if [ ! -f "$HOME/.env" ] && [ -f "$DOTFILES_DIR/.env.example" ]; then
+  echo "=====> Creating ~/.env from .env.example"
+  cp "$DOTFILES_DIR/.env.example" "$HOME/.env"
   echo "-----> Edit ~/.env with your API keys"
 else
   echo "=====> ~/.env already exists (not overwriting)"
