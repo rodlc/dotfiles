@@ -14,129 +14,67 @@ Save a structured summary of this conversation to Notion Tasks.
 
 ## Properties
 
-- **Task**: Generate from conversation (use `$ARGUMENTS` as override if provided)
+- **Task**: Short title in EN, use | or / for sub-elements (override with `$ARGUMENTS`)
 - **Priority**: Quick (~5min) | D2 (~30min) | W5 (~2h) | Scheduled | Reminder | Errand
 - **Do date**: Today
 - **Done**: Yes if complete
 - **Project/Area**: Link if found, empty otherwise
 
+**Examples:**
+- ✅ "🔧 Claude Code | Setup"
+- ✅ "🔍 PER * PTZ"
+- ✅ "🔬 Obat / PlayPlay / Alan"
+- ❌ "Setup optimisé Claude Code - Terminal + Workflow /notion"
+
 ## Content Templates
 
-**Detect type from context, adapt structure:**
+**Detect type, adapt structure. Number sections with 1️⃣ 2️⃣ 3️⃣**
 
-### 🔧 Setup/Config (Technical sessions)
-```markdown
-## Context
-[Problem, trigger, initial state]
+### 🔧 Setup/Config
+Context → Decisions → Summary (result, modified files, metrics) → Sources
 
-## Decisions
-- [x] Action completed
-- [x] Config changed
+### 🔍 Research
+Title (CAPS) → Audit/Hypotheses → Calculations → Risks → Verdict → Roadmap → Quote
 
-## Summary
-**Result:**
-- Key outcomes
-**Modified files:**
-- path/to/file:lines (code refs)
-**Metrics:** [if applicable]
+### 🔬 Analysis
+Market Standard → Position → Tactics → Matrix (🥇🥈🥉) → One-sentence summary
 
-## Sources
-- [Link](url)
-```
+### 💻 Learning
+Bullet lists, definitions, minimal structure
 
-### 🔍 Research (Comparisons, financial analysis)
-```markdown
-## 📁 TITLE (CAPS + Context)
+**Default to 🔧 if type unclear**
 
-### Audit / Hypotheses
-[Validation tables]
+## Style Guide
 
-### Detailed Calculations
-[Financial tables, formulas if needed]
+**Emojis:** 🔧 Setup | 🔍 Research | 🔬 Analysis | 💻 Learning | 🔖 Tasks | 🧮 Data | (+ others as needed)
 
-### Blind Spots / Risks
-[Risk assessment table]
+**Language:**
+- Titles: EN
+- Content: Match discussion language
 
-### Final Verdict
-[Comparison table + Winner]
+**Tables:** Use for comparisons (≥2 options), structured data, risks, benchmarks
 
-### Roadmap
-- [ ] Action checkboxes
+**Closing:** Research/Analysis = quote/summary | Technical = next actions
 
-> Impactful closing quote
-```
-
-### 🔬 Analysis (Strategic decisions)
-```markdown
-### Market Standard
-[Benchmark tables]
-
-### Current Position
-[Strengths/weaknesses table]
-
-### Tactics / Options
-[Options with inline quotes]
-
-### Final Matrix
-[Comparison table + Ranking emojis 🥇🥈🥉]
-
-**Summary in one sentence**
-```
-
-### 💻 Learning / Simple notes
-```markdown
-[Bullet lists, definitions, no complex structure]
-```
-
-**Default to 🔧 Setup/Config if type unclear**
-
-## Rules
-
-- Concise: actionable info only
-- Code refs: file:line format
-- Resources: suggest only (user handles BASB merge)
-- On API error: show summary for manual copy
-
-## Style Guide (from user patterns)
-
-**Title emojis:**
-- 🔧 = Setup, Config, Tools
-- 🔍 = Research, Exploration
-- 🔬 = Analysis, Strategy, Experiments
-- 💻 = Learning, Code, Technical notes
-- 🔖 = Tasks, Checklists, User stories
-- 🌐 = Online research
-- 📞 = Phone call
-- 🤝 = In-person meeting
-- 📧 = Email/Message
-- 🧮 = Data analysis
-
-**When to use tables:**
-- Comparing options (≥2 alternatives)
-- Structured data (budgets, timelines, specs)
-- Risk assessment
-- Benchmarks
-
-**Closing:**
-- Research/Analysis: Add impactful quote or one-sentence summary
-- Technical: Keep dry, focus on next actions
+**Concise:** Actionable info only, code refs as file:line
 
 ## Technical Notes
 
-**Property formats** (critical for API success):
+**Property formats** (critical for API):
 - Area/Project: Single URL string, NOT array
   - ✅ `"Area": "https://www.notion.so/6d9b458c..."`
   - ❌ `"Area": ["https://www.notion.so/6d9b458c..."]`
-- Date properties: Use `date:PropertyName:start`, `date:PropertyName:is_datetime`
+- Date: Use `date:PropertyName:start`, `date:PropertyName:is_datetime`
 - Done: Use `"__YES__"` or `"__NO__"`
 
-**Search strategy**:
-1. Identify main topic keyword (e.g., "Code", "Finance")
-2. Search existing Areas/Projects: `notion-search` with keyword
-3. Match by relevance in search results
-4. Use URL directly in properties (no brackets)
+**Search strategy:**
+1. Identify keyword (e.g., "Code", "Finance")
+2. Search Areas/Projects with `notion-search`
+3. Use URL directly in properties (no brackets)
 
-**Common errors**:
-- "Invalid input" → Check property types (string vs array)
-- Area not found → Leave empty, user will link manually
-- Duplicate pages → Search first to avoid recreation
+**Common errors:**
+- "Invalid input" → Check string vs array
+- Area not found → Leave empty, user links manually
+- Duplicates → Search first
+
+**On API error:** Show summary for manual copy

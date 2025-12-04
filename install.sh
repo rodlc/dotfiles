@@ -90,12 +90,24 @@ else
   echo "=====> ~/.env already exists (not overwriting)"
 fi
 
-# Install pre-commit hooks
+# Install pre-commit hooks (Gitleaks)
 if [ -f "$DOTFILES_DIR/.pre-commit-config.yaml" ]; then
   echo "=====> Installing pre-commit hooks"
   pre-commit install
 else
   echo "Warning: .pre-commit-config.yaml not found"
+fi
+
+# Install global git hook (dotfiles reminder)
+GLOBAL_HOOKS_DIR="$HOME/.git-templates/hooks"
+mkdir -p "$GLOBAL_HOOKS_DIR"
+if [ -f "$DOTFILES_DIR/.git-hooks/pre-commit" ]; then
+  echo "=====> Installing global dotfiles reminder hook"
+  cp "$DOTFILES_DIR/.git-hooks/pre-commit" "$GLOBAL_HOOKS_DIR/pre-commit"
+  chmod +x "$GLOBAL_HOOKS_DIR/pre-commit"
+  git config --global init.templatedir "$HOME/.git-templates"
+else
+  echo "Warning: .git-hooks/pre-commit not found"
 fi
 
 echo "✓ Done"

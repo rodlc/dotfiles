@@ -1,0 +1,22 @@
+#!/bin/zsh
+# Pre-commit hook: Check if dotfiles repo has uncommitted changes
+# This warns you to save your configs when working in other repos
+
+DOTFILES_DIR="$HOME/Code/rodlc/dotfiles"
+
+# Only run if we're NOT already in the dotfiles repo (avoid recursion)
+if [ "$PWD" != "$DOTFILES_DIR" ]; then
+  if [ -d "$DOTFILES_DIR/.git" ]; then
+    cd "$DOTFILES_DIR"
+    if ! git diff-index --quiet HEAD -- 2>/dev/null; then
+      echo ""
+      echo "⚠️  Dotfiles has uncommitted changes!"
+      echo "   Run 'df-status' to see changes"
+      echo "   Run 'df-save' to save and push"
+      echo ""
+    fi
+  fi
+fi
+
+# Always allow the commit to proceed
+exit 0

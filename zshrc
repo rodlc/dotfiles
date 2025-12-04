@@ -85,5 +85,10 @@ alias cc-live='npx ccusage blocks --live'
 alias cc-daily='npx ccusage daily'
 alias cc-monthly='npx ccusage monthly'
 
+# Dotfiles management aliases
+alias dotfiles='cd ~/Code/rodlc/dotfiles'
+alias df-save='cd ~/Code/rodlc/dotfiles && git add -A && git commit -m "Update configs" && git push'
+alias df-status='cd ~/Code/rodlc/dotfiles && git status'
+
 # Répertoire de travail par défaut
 cd ~/Code
