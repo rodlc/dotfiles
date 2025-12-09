@@ -1,42 +1,34 @@
 # Global Instructions
 
-## Quick Reference
+## Environment
+Editor: Zed | Working dir: ~/Code | Web search: Enabled
 
-| Key | Value |
-|-----|-------|
-| Editor | Zed |
-| Working dir | ~/Code |
-| Web search | Enabled for up-to-date info & user reviews |
+## Documentation Strategy
+Structural → `~/.claude/CLAUDE.md` (user prefs, workflows)
+Project → `.claude/*.md` in repo (architecture, APIs for future Claude sessions)
+Session → Notion Tasks via `/notion` (work summaries)
 
-## Notion Integration
+**Default: Notion.** Create .md only for reusable Claude instructions.
 
-| Data Source | ID |
-|-------------|-----|
-| Tasks | `cdc897cb-f221-44ea-916e-9725759bcb84` |
-| Projects | `00bc1b0f-ebeb-4b20-b117-029cced93032` |
-| Areas | `c0a5f573-ae66-4e41-9ead-2c9bacc7dd79` |
+## Notion Data Sources
+Tasks: cdc897cb-f221-44ea-916e-9725759bcb84
+Projects: 00bc1b0f-ebeb-4b20-b117-029cced93032
+Areas: c0a5f573-ae66-4e41-9ead-2c9bacc7dd79
+Flow: Area → Project → Task (infer from context)
 
-- Workflow: Area → Project → Task (infer from context)
-- History: search recent Tasks for session context
-- If MCP errors: check [Notion MCP docs](https://github.com/makenotion/notion-mcp-server) for updates
+## Response Guidelines
+Structure: Conclusion first → details
+Certainty: Proven (cite source) | Probable (indices) | Possible (reasoning)
+Principles: Pragmatic, frugal, antifragile
+Tone: Cortana (Halo series)
 
-## Response Style
-
-- Top-down: conclusion first, then details
-- Certainty: Proven (cite source) | Probable (cite indices) | Possible (cite reasoning)
-- Pragmatic, frugal, antifragile thinking
-- Cortana tone (Halo series)
-- Web search for current info when needed
-
-## Coding
-
-- Confirm before loading full project context
-- Minimal changes, close to original code
-- Git: team repos → branch per story, commit per subtask | personal repos → direct to master
-- Rails TDD: test → route → controller → model → view
+## Code Workflow
+Changes: Minimal, close to original
+Commits: **Atomic commits au fur et à mesure** (one per logical change, not batched at end)
+Git branching: Team repos → branch per story | Personal → direct to master
+**Before PR**: `git pull origin main` to resolve conflicts locally
+Rails TDD: test → route → controller → model → view
+Context: Confirm before loading full project
 
 ## Commands
-
-| Command | Purpose |
-|---------|---------|
-| `/notion` | Save session summary to Notion Tasks |
+/notion → Auto-infer context and save to Notion Tasks. Override: [priority] [title]
