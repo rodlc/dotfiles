@@ -1,3 +1,7 @@
+# Dotfiles management
+alias df-status="cd ~/Code/rodlc/dotfiles && git status"
+alias df-save="cd ~/Code/rodlc/dotfiles && git add -A && git commit -m 'Update dotfiles' && git push"
+
 # Network utilities
 alias myip="curl https://ipinfo.io/json"
 alias speedtest="curl -s https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py | python -"
@@ -7,3 +11,29 @@ alias serve='ruby -run -e httpd . -p 8000'
 
 # Open current directory in Zed
 alias z="zed ."
+
+# Git wrapper — Alert if main is behind origin before checkout
+git() {
+  # Alerte avant checkout si main est en retard
+  if [[ "$1" =~ ^(checkout|co|switch)$ ]]; then
+    command git fetch --quiet 2>/dev/null
+    local default_branch=$(command git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | cut -d'/' -f4)
+    default_branch=${default_branch:-main}
+    local behind=$(command git rev-list --count $default_branch..origin/$default_branch 2>/dev/null)
+    [[ "$behind" -gt 0 ]] && echo "⚠️  \033[1;33m$default_branch\033[0m behind by \033[1;31m$behind\033[0m"
+  fi
+  command git "$@"
+}
+
+# Checkout main (passe par le wrapper → alerte incluse)
+gm() {
+  git checkout "$(command git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | cut -d'/' -f4 || echo main)"
+}
+
+# Nettoyage branches (passe par le wrapper → alerte incluse)
+gcleanup() {
+  local db=$(command git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | cut -d'/' -f4)
+  db="${db:-main}"
+  git checkout "$db" && git pull origin "$db" && git fetch -p && \
+    command git branch --merged | grep -vE "^\*|$db" | xargs -n1 git branch -d
+}
