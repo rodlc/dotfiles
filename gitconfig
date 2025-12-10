@@ -39,12 +39,8 @@
   # Then other can access via `git clone git://#{YOUR_IP_ADDRESS}/
   serve = !git daemon --reuseaddr --verbose  --base-path=. --export-all ./.git
 
-  # Checkout to defaultBranch
-  m = !git checkout $(git defaultBranch)
-
   # Removes a file from the index
   unstage = reset HEAD --
-	cleanup = !git checkout master && git pull origin master && git fetch -p && git branch --merged | grep -v \"\\*\" | grep -v \"master\" | xargs -n 1 git branch -d
 	sync = !git pull --rebase && git fetch -p
 
 [help]
@@ -62,6 +58,7 @@
 
 [init]
 	defaultBranch = main
+	templatedir = /Users/rodlecoent/.git-templates
 [user]
 	email = 63702959+rodlc@users.noreply.github.com
 	name = Rod Lc

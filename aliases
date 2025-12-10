@@ -1,10 +1,7 @@
-# Dotfiles management
-alias df-status="cd ~/Code/rodlc/dotfiles && git status"
-alias df-save="cd ~/Code/rodlc/dotfiles && git add -A && git commit -m 'Update dotfiles' && git push"
-
 # Network utilities
 alias myip="curl https://ipinfo.io/json"
-alias speedtest="curl -s https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py | python -"
+alias speedtest="curl -s https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py | python -"  # Ookla servers
+alias fastcom="npx fast-cli"  # Netflix CDN (fast.com)
 
 # Development server
 alias serve='ruby -run -e httpd . -p 8000'

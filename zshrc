@@ -16,6 +16,7 @@ ZSH_DISABLE_COMPFIX=true
 source "${ZSH}/oh-my-zsh.sh"
 unalias rm # No interactive rm by default (brought by plugins/common-aliases)
 unalias lt # we need `lt` for https://github.com/localtunnel/localtunnel
+unalias gm # Override git plugin alias (custom function in .aliases)
 
 # Load rbenv if installed (to manage your Ruby versions)
 export PATH="${HOME}/.rbenv/bin:${PATH}" # Needed for Linux/WSL
@@ -23,7 +24,7 @@ type -a rbenv > /dev/null && eval "$(rbenv init -)"
 
 # Load pyenv (to manage your Python versions)
 export PYENV_VIRTUALENV_DISABLE_PROMPT=1
-type -a pyenv > /dev/null && eval "$(pyenv init -)" && eval "$(pyenv virtualenv-init - 2> /dev/null)" && RPROMPT+='[🐍 $(pyenv version-name)]'
+type -a pyenv > /dev/null && eval "$(pyenv init -)" && eval "$(pyenv virtualenv-init - 2> /dev/null)" && RPROMPT='[🐍 $(pyenv version-name)]'
 
 # Load nvm (to manage your node versions)
 export NVM_DIR="$HOME/.nvm"
@@ -80,7 +81,7 @@ export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
 [[ -f "$HOME/.env" ]] && source "$HOME/.env"
 
 # Claude Code monitoring aliases
-alias cc-usage='npx ccusage@latest'
+alias cc-global='npx ccusage@latest'
 alias cc-live='npx ccusage blocks --live'
 alias cc-daily='npx ccusage daily'
 alias cc-monthly='npx ccusage monthly'
