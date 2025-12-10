@@ -34,3 +34,32 @@ gcleanup() {
   git checkout "$db" && git pull origin "$db" && git fetch -p && \
     command git branch --merged | grep -vE "^\*|$db" | xargs -n1 git branch -d
 }
+
+# Git worktree — Travailler sur plusieurs branches en parallèle
+wt-new() {
+  [[ -z "$1" ]] && echo "Usage: wt-new <branch>" && return 1
+  local repo=$(basename "$(git rev-parse --show-toplevel)")
+  local target="../${repo}-$1"
+  git worktree add "$target" -b "$1" && echo "✅ Worktree: $target" && cd "$target"
+}
+
+wt-from() {
+  [[ -z "$1" ]] && echo "Usage: wt-from <existing-branch>" && return 1
+  local repo=$(basename "$(git rev-parse --show-toplevel)")
+  local target="../${repo}-$1"
+  git worktree add "$target" "$1" && echo "✅ Worktree: $target" && cd "$target"
+}
+
+wt-list() { git worktree list; }
+
+wt-rm() {
+  [[ -z "$1" ]] && echo "Usage: wt-rm <branch>" && return 1
+  local repo=$(basename "$(git rev-parse --show-toplevel 2>/dev/null || git rev-parse --show-toplevel)")
+  git worktree remove "../${repo}-$1" && echo "🗑️  Removed ${repo}-$1"
+}
+
+wt-clean() {
+  git worktree list | tail -n +2 | awk '{print $1}' | while read wt; do
+    git worktree remove "$wt" && echo "🗑️  Removed $wt"
+  done
+}
