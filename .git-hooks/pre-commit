@@ -1,29 +1,21 @@
 #!/bin/zsh
-# Pre-commit hook: Check if dotfiles repo has uncommitted or unpushed changes
-# This warns you to save your configs when working in other repos
+# Pre-commit hook: Remind to save dotfiles changes
+# Warns if dotfiles has uncommitted or unpushed changes
 
 DOTFILES_DIR="$HOME/Code/rodlc/dotfiles"
 
-# Only run if we're NOT already in the dotfiles repo (avoid recursion)
-if [ "$PWD" != "$DOTFILES_DIR" ]; then
-  if [ -d "$DOTFILES_DIR/.git" ]; then
-    cd "$DOTFILES_DIR"
+# Only run if we're NOT in the dotfiles repo (avoid recursion)
+if [ "$PWD" != "$DOTFILES_DIR" ] && [ -d "$DOTFILES_DIR/.git" ]; then
+  cd "$DOTFILES_DIR"
 
-    # Check for uncommitted changes
-    if ! git diff-index --quiet HEAD -- 2>/dev/null; then
-      echo ""
-      echo "⚠️  Dotfiles has uncommitted changes!"
-      echo "   cd $DOTFILES_DIR && git status"
-      echo ""
-    # Check for unpushed commits
-    elif [ -n "$(git log origin/master..HEAD 2>/dev/null)" ]; then
-      echo ""
-      echo "⚠️  Dotfiles has unpushed commits!"
-      echo "   cd $DOTFILES_DIR && git push"
-      echo ""
-    fi
+  # Check if there are any changes (uncommitted or unpushed)
+  if ! git diff-index --quiet HEAD -- 2>/dev/null || \
+     [ -n "$(git log origin/master..HEAD 2>/dev/null)" ]; then
+    echo ""
+    echo "⚠️  Dotfiles has unsaved changes!"
+    echo "   cd ~/Code/rodlc/dotfiles && git add -A && git commit -m \"Update\" && git push"
+    echo ""
   fi
 fi
 
-# Always allow the commit to proceed
 exit 0
