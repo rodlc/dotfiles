@@ -1,5 +1,5 @@
 #!/bin/zsh
-# Pre-commit hook: Check if dotfiles repo has uncommitted changes
+# Pre-commit hook: Check if dotfiles repo has uncommitted or unpushed changes
 # This warns you to save your configs when working in other repos
 
 DOTFILES_DIR="$HOME/Code/rodlc/dotfiles"
@@ -8,11 +8,18 @@ DOTFILES_DIR="$HOME/Code/rodlc/dotfiles"
 if [ "$PWD" != "$DOTFILES_DIR" ]; then
   if [ -d "$DOTFILES_DIR/.git" ]; then
     cd "$DOTFILES_DIR"
+
+    # Check for uncommitted changes
     if ! git diff-index --quiet HEAD -- 2>/dev/null; then
       echo ""
       echo "⚠️  Dotfiles has uncommitted changes!"
-      echo "   Run 'df-status' to see changes"
-      echo "   Run 'df-save' to save and push"
+      echo "   cd $DOTFILES_DIR && git status"
+      echo ""
+    # Check for unpushed commits
+    elif [ -n "$(git log origin/master..HEAD 2>/dev/null)" ]; then
+      echo ""
+      echo "⚠️  Dotfiles has unpushed commits!"
+      echo "   cd $DOTFILES_DIR && git push"
       echo ""
     fi
   fi
