@@ -77,6 +77,9 @@ export SSL_CERT_FILE=/opt/homebrew/etc/openssl@3/cert.pem
 export SSL_CERT_DIR=/opt/homebrew/etc/openssl@3/certs
 export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
 
+# MCP Notion timeout configuration (fix timeouts)
+export MCP_TIMEOUT=30000
+
 # Load environment variables from local .env (not versioned)
 [[ -f "$HOME/.env" ]] && source "$HOME/.env"
 

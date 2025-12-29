@@ -78,3 +78,13 @@ Bullet lists, definitions, minimal structure
 - Duplicates → Search first
 
 **On API error:** Show summary for manual copy
+
+**Timeout fallback:**
+If 2+ consecutive Notion MCP calls timeout:
+1. Infer concise filename from conversation topic (e.g., `traitement-chassis-t5`)
+2. Create `~/Downloads/{YYYYMMDDHHmmss}-notion-{inferred-filename}.md`
+3. Use same formatting as would be posted to Notion
+4. Inform user: "⚠️ MCP Notion timeout - fichier créé dans Downloads pour copie manuelle"
+5. Include full structured content ready to paste
+
+Example: `~/Downloads/20251228143022-notion-traitement-chassis-t5.md`
