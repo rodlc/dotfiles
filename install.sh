@@ -80,6 +80,8 @@ backup "$HOME/.claude/CLAUDE.md"
 symlink "$DOTFILES_DIR/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
 backup "$HOME/.claude/commands/notion.md"
 symlink "$DOTFILES_DIR/claude/commands/notion.md" "$HOME/.claude/commands/notion.md"
+backup "$HOME/.claude/settings.json"
+cp "$DOTFILES_DIR/claude/settings.json" "$HOME/.claude/settings.json" 2>/dev/null && echo "-----> Copied settings.json" || true
 
 # Environment variables
 if [ ! -f "$HOME/.env" ] && [ -f "$DOTFILES_DIR/.env.example" ]; then

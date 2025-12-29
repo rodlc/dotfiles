@@ -1,0 +1,50 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(**)",
+      "Edit",
+      "WebSearch",
+      "WebFetch",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git branch:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "mcp__notion__notion-fetch",
+      "mcp__notion__notion-search",
+      "mcp__acp__Read",
+      "mcp__acp__BashOutput",
+      "mcp__acp__KillShell"
+    ],
+    "deny": [
+      "Bash(rm:*)",
+      "Bash(curl:*)",
+      "Bash(wget:*)",
+      "Bash(sudo:*)",
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(**/credentials.yml.enc)",
+      "Read(**/config/master.key)",
+      "Read(**/.git/config)",
+      "Read(**/id_rsa*)",
+      "Read(**/.ssh/*)",
+      "Write(./.env)",
+      "Write(./.env.*)",
+      "Write(**/credentials.yml.enc)",
+      "Write(**/config/master.key)",
+      "Write(**/.git/config)",
+      "Write(**/id_rsa*)",
+      "Write(**/.ssh/*)"
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "/Users/rodlecoent/.claude/statusline.sh"
+  },
+  "model": "opusplan"
+}
