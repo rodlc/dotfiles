@@ -35,6 +35,17 @@ gcleanup() {
     command git branch --merged | grep -vE "^\*|$db" | xargs -n1 git branch -d
 }
 
+# Nettoyage complet : branches mergées + remotes disparus
+gpurge() {
+  local db=$(command git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | cut -d'/' -f4)
+  db="${db:-main}"
+  git checkout "$db" && git pull origin "$db" && git fetch -p && \
+    # Supprime branches mergées (safe avec -d)
+    command git branch --merged | grep -vE "^\*|$db" | xargs -n1 git branch -d
+    # Supprime branches dont le remote a disparu (force avec -D)
+    command git branch -vv | grep ': gone]' | awk '{sub(/^[+* ]/, ""); print $1}' | xargs -r git branch -D
+}
+
 # Git worktree — Travailler sur plusieurs branches en parallèle
 wt-new() {
   [[ -z "$1" ]] && echo "Usage: wt-new <branch>" && return 1

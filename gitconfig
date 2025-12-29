@@ -42,6 +42,7 @@
   # Removes a file from the index
   unstage = reset HEAD --
 	sync = !git pull --rebase && git fetch -p
+	purge = "\\!git fetch -p && git branch --merged | grep -vE '\\*|main|master' | xargs -r git branch -d && git branch -vv | grep ': gone]' | awk '{sub(/^[+* ]/, \"\"); print $1}' | xargs -r git branch -D"
 
 [help]
   autocorrect = 1
