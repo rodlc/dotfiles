@@ -7,7 +7,7 @@ Editor: Zed | Dir: ~/Code | Web: Enabled
 Default: Notion Tasks. .claude/*.md for reusable Claude instructions only.
 
 ## Notion IDs
-Tasks: cdc897cb-f221-44ea-916e-9725759bcb84
+Tasks: 68d1e0ee-a70a-4a27-b723-dde6ad636904
 Projects: 00bc1b0f-ebeb-4b20-b117-029cced93032
 Areas: c0a5f573-ae66-4e41-9ead-2c9bacc7dd79
 
