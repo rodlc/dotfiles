@@ -63,7 +63,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "/Users/rodlecoent/.claude/statusline.sh"
+    "command": "~/.claude/statusline.sh"
   },
   "model": "opusplan"
 }
