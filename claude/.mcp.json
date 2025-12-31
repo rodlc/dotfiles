@@ -1,0 +1,50 @@
+{
+  "mcpServers": {
+    "notion": {
+      "command": "node",
+      "args": ["/Users/rodlecoent/Code/mcp-notion-server/build/index.js"],
+      "env": {
+        "NOTION_API_TOKEN": "${NOTION_API_TOKEN}",
+        "NOTION_MARKDOWN_CONVERSION": "true"
+      }
+    },
+    "rails-mcp": {
+      "command": "/Users/rodlecoent/Code/rails-mcp-server/exe/rails-mcp-server",
+      "args": [],
+      "env": {}
+    },
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_TOKEN}"
+      }
+    },
+    "gmail-rodlecoent": {
+      "command": "npx",
+      "args": ["-y", "@shinzolabs/gmail-mcp"],
+      "env": {
+        "GOOGLE_CLIENT_ID": "${GMAIL_RODLECOENT_CLIENT_ID}",
+        "GOOGLE_CLIENT_SECRET": "${GMAIL_RODLECOENT_CLIENT_SECRET}",
+        "AUTH_SERVER_PORT": "3000"
+      }
+    },
+    "gmail-rodolphe": {
+      "command": "npx",
+      "args": ["-y", "@shinzolabs/gmail-mcp"],
+      "env": {
+        "GOOGLE_CLIENT_ID": "${GMAIL_RODOLPHE_CLIENT_ID}",
+        "GOOGLE_CLIENT_SECRET": "${GMAIL_RODOLPHE_CLIENT_SECRET}",
+        "AUTH_SERVER_PORT": "3001"
+      }
+    },
+    "slack": {
+      "command": "/Users/rodlecoent/Code/slack-mcp-server/slack-mcp-server",
+      "args": ["--transport", "stdio"],
+      "env": {
+        "SLACK_MCP_XOXC_TOKEN": "${SLACK_XOXC_TOKEN}",
+        "SLACK_MCP_XOXD_TOKEN": "${SLACK_XOXD_TOKEN}"
+      }
+    }
+  }
+}
