@@ -24,18 +24,16 @@
       "command": "npx",
       "args": ["-y", "@shinzolabs/gmail-mcp"],
       "env": {
-        "CLIENT_ID": "${GMAIL_RODLECOENT_CLIENT_ID}",
-        "CLIENT_SECRET": "${GMAIL_RODLECOENT_CLIENT_SECRET}",
-        "AUTH_SERVER_PORT": "3000"
+        "GMAIL_OAUTH_PATH": "~/.gmail-mcp-rodlecoent/gcp-oauth.keys.json",
+        "GMAIL_CREDENTIALS_PATH": "~/.gmail-mcp-rodlecoent/credentials.json"
       }
     },
     "gmail-rodolphe": {
       "command": "npx",
       "args": ["-y", "@shinzolabs/gmail-mcp"],
       "env": {
-        "CLIENT_ID": "${GMAIL_RODOLPHE_CLIENT_ID}",
-        "CLIENT_SECRET": "${GMAIL_RODOLPHE_CLIENT_SECRET}",
-        "AUTH_SERVER_PORT": "3001"
+        "GMAIL_OAUTH_PATH": "~/.gmail-mcp-rodolphe/gcp-oauth.keys.json",
+        "GMAIL_CREDENTIALS_PATH": "~/.gmail-mcp-rodolphe/credentials.json"
       }
     },
     "slack": {
