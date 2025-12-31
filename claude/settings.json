@@ -1,45 +1,64 @@
 {
   "permissions": {
     "allow": [
+      "Read(//**)",
+      "Read(~/**)",
       "Read(**)",
       "Edit",
+      "Write",
       "WebSearch",
       "WebFetch",
-      "Bash(git status:*)",
-      "Bash(git diff:*)",
-      "Bash(git log:*)",
-      "Bash(git branch:*)",
-      "Bash(ls:*)",
-      "Bash(find:*)",
-      "Bash(cat:*)",
-      "Bash(head:*)",
-      "Bash(tail:*)",
-      "Bash(wc:*)",
-      "mcp__notion__notion-fetch",
-      "mcp__notion__notion-search",
+      "Glob",
+      "Grep",
+      "mcp__notion__notion_search",
+      "mcp__notion__notion_retrieve_database",
+      "mcp__notion__notion_query_database",
+      "mcp__notion__notion_retrieve_page",
+      "mcp__notion__notion_retrieve_block",
+      "mcp__notion__notion_retrieve_block_children",
+      "mcp__notion__notion_append_block_children",
+      "mcp__notion__notion_create_database_item",
+      "mcp__notion__notion_update_page_properties",
       "mcp__acp__Read",
       "mcp__acp__BashOutput",
       "mcp__acp__KillShell"
     ],
     "deny": [
-      "Bash(rm:*)",
-      "Bash(curl:*)",
-      "Bash(wget:*)",
+      "Bash(rm -rf:*)",
       "Bash(sudo:*)",
-      "Read(./.env)",
-      "Read(./.env.*)",
+      "Bash(chmod 777:*)",
+      "Read(//.env)",
+      "Read(~/.env)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(~/.ssh/*)",
+      "Read(//**/.ssh/*)",
       "Read(**/credentials.yml.enc)",
       "Read(**/config/master.key)",
       "Read(**/.git/config)",
+      "Read(~/id_rsa*)",
       "Read(**/id_rsa*)",
-      "Read(**/.ssh/*)",
-      "Write(./.env)",
-      "Write(./.env.*)",
+      "Write(//.env)",
+      "Write(~/.env)",
+      "Write(**/.env)",
+      "Write(**/.env.*)",
+      "Write(~/.ssh/*)",
+      "Write(//**/.ssh/*)",
       "Write(**/credentials.yml.enc)",
-      "Write(**/config/master.key)",
-      "Write(**/.git/config)",
-      "Write(**/id_rsa*)",
-      "Write(**/.ssh/*)"
+      "Write(**/config/master.key)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/safe-bash.sh"
+          }
+        ]
+      }
     ]
   },
   "statusLine": {

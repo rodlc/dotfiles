@@ -2,14 +2,14 @@
   "mcpServers": {
     "notion": {
       "command": "node",
-      "args": ["/Users/rodlecoent/Code/mcp-notion-server/build/index.js"],
+      "args": ["${CODE_DIR}/mcp-notion-server/build/index.js"],
       "env": {
         "NOTION_API_TOKEN": "${NOTION_API_TOKEN}",
         "NOTION_MARKDOWN_CONVERSION": "true"
       }
     },
     "rails-mcp": {
-      "command": "/Users/rodlecoent/Code/rails-mcp-server/exe/rails-mcp-server",
+      "command": "${CODE_DIR}/rails-mcp-server/exe/rails-mcp-server",
       "args": [],
       "env": {}
     },
@@ -21,23 +21,23 @@
       }
     },
     "gmail-rodlecoent": {
-      "command": "npx",
-      "args": ["-y", "@shinzolabs/gmail-mcp"],
+      "command": "node",
+      "args": ["${CODE_DIR}/Gmail-MCP-Server/dist/index.js"],
       "env": {
-        "GMAIL_OAUTH_PATH": "~/.gmail-mcp-rodlecoent/gcp-oauth.keys.json",
-        "GMAIL_CREDENTIALS_PATH": "~/.gmail-mcp-rodlecoent/credentials.json"
+        "GMAIL_OAUTH_PATH": "${HOME}/.gmail-mcp-rodlecoent/gcp-oauth.keys.json",
+        "GMAIL_CREDENTIALS_PATH": "${HOME}/.gmail-mcp-rodlecoent/credentials.json"
       }
     },
     "gmail-rodolphe": {
-      "command": "npx",
-      "args": ["-y", "@shinzolabs/gmail-mcp"],
+      "command": "node",
+      "args": ["${CODE_DIR}/Gmail-MCP-Server/dist/index.js"],
       "env": {
-        "GMAIL_OAUTH_PATH": "~/.gmail-mcp-rodolphe/gcp-oauth.keys.json",
-        "GMAIL_CREDENTIALS_PATH": "~/.gmail-mcp-rodolphe/credentials.json"
+        "GMAIL_OAUTH_PATH": "${HOME}/.gmail-mcp-rodolphe/gcp-oauth.keys.json",
+        "GMAIL_CREDENTIALS_PATH": "${HOME}/.gmail-mcp-rodolphe/credentials.json"
       }
     },
     "slack": {
-      "command": "/Users/rodlecoent/Code/slack-mcp-server/slack-mcp-server",
+      "command": "${CODE_DIR}/slack-mcp-server/slack-mcp-server",
       "args": ["--transport", "stdio"],
       "env": {
         "SLACK_MCP_XOXC_TOKEN": "${SLACK_XOXC_TOKEN}",

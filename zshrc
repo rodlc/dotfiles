@@ -93,6 +93,7 @@ alias cc-monthly='npx ccusage monthly'
 alias dotfiles='cd ~/Code/rodlc/dotfiles'
 alias df-save='cd ~/Code/rodlc/dotfiles && git add -A && git commit -m "Update configs" && git push'
 alias df-status='cd ~/Code/rodlc/dotfiles && git status'
+alias mcp-sync='~/Code/rodlc/dotfiles/claude/mcp-sync.sh'
 
 # Répertoire de travail par défaut
 cd ~/Code

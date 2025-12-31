@@ -75,13 +75,25 @@ backup "$ZED_DIR/keymap.json"
 symlink "$DOTFILES_DIR/zed/keymap.json" "$ZED_DIR/keymap.json"
 
 # Claude Code
-mkdir -p "$HOME/.claude/commands"
+mkdir -p "$HOME/.claude/commands" "$HOME/.claude/hooks" "$HOME/.claude/skills"
 backup "$HOME/.claude/CLAUDE.md"
 symlink "$DOTFILES_DIR/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
 backup "$HOME/.claude/commands/notion.md"
 symlink "$DOTFILES_DIR/claude/commands/notion.md" "$HOME/.claude/commands/notion.md"
+backup "$HOME/.claude/commands/summarize.md"
+symlink "$DOTFILES_DIR/claude/commands/summarize.md" "$HOME/.claude/commands/summarize.md"
+backup "$HOME/.claude/hooks/safe-bash.sh"
+symlink "$DOTFILES_DIR/claude/hooks/safe-bash.sh" "$HOME/.claude/hooks/safe-bash.sh"
+backup "$HOME/.claude/skills/playwright.md"
+symlink "$DOTFILES_DIR/claude/skills/playwright.md" "$HOME/.claude/skills/playwright.md"
+backup "$HOME/.claude/statusline.sh"
+symlink "$DOTFILES_DIR/claude/statusline.sh" "$HOME/.claude/statusline.sh"
 backup "$HOME/.claude/settings.json"
 cp "$DOTFILES_DIR/claude/settings.json" "$HOME/.claude/settings.json" 2>/dev/null && echo "-----> Copied settings.json" || true
+
+# Install MCPs from dotfiles
+echo "=====> Installing MCP servers"
+"$DOTFILES_DIR/claude/mcp-sync.sh" install
 
 # Environment variables
 if [ ! -f "$HOME/.env" ] && [ -f "$DOTFILES_DIR/.env.example" ]; then

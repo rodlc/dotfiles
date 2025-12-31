@@ -1,5 +1,5 @@
 #!/bin/bash
-COST_LIMIT=30.00  # Promo Noël 2x : $30 / fenêtre 5h
+COST_LIMIT=36.00  # Limite Claude de base (sans promo)
 
 input=$(cat)
 dir=$(echo "$input" | jq -r '.workspace.current_dir' | xargs basename)
@@ -20,7 +20,7 @@ ctx=$(echo "$input" | jq -r '
    (.context_window.current_usage.cache_read_input_tokens // 0)) * 100 /
   (.context_window.context_window_size // 200000) | floor')
 
-# Quota persisté par fenêtre de 5h glissante
+# Quota persisté multi-sessions avec baseline
 quota_file="$HOME/.claude/quota-window.json"
 session_cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
 session_id=$(echo "$input" | jq -r '.session_id // ""')
@@ -30,12 +30,32 @@ now=$(date +%s)
 
 # Lire état précédent
 if [ -f "$quota_file" ] && [ -s "$quota_file" ]; then
-  sessions_json=$(jq -c '.sessions // {}' "$quota_file" 2>/dev/null || echo '{}')
+  prev_state=$(cat "$quota_file")
+  sessions_json=$(echo "$prev_state" | jq -c '.sessions // {}')
+  last_reset=$(echo "$prev_state" | jq -r '.last_reset // 0')
 else
   sessions_json='{}'
+  last_reset=0
 fi
 
-# Mettre à jour session courante avec gestion reset fenêtre
+# Vérifier si on doit reset (5h = 18000s)
+if [ $((now - last_reset)) -ge 18000 ]; then
+  # Reset : cost_at_reset = cost pour toutes les sessions
+  sessions_json=$(echo "$sessions_json" | jq -c '
+    to_entries
+    | map(.value = (
+        if .value | type == "object" then
+          .value | .cost_at_reset = .cost
+        else
+          {cost: .value, first_seen: '"$now"', cost_at_reset: .value}
+        end
+      ))
+    | from_entries
+  ')
+  last_reset=$now
+fi
+
+# Mettre à jour session courante avec baseline
 sessions_json=$(echo "$sessions_json" | jq -c --arg sid "$session_id" --argjson cost "$session_cost" --argjson now "$now" '
   # Normaliser sessions existantes (ajouter cost_at_reset si absent)
   to_entries
@@ -49,16 +69,11 @@ sessions_json=$(echo "$sessions_json" | jq -c --arg sid "$session_id" --argjson 
   | from_entries
   # Mettre à jour session courante
   | if .[$sid] then
-      if ($now - .[$sid].first_seen) > 18000 then
-        # Fenêtre expirée - reset avec baseline
-        .[$sid] = {cost: $cost, first_seen: $now, cost_at_reset: $cost}
-      else
-        # Fenêtre active - update cost seulement
-        .[$sid].cost = $cost
-      end
+      # Session existante - update cost seulement
+      .[$sid].cost = $cost
     else
-      # Nouvelle session
-      .[$sid] = {cost: $cost, first_seen: $now, cost_at_reset: 0}
+      # Nouvelle session - baseline le coût hérité
+      .[$sid] = {cost: $cost, first_seen: $now, cost_at_reset: $cost}
     end
   # Filtrer autres sessions expirées (garder courante)
   | to_entries
@@ -66,27 +81,14 @@ sessions_json=$(echo "$sessions_json" | jq -c --arg sid "$session_id" --argjson 
   | from_entries
 ')
 
-# Trouver session la plus ancienne pour reset time
-oldest_seen=$(echo "$sessions_json" | jq '[.[] | select(type == "object") | .first_seen] | min // 0' 2>/dev/null)
-oldest_seen=${oldest_seen:-0}
-if [ -z "$oldest_seen" ] || [ "$oldest_seen" -eq 0 ]; then
-  oldest_seen=$now
-fi
-
-# Calculer reset time = oldest_seen + 5h
-reset_time=$((oldest_seen + 18000))
-reset_h=$(date -r "$reset_time" +%H 2>/dev/null || echo "00")
-reset_m=$(date -r "$reset_time" +%M 2>/dev/null || echo "00")
-
 # Total = somme des coûts fenêtre (cost - cost_at_reset)
 total_cost=$(echo "$sessions_json" | jq '[.[] | if type == "object" then (.cost - .cost_at_reset) else . end] | add // 0' 2>/dev/null || echo 0)
 
 # Sauvegarder
-echo "$sessions_json" | jq '{sessions: .}' > "$quota_file" 2>/dev/null
+echo "$sessions_json" | jq --argjson reset "$last_reset" '{sessions: ., last_reset: $reset}' > "$quota_file" 2>/dev/null
 
 # Calculer %
 quota=$(echo "scale=0; $total_cost * 100 / $COST_LIMIT" | bc 2>/dev/null || echo 0)
-[ $quota -gt 100 ] && quota=100
 
-printf "📁 %s  🌿 %s  🤖 %s  🧠 %d%%  📊 Max5 ~%d%% 🔄 %s:%s" \
-  "$dir" "$branch" "$model" "$ctx" "$quota" "$reset_h" "$reset_m"
+printf "📁 %s  🌿 %s  🤖 %s  🧠 %d%%  📊 Max5 ~%d%%" \
+  "$dir" "$branch" "$model" "$ctx" "$quota"

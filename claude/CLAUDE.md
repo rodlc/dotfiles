@@ -21,5 +21,8 @@ Git: Team → branch/story | Personal → master direct
 Before PR: pull main → verify locally (Playwright/ask) → check assets/migrations
 Rails TDD: test → route → controller → model → view
 
+## Email Style
+For drafting emails → see ~/.claude/email-style.md
+
 ## Commands
 /notion [priority] [title] → Save to Notion Tasks (auto-infer context)
