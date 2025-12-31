@@ -113,7 +113,7 @@ update_terminal_cwd() {
 
         if [ -n "$claude_title" ]; then
             if [ -n "$CLAUDE_TITLE_CLAIMED" ]; then
-                printf '\033]0;%s\007' "$claude_title"
+                printf '\033]1;%s\007' "$claude_title"
                 return
             else
                 local current_time=$(date +%s)
@@ -126,7 +126,7 @@ update_terminal_cwd() {
                 fi
 
                 if [[ -z "$file_time" ]] || ! [[ "$file_time" =~ ^[0-9]+$ ]]; then
-                    printf '\033]0;%s\007' "${PWD/#$HOME/~}"
+                    printf '\033]1;%s\007' "${PWD/#$HOME/~}"
                     return
                 fi
 
@@ -134,14 +134,14 @@ update_terminal_cwd() {
 
                 if [ $age -lt 300 ]; then
                     export CLAUDE_TITLE_CLAIMED=1
-                    printf '\033]0;%s\007' "$claude_title"
+                    printf '\033]1;%s\007' "$claude_title"
                     return
                 fi
             fi
         fi
     fi
 
-    printf '\033]0;%s\007' "${PWD/#$HOME/~}"
+    printf '\033]1;%s\007' "${PWD/#$HOME/~}"
 }
 
 if [[ ! "${precmd_functions[(r)update_terminal_cwd]}" == "update_terminal_cwd" ]]; then
