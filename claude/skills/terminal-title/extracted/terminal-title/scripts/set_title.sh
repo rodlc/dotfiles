@@ -53,11 +53,11 @@ mv "$TEMP_FILE" "$TITLE_FILE" 2>/dev/null || rm -f "$TEMP_FILE"
 case "$TERM" in
     xterm*|rxvt*|screen*|tmux*)
         # Standard xterm-compatible terminals
-        printf '\033]1;%s\007' "$FINAL_TITLE"
+        printf '\033]0;%s\007' "$FINAL_TITLE"
         ;;
     *)
         # Fallback: try anyway, suppress errors
         # This works for iTerm2, Alacritty, and most modern terminals
-        printf '\033]1;%s\007' "$FINAL_TITLE" 2>/dev/null
+        printf '\033]0;%s\007' "$FINAL_TITLE" 2>/dev/null
         ;;
 esac
