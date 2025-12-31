@@ -96,3 +96,56 @@ alias df-status='cd ~/Code/rodlc/dotfiles && git status'
 
 # Répertoire de travail par défaut
 cd ~/Code
+
+# ============================================================================
+# CLAUDE_TERMINAL_TITLE_SETUP - Terminal Title Skill Configuration
+# ============================================================================
+
+# Préfixe personnalisé pour les titres Claude
+export CLAUDE_TITLE_PREFIX="🤖"
+
+# Override macOS Terminal.app's update_terminal_cwd to preserve Claude titles
+update_terminal_cwd() {
+    local title_file="${HOME}/.claude/terminal_title"
+
+    if [ -f "$title_file" ]; then
+        local claude_title=$(cat "$title_file" 2>/dev/null)
+
+        if [ -n "$claude_title" ]; then
+            if [ -n "$CLAUDE_TITLE_CLAIMED" ]; then
+                printf '\033]0;%s\007' "$claude_title"
+                return
+            else
+                local current_time=$(date +%s)
+                local file_time
+
+                if [[ "$OSTYPE" == "darwin"* ]]; then
+                    file_time=$(stat -f %m "$title_file" 2>/dev/null)
+                else
+                    file_time=$(stat -c %Y "$title_file" 2>/dev/null)
+                fi
+
+                if [[ -z "$file_time" ]] || ! [[ "$file_time" =~ ^[0-9]+$ ]]; then
+                    printf '\033]0;%s\007' "${PWD/#$HOME/~}"
+                    return
+                fi
+
+                local age=$((current_time - file_time))
+
+                if [ $age -lt 300 ]; then
+                    export CLAUDE_TITLE_CLAIMED=1
+                    printf '\033]0;%s\007' "$claude_title"
+                    return
+                fi
+            fi
+        fi
+    fi
+
+    printf '\033]0;%s\007' "${PWD/#$HOME/~}"
+}
+
+if [[ ! "${precmd_functions[(r)update_terminal_cwd]}" == "update_terminal_cwd" ]]; then
+    precmd_functions+=(update_terminal_cwd)
+fi
+
+# ============================================================================
