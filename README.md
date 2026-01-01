@@ -15,9 +15,11 @@ The script will automatically:
 1. **Install tools** (Homebrew, Zed, Claude Code, pyenv, rbenv, nvm, oh-my-zsh)
 2. **Backup** existing config files as `*.backup`
 3. **Create symlinks** from `~/.config` to this repo
-4. **Setup environment** (create `~/.env` from template if not exists)
-5. **Install plugins** (zsh-autosuggestions, zsh-syntax-highlighting)
-6. **Install security hooks** (Gitleaks pre-commit)
+4. **Clone & build MCP servers** (Notion, Gmail, Slack, Rails MCP to `~/Code`)
+5. **Configure MCPs** (merge template into `~/.claude.json`)
+6. **Setup environment** (create `~/.env` from template if not exists)
+7. **Install plugins** (zsh-autosuggestions, zsh-syntax-highlighting)
+8. **Install security hooks** (Gitleaks pre-commit)
 
 After installation:
 1. Edit `~/.env` with your API keys
@@ -34,6 +36,7 @@ dotfiles/
 ├── zed/                    # Zed editor configs
 └── claude/                 # Claude Code configs + commands + MCPs
     ├── .mcp.json           # MCP servers template (GitHub, Notion, Slack, Gmail, Rails)
+    ├── install-mcp-servers.sh  # Clone & build MCP repos from GitHub
     ├── mcp-sync.sh         # Sync MCPs: install/export/diff
     ├── settings.json       # Permissions, hooks, model
     ├── hooks/              # PreToolUse hooks (safe-bash.sh)
@@ -85,6 +88,30 @@ mcp-sync diff      # Compare dotfiles vs active config
 2. Run `mcp-sync install` to apply changes
 3. Restart Claude Code
 4. Run `df-save` to version changes
+
+## Raycast MCP
+
+Raycast AI uses the same MCP servers for productivity workflows (quick queries, email, Slack).
+
+**Active servers** (5):
+- **Notion** (stdio): Tasks, notes, databases
+- **Gmail-pro** (stdio): rodlecoent@gmail.com
+- **Gmail-perso** (stdio): rodolphe.lecoent@gmail.com
+- **Memory** (npx): Persistent context between sessions
+- **Filesystem** (npx): Read/analyze local files
+
+**Installation** (manual via Raycast UI):
+```
+Cmd+Space → "Install Server"
+Fill: Name, Command, Args, Env
+Test: @notion, @gmail-pro, @filesystem
+```
+
+**Server locations**: Shared from `~/Code/` (cloned by `install-mcp-servers.sh`)
+
+**Philosophy**:
+- **Raycast** = Productivity (email, files, quick queries)
+- **Claude Code** = Dev workflow (GitHub, Rails MCP)
 
 ## Daily Workflow
 
