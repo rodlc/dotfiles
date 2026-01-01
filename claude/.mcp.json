@@ -43,6 +43,11 @@
         "SLACK_MCP_XOXC_TOKEN": "${SLACK_XOXC_TOKEN}",
         "SLACK_MCP_XOXD_TOKEN": "${SLACK_XOXD_TOKEN}"
       }
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest"],
+      "disabled": true
     }
   }
 }
