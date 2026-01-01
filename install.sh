@@ -91,8 +91,12 @@ symlink "$DOTFILES_DIR/claude/statusline.sh" "$HOME/.claude/statusline.sh"
 backup "$HOME/.claude/settings.json"
 cp "$DOTFILES_DIR/claude/settings.json" "$HOME/.claude/settings.json" 2>/dev/null && echo "-----> Copied settings.json" || true
 
+# Install MCP server repositories
+echo "=====> Installing MCP server repositories"
+"$DOTFILES_DIR/claude/install-mcp-servers.sh"
+
 # Install MCPs from dotfiles
-echo "=====> Installing MCP servers"
+echo "=====> Configuring MCP servers"
 "$DOTFILES_DIR/claude/mcp-sync.sh" install
 
 # Environment variables
