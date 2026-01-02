@@ -1,5 +1,11 @@
 # Global Instructions
 
+## Personal Context
+MCP Memory stores identity, paths, preferences. Query via `search_nodes`:
+- Identity: `Rodolphe` (NIR, France Travail, contact)
+- Paths: `DocumentPaths`, `FileArchitecture` (CNI, RIB, folder structure)
+- Preferences: `EmailStyle` (4 contexts), `Personality` (MBTI/Socionics), `Preferences` (naming, tools), `NotionIDs` (DB IDs)
+
 ## Environment
 Editor: Zed | Dir: ~/Code | Web: Enabled
 
