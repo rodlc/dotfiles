@@ -45,4 +45,9 @@ install_mcp "rails-mcp-server" \
   "https://github.com/railsmcp/rails-mcp-server.git" \
   "bundle install --quiet"
 
+# Memory MCP (Python)
+install_mcp "mcp-memory-service" \
+  "https://github.com/doobidoo/mcp-memory-service.git" \
+  "pip install -e . && chmod +x bin/memory"
+
 echo "✓ MCP servers installed"

@@ -48,6 +48,22 @@
       "command": "npx",
       "args": ["@playwright/mcp@latest"],
       "disabled": true
+    },
+    "memory": {
+      "command": "${CODE_DIR}/mcp-memory-service/bin/memory",
+      "args": ["server"],
+      "env": {
+        "MCP_MEMORY_CHROMA_PATH": "${HOME}/.claude/memory-chroma",
+        "MCP_MEMORY_BACKUPS_PATH": "${HOME}/.claude/memory-backups",
+        "MCP_CONSOLIDATION_ENABLED": "true",
+        "MCP_SCHEDULE_DAILY": "03:00",
+        "MCP_SCHEDULE_WEEKLY": "SUN 04:00",
+        "MCP_SCHEDULE_MONTHLY": "01 05:00",
+        "MCP_RETENTION_CRITICAL": "365",
+        "MCP_RETENTION_REFERENCE": "180",
+        "MCP_RETENTION_STANDARD": "90",
+        "MCP_RETENTION_TEMPORARY": "30"
+      }
     }
   }
 }
