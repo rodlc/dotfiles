@@ -11,9 +11,10 @@ Wrap up this session by:
 ## Workflow
 
 1. Execute /memorize - extract and store learnings (interactive)
-2. Execute /notion with arguments: `$ARGUMENTS`
-3. Confirm both saves completed
-4. Display: "✅ Wrap-up terminé. Tape /exit ou Ctrl+D pour quitter."
+2. Execute /consolidate-memory daily - quick consolidation
+3. Execute /notion with arguments: `$ARGUMENTS`
+4. Confirm all saves completed
+5. Display: "✅ Wrap-up terminé. Tape /exit ou Ctrl+D pour quitter."
 
 ## Usage
 

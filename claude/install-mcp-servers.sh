@@ -27,27 +27,27 @@ install_mcp() {
 
 # Notion MCP (Node.js)
 install_mcp "mcp-notion-server" \
-  "https://github.com/suekou/mcp-notion-server.git" \
+  "git@github.com:rodlc/mcp-notion-server.git" \
   "npm install --silent && npm run build"
 
 # Gmail MCP (Node.js)
 install_mcp "Gmail-MCP-Server" \
-  "https://github.com/shinzolabs/gmail-mcp-server.git" \
+  "git@github.com:rodlc/Gmail-MCP-Server.git" \
   "npm install --silent && npm run build"
 
 # Slack MCP (Go)
 install_mcp "slack-mcp-server" \
-  "https://github.com/korotovsky/slack-mcp-server.git" \
+  "git@github.com:rodlc/slack-mcp-server.git" \
   "go build -o slack-mcp-server ./cmd/slack-mcp-server"
 
 # Rails MCP (Ruby)
 install_mcp "rails-mcp-server" \
-  "https://github.com/railsmcp/rails-mcp-server.git" \
+  "git@github.com:rodlc/rails-mcp-server.git" \
   "bundle install --quiet"
 
 # Memory MCP (Python)
 install_mcp "mcp-memory-service" \
-  "https://github.com/doobidoo/mcp-memory-service.git" \
-  "pip install -e . && chmod +x bin/memory"
+  "git@github.com:rodlc/mcp-memory-service.git" \
+  "pip install -e ."
 
 echo "✓ MCP servers installed"
