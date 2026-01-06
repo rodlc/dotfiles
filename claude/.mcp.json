@@ -37,7 +37,7 @@
       }
     },
     "slack": {
-      "command": "${CODE_DIR}/slack-mcp-server/build/slack-mcp-server",
+      "command": "${CODE_DIR}/slack-mcp-server/slack-mcp-server",
       "args": ["--transport", "stdio"],
       "env": {
         "SLACK_MCP_XOXC_TOKEN": "${SLACK_XOXC_TOKEN}",
@@ -50,8 +50,8 @@
       "disabled": true
     },
     "memory": {
-      "command": "${CODE_DIR}/mcp-memory-service/bin/memory",
-      "args": ["server"],
+      "command": "${CODE_DIR}/mcp-memory-service/bin/python",
+      "args": ["-m", "mcp_memory_service.mcp_server"],
       "env": {
         "MCP_MEMORY_CHROMA_PATH": "${HOME}/.claude/memory-chroma",
         "MCP_MEMORY_BACKUPS_PATH": "${HOME}/.claude/memory-backups",
