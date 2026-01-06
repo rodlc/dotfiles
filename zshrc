@@ -22,10 +22,6 @@ unalias gm # Override git plugin alias (custom function in .aliases)
 export PATH="${HOME}/.rbenv/bin:${PATH}" # Needed for Linux/WSL
 type -a rbenv > /dev/null && eval "$(rbenv init -)"
 
-# Load pyenv (to manage your Python versions)
-export PYENV_VIRTUALENV_DISABLE_PROMPT=1
-type -a pyenv > /dev/null && eval "$(pyenv init -)" && eval "$(pyenv virtualenv-init - 2> /dev/null)" && RPROMPT='[🐍 $(pyenv version-name)]'
-
 # Load nvm (to manage your node versions)
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
@@ -77,6 +73,12 @@ export SSL_CERT_FILE=/opt/homebrew/etc/openssl@3/cert.pem
 export SSL_CERT_DIR=/opt/homebrew/etc/openssl@3/certs
 export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
 
+# Load pyenv (to manage your Python versions) - AFTER Homebrew to override python3
+export PYENV_ROOT="$HOME/.pyenv"
+[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+export PYENV_VIRTUALENV_DISABLE_PROMPT=1
+type -a pyenv > /dev/null && eval "$(pyenv init -)" && eval "$(pyenv virtualenv-init - 2> /dev/null)" && RPROMPT='[🐍 $(pyenv version-name)]'
+
 # MCP Notion timeout configuration (fix timeouts)
 export MCP_TIMEOUT=30000
 
@@ -91,8 +93,9 @@ alias cc-monthly='npx ccusage monthly'
 
 # Dotfiles management aliases
 alias dotfiles='cd ~/Code/rodlc/dotfiles'
-alias df-save='cd ~/Code/rodlc/dotfiles && git add -A && git commit -m "Update configs" && git push'
 alias df-status='cd ~/Code/rodlc/dotfiles && git status'
+alias df-push='cd ~/Code/rodlc/dotfiles && git add -A && git commit -m "Update configs" && git push'
+alias df-pull='cd ~/Code/rodlc/dotfiles && git pull && echo "✅ Dotfiles updated. Restart Claude Code if needed."'
 alias mcp-sync='~/Code/rodlc/dotfiles/claude/mcp-sync.sh'
 
 # Répertoire de travail par défaut
@@ -147,6 +150,68 @@ update_terminal_cwd() {
 
 if [[ ! "${precmd_functions[(r)update_terminal_cwd]}" == "update_terminal_cwd" ]]; then
     precmd_functions+=(update_terminal_cwd)
+fi
+
+# ============================================================================
+# MCP Memory - Dream Consolidation Configuration
+# ============================================================================
+
+# Enable dream-inspired consolidation system
+export MCP_CONSOLIDATION_ENABLED=true
+
+# Quality scoring with implicit signals (access_count, recency, ranking)
+export MCP_QUALITY_BOOST_ENABLED=true
+export MCP_QUALITY_BOOST_WEIGHT=0.3  # 30% implicit signals, 70% semantic
+
+# Association-based quality boost (v8.47.0+)
+export MCP_CONSOLIDATION_QUALITY_BOOST_ENABLED=true
+export MCP_CONSOLIDATION_MIN_CONNECTIONS_FOR_BOOST=3
+export MCP_CONSOLIDATION_QUALITY_BOOST_FACTOR=1.2
+
+# Graph storage for associations persistence
+export GRAPH_STORAGE_MODE=dual_write
+
+# Consolidation scheduling (APScheduler)
+export MCP_CONSOLIDATION_SCHEDULE_DAILY="03:00"
+export MCP_CONSOLIDATION_SCHEDULE_WEEKLY="SUN 04:00"
+export MCP_CONSOLIDATION_SCHEDULE_MONTHLY="01 05:00"
+export MCP_CONSOLIDATION_SCHEDULE_QUARTERLY="disabled"
+export MCP_CONSOLIDATION_SCHEDULE_YEARLY="disabled"
+
+# Enabled phases per horizon (skip clustering/archiving for small corpus)
+export MCP_CONSOLIDATION_ENABLED_PHASES_ASSOCIATIONS="weekly,monthly"
+export MCP_CONSOLIDATION_ENABLED_PHASES_COMPRESSION="weekly,monthly"
+export MCP_CONSOLIDATION_ENABLED_PHASES_CLUSTERING="disabled"
+export MCP_CONSOLIDATION_ENABLED_PHASES_FORGETTING="disabled"
+
+# Retention periods by memory type (days)
+export MCP_CONSOLIDATION_RETENTION_CRITICAL=365    # T1 equivalent
+export MCP_CONSOLIDATION_RETENTION_REFERENCE=180   # T2 equivalent
+export MCP_CONSOLIDATION_RETENTION_STANDARD=90     # T3 equivalent
+export MCP_CONSOLIDATION_RETENTION_TEMPORARY=30    # T4 equivalent
+
+# ============================================================================
+# Dotfiles Sync Check (MOTD)
+# ============================================================================
+
+if [ -d "$HOME/Code/rodlc/dotfiles/.git" ]; then
+  (
+    cd "$HOME/Code/rodlc/dotfiles" 2>/dev/null
+
+    # Async fetch pour détecter remote changes
+    git fetch origin main >/dev/null 2>&1 &
+
+    # Check uncommitted local changes
+    if [ -n "$(git status --porcelain 2>/dev/null)" ]; then
+      echo "⚠️  Dotfiles have uncommitted changes. Run: df-push"
+    fi
+
+    # Check if behind remote
+    local behind=$(git rev-list HEAD...origin/main --count 2>/dev/null)
+    if [ "$behind" != "0" ] && [ -n "$behind" ]; then
+      echo "🔄 Dotfiles outdated ($behind commits). Run: df-pull"
+    fi
+  ) 2>/dev/null
 fi
 
 # ============================================================================

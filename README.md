@@ -87,7 +87,7 @@ mcp-sync diff      # Compare dotfiles vs active config
 1. Edit `claude/.mcp.json` template (add/remove servers)
 2. Run `mcp-sync install` to apply changes
 3. Restart Claude Code
-4. Run `df-save` to version changes
+4. Run `df-push` to version changes
 
 ## Raycast MCP
 
@@ -117,7 +117,8 @@ Test: @notion, @gmail-pro, @filesystem
 
 **Save config changes**:
 ```bash
-df-save        # Commit and push all dotfiles changes
+df-push        # Commit and push all dotfiles changes (formerly df-save)
+df-pull        # Pull latest dotfiles from remote
 df-status      # Check uncommitted changes
 dotfiles       # cd to dotfiles repo
 mcp-sync diff  # Check MCP config drift

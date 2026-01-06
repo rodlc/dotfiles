@@ -1,4 +1,8 @@
 {
+  "env": {
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4-5-20251101",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-4-5-20250929"
+  },
   "permissions": {
     "allow": [
       "Read(//**)",
@@ -21,7 +25,14 @@
       "mcp__notion__notion_update_page_properties",
       "mcp__acp__Read",
       "mcp__acp__BashOutput",
-      "mcp__acp__KillShell"
+      "mcp__acp__KillShell",
+      "mcp__gmail-rodolphe__read_email",
+      "mcp__gmail-rodolphe__search_emails",
+      "mcp__gmail-rodolphe__draft_email",
+      "mcp__gmail-rodlecoent__read_email",
+      "mcp__gmail-rodlecoent__search_emails",
+      "mcp__gmail-rodlecoent__draft_email",
+      "mcp__memory"
     ],
     "deny": [
       "Bash(rm -rf:*)",
@@ -45,9 +56,16 @@
       "Write(~/.ssh/*)",
       "Write(//**/.ssh/*)",
       "Write(**/credentials.yml.enc)",
-      "Write(**/config/master.key)"
-    ]
+      "Write(**/config/master.key)",
+      "Bash(git reset --hard:*)",
+      "Bash(git push -f:*)",
+      "Bash(git push --force:*)",
+      "Bash(git clean -f:*)",
+      "Bash(git branch -D:*)"
+    ],
+    "defaultMode": "acceptEdits"
   },
+  "model": "opusplan",
   "hooks": {
     "PreToolUse": [
       {
@@ -59,11 +77,22 @@
           }
         ]
       }
+    ],
+    "PermissionRequest": [
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/auto-approve-skills.sh"
+          }
+        ]
+      }
     ]
   },
   "statusLine": {
     "type": "command",
     "command": "~/.claude/statusline.sh"
   },
-  "model": "opusplan"
+  "alwaysThinkingEnabled": false
 }

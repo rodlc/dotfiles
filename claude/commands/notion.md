@@ -58,6 +58,9 @@ Bullet lists, definitions, minimal structure
 
 **Concise:** Actionable info only, code refs as file:line
 
+**Plan reference:** If a plan file exists in `~/.claude/plans/` modified within the last hour, add in Sources section:
+- `📋 Plan: ~/.claude/plans/{filename}.md`
+
 ## Technical Notes
 
 **Property formats** (critical for API):
@@ -80,11 +83,18 @@ Bullet lists, definitions, minimal structure
 **On API error:** Show summary for manual copy
 
 **Timeout fallback:**
-If 2+ consecutive Notion MCP calls timeout:
-1. Infer concise filename from conversation topic (e.g., `traitement-chassis-t5`)
+If ANY Notion MCP call fails (timeout, 404, rate limit):
+1. Infer concise filename from conversation topic (e.g., `wrap-skill-setup`)
 2. Create `~/Downloads/{YYYYMMDDHHmmss}-notion-{inferred-filename}.md`
 3. Use same formatting as would be posted to Notion
-4. Inform user: "⚠️ MCP Notion timeout - fichier créé dans Downloads pour copie manuelle"
-5. Include full structured content ready to paste
+4. Show user: "⚠️ Notion MCP failed - saved to ~/Downloads/{filename} for manual paste"
+5. Include full structured content ready to copy
 
-Example: `~/Downloads/20251228143022-notion-traitement-chassis-t5.md`
+Example: `~/Downloads/20260104233045-notion-wrap-skill-setup.md`
+
+**Error types triggering fallback:**
+- Timeout (no response)
+- 404 (database not found)
+- 400 (invalid properties)
+- Rate limit (429)
+- Any non-2xx response

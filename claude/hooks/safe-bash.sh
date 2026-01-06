@@ -16,6 +16,17 @@ if [[ $command =~ git.*reset.*--hard ]] || \
   exit 0
 fi
 
+# DENY: rm récursif dangereux (chemins absolus ou home)
+# Détecte -r, -R, -rf, -fr, -Rf, etc.
+if [[ $command =~ ^rm[[:space:]] ]] && [[ $command =~ -[rRfF]*[rR][rRfF]* ]]; then
+  # Bloque si chemin absolu (/) ou home (~) détecté
+  if [[ $command =~ [[:space:]]/[^.] ]] || [[ $command =~ [[:space:]]~ ]]; then
+    echo "DEBUG: DENY! rm recursive with absolute or home path" >> /tmp/claude-hook-debug.log
+    echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"rm recursive with absolute or home path blocked"}}'
+    exit 0
+  fi
+fi
+
 # Commandes safe (même avec pipes/redirections)
 if [[ $command =~ ^ls([[:space:]]|$) ]] || \
    [[ $command =~ ^find([[:space:]]|$) ]] || \
@@ -56,7 +67,13 @@ if [[ $command =~ ^ls([[:space:]]|$) ]] || \
    [[ $command =~ ^realpath([[:space:]]|$) ]] || \
    [[ $command =~ ^tree([[:space:]]|$) ]] || \
    [[ $command =~ ^less([[:space:]]|$) ]] || \
-   [[ $command =~ ^more([[:space:]]|$) ]]; then
+   [[ $command =~ ^more([[:space:]]|$) ]] || \
+   [[ $command =~ ^mkdir([[:space:]]|$) ]] || \
+   [[ $command =~ ^touch([[:space:]]|$) ]] || \
+   [[ $command =~ ^mv([[:space:]]|$) ]] || \
+   [[ $command =~ ^cp([[:space:]]|$) ]] || \
+   [[ $command =~ ^rm([[:space:]]|$) ]] || \
+   [[ $command =~ ^\.\/.+ ]]; then
   echo "DEBUG: MATCH! Allowing command" >> /tmp/claude-hook-debug.log
   echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow","permissionDecisionReason":"Safe command auto-approved"}}'
   exit 0

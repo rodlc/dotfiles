@@ -9,11 +9,12 @@ Automatically process unsummarized files, append to resume, clean up, and option
 
 When invoked without arguments (`/summarize`):
 
-1. **Scan** `~/Downloads/Summarize/` for all supported files
-2. **Identify unsummarized files** by comparing with existing `*_Resume_*.md`
-3. **Process each** unsummarized file and append to resume
-4. **Clean up** source files after successful summarization
-5. **Ask user** which summaries to save to Notion Tasks
+1. **Scan** `~/Downloads/Summarize/Pending/` for all supported files
+2. **Identify unsummarized files** by comparing with existing `*_Resume_*.md` (in parent dir)
+3. **Detect duplicates** by content similarity (skip if already summarized)
+4. **Process each** unsummarized file and append to resume
+5. **Clean up** source files after successful summarization (delete from Pending/)
+6. **Ask user** which summaries to save to Notion Tasks
 
 ## With Arguments
 
@@ -56,6 +57,8 @@ Generate structured summary with **readable spacing**:
 
 [Si données denses sans sous-sections naturelles, utiliser paragraphes courts séparés par lignes vides]
 
+👿 **Détracteur** - [Point de vue opposé ou limite de l'analyse] ([Consensus: majoritaire/minoritaire/à débattre])
+
 🔖 **Action**
 
 - Implication 1
@@ -78,11 +81,11 @@ Parse `$ARGUMENTS`:
 
 1. **Determine target directory**:
    - If `$ARGUMENTS` provided → use specified path
-   - Else → use `~/Downloads/Summarize/`
+   - Else → use `~/Downloads/Summarize/Pending/`
 
 2. **Find resume file**:
-   - Search for `*_Resume_*.md` in target directory
-   - If not found → create `{YYYYMMDD}_Resume.md`
+   - Search for `*_Resume_*.md` in parent directory (`~/Downloads/Summarize/`)
+   - If not found → create `{YYYYMMDD}_Resume.md` in parent
 
 3. **List all source files**:
    - Supported: `.pdf`, `.srt`, `.mhtml`, `.txt`
@@ -90,7 +93,11 @@ Parse `$ARGUMENTS`:
 
 4. **Identify unsummarized files**:
    - Read resume file content
-   - For each source file, check if filename appears in resume
+   - For each source file, check if similar content/title appears in resume
+   - **Duplicate detection**:
+     - Extract title/date from filename (e.g., "Réveil Courrier du 3 janvier")
+     - Search resume for matching title/date
+     - Skip if found (avoid processing same content from different sources)
    - Mark files NOT found in resume as "to process"
 
 ### Phase 2: Summarization
@@ -118,8 +125,9 @@ For each unsummarized file:
 ### Phase 3: Cleanup
 
 1. **Delete processed source files**:
-   - Only delete files that were successfully summarized
-   - Keep: resume file, extract scripts, temp extracts used for processing
+   - Only delete files from `Pending/` that were successfully summarized
+   - Keep: resume file (parent dir), extract scripts, temp extracts
+   - **Also delete duplicates** that were skipped (they're already in resume)
    - Show list of deleted files to user
 
 ### Phase 4: Notion Sync
@@ -169,32 +177,36 @@ For each unsummarized file:
 ## Typical Output
 
 ```
-🔍 Scanning ~/Downloads/Summarize/...
-Found resume: Courrier_International_Resume_2024-12-24.md
-Found 3 unsummarized files:
-  - new_article.pdf
-  - interview.srt
-  - report.mhtml
+🔍 Scanning ~/Downloads/Summarize/Pending/...
+Found resume: ~/Downloads/Summarize/Courrier_International_Resume_2024-12-24.md
+Found 5 files:
+  - new_article.pdf (new)
+  - interview.srt (new)
+  - report.mhtml (new)
+  - duplicate_reveil_28dec.pdf (duplicate - skipping)
+  - duplicate_reveil_28dec.mhtml (duplicate - skipping)
 
 📝 Processing new_article.pdf...
-   ✓ Summary appended (V4)
+   ✓ Summary appended (P6)
 
 📝 Processing interview.srt...
-   ✓ Summary appended (V5)
+   ✓ Summary appended (V6)
 
 📝 Processing report.mhtml...
-   ✓ Summary appended (P3)
+   ✓ Summary appended (P7)
 
-🧹 Cleaning up source files...
+🧹 Cleaning up Pending/ files...
    Deleted: new_article.pdf
    Deleted: interview.srt
    Deleted: report.mhtml
+   Deleted: duplicate_reveil_28dec.pdf (duplicate)
+   Deleted: duplicate_reveil_28dec.mhtml (duplicate)
 
 💾 Save to Notion?
    Which summaries should be saved to Notion Tasks? [multi-select]
-   □ V4. New Article Title
-   □ V5. Interview Title
-   □ P3. Report Title
+   □ P6. New Article Title
+   □ V6. Interview Title
+   □ P7. Report Title
 ```
 
 ## Style
