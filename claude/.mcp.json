@@ -37,7 +37,7 @@
       }
     },
     "slack": {
-      "command": "${CODE_DIR}/slack-mcp-server/slack-mcp-server",
+      "command": "${CODE_DIR}/slack-mcp-server/build/slack-mcp-server",
       "args": ["--transport", "stdio"],
       "env": {
         "SLACK_MCP_XOXC_TOKEN": "${SLACK_XOXC_TOKEN}",
