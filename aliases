@@ -95,13 +95,13 @@ alias mcp-sync='~/Code/rodlc/dotfiles/claude/mcp-sync.sh'
 alias bw-secrets='~/Code/rodlc/dotfiles/scripts/bw-secrets'
 
 # ============================================================================
-# Claude Context (Memory + Plans)
+# Workspace (Memory + Plans + AI Context)
 # ============================================================================
-alias context-sync='~/Code/rodlc/claude-context/scripts/context-sync'
-alias context-status='~/Code/rodlc/claude-context/scripts/context-sync status'
-alias context-push='~/Code/rodlc/claude-context/scripts/context-sync push'
-alias context-pull='~/Code/rodlc/claude-context/scripts/context-sync pull'
+alias workspace-sync='~/Code/rodlc/workspace/scripts/context-sync'
+alias workspace-status='~/Code/rodlc/workspace/scripts/context-sync status'
+alias workspace-push='~/Code/rodlc/workspace/scripts/context-sync push'
+alias workspace-pull='~/Code/rodlc/workspace/scripts/context-sync pull'
 
-alias memory-export='~/Code/rodlc/claude-context/memory/sync-memory.sh export'
-alias memory-import='~/Code/rodlc/claude-context/memory/sync-memory.sh import'
-alias plans-sync='~/Code/rodlc/claude-context/scripts/plans-sync'
+alias memory-export='~/Code/rodlc/workspace/memory/sync-memory.sh export'
+alias memory-import='~/Code/rodlc/workspace/memory/sync-memory.sh import'
+alias plans-sync='~/Code/rodlc/workspace/scripts/plans-sync'

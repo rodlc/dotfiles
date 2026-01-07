@@ -167,7 +167,7 @@ export MCP_CONSOLIDATION_RETENTION_REFERENCE=180   # T2 equivalent
 export MCP_CONSOLIDATION_RETENTION_STANDARD=90     # T3 equivalent
 export MCP_CONSOLIDATION_RETENTION_TEMPORARY=30    # T4 equivalent
 
-# Dotfiles & Claude context sync check (MOTD)
+# Dotfiles & Workspace sync check (MOTD)
 if [ -d "$HOME/Code/rodlc/dotfiles/.git" ]; then
   (
     cd "$HOME/Code/rodlc/dotfiles" 2>/dev/null
@@ -180,15 +180,15 @@ if [ -d "$HOME/Code/rodlc/dotfiles/.git" ]; then
   ) 2>/dev/null
 fi
 
-if [ -d "$HOME/Code/rodlc/claude-context/.git" ]; then
+if [ -d "$HOME/Code/rodlc/workspace/.git" ]; then
   (
-    cd "$HOME/Code/rodlc/claude-context" 2>/dev/null
+    cd "$HOME/Code/rodlc/workspace" 2>/dev/null
     git fetch origin main >/dev/null 2>&1 &
 
-    [ -n "$(git status --porcelain 2>/dev/null)" ] && echo "⚠️  Claude context has uncommitted changes. Run: context-sync"
+    [ -n "$(git status --porcelain 2>/dev/null)" ] && echo "⚠️  Workspace has uncommitted changes. Run: workspace-sync"
 
     local behind=$(git rev-list HEAD...origin/main --count 2>/dev/null)
-    [ "$behind" != "0" ] && [ -n "$behind" ] && echo "🔄 Claude context outdated ($behind commits). Run: context-sync pull"
+    [ "$behind" != "0" ] && [ -n "$behind" ] && echo "🔄 Workspace outdated ($behind commits). Run: workspace-sync pull"
   ) 2>/dev/null
 fi
 
