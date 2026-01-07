@@ -97,10 +97,9 @@ alias bw-secrets='~/Code/rodlc/dotfiles/scripts/bw-secrets'
 # ============================================================================
 # Workspace (Memory + Plans + AI Context)
 # ============================================================================
-alias workspace-sync='~/Code/rodlc/workspace/scripts/context-sync'
-alias workspace-status='~/Code/rodlc/workspace/scripts/context-sync status'
 alias workspace-push='~/Code/rodlc/workspace/scripts/context-sync push'
 alias workspace-pull='~/Code/rodlc/workspace/scripts/context-sync pull'
+alias workspace-status='~/Code/rodlc/workspace/scripts/context-sync status'
 
 alias memory-export='~/Code/rodlc/workspace/memory/sync-memory.sh export'
 alias memory-import='~/Code/rodlc/workspace/memory/sync-memory.sh import'

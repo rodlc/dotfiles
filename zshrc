@@ -167,29 +167,74 @@ export MCP_CONSOLIDATION_RETENTION_REFERENCE=180   # T2 equivalent
 export MCP_CONSOLIDATION_RETENTION_STANDARD=90     # T3 equivalent
 export MCP_CONSOLIDATION_RETENTION_TEMPORARY=30    # T4 equivalent
 
-# Dotfiles & Workspace sync check (MOTD)
-if [ -d "$HOME/Code/rodlc/dotfiles/.git" ]; then
-  (
-    cd "$HOME/Code/rodlc/dotfiles" 2>/dev/null
-    git fetch origin main >/dev/null 2>&1 &
+# ============================================================================
+# MOTD - Git Repository Status with Cache (5min TTL)
+# ============================================================================
 
-    [ -n "$(git status --porcelain 2>/dev/null)" ] && echo "⚠️  Dotfiles have uncommitted changes. Run: df-push"
+check_repo_status() {
+    local repo_path="$1"
+    local repo_name="$2"
+    local alias_push="$3"
+    local alias_pull="$4"
 
-    local behind=$(git rev-list HEAD...origin/main --count 2>/dev/null)
-    [ "$behind" != "0" ] && [ -n "$behind" ] && echo "🔄 Dotfiles outdated ($behind commits). Run: df-pull"
-  ) 2>/dev/null
-fi
+    # Check if repo exists
+    if [[ ! -d "$repo_path/.git" ]]; then
+        return 0
+    fi
 
-if [ -d "$HOME/Code/rodlc/workspace/.git" ]; then
-  (
-    cd "$HOME/Code/rodlc/workspace" 2>/dev/null
-    git fetch origin main >/dev/null 2>&1 &
+    # Cache setup
+    local cache_dir="$HOME/.cache"
+    mkdir -p "$cache_dir"
+    local cache_file="$cache_dir/git-status-$repo_name"
+    local cache_ttl=300  # 5 minutes
 
-    [ -n "$(git status --porcelain 2>/dev/null)" ] && echo "⚠️  Workspace has uncommitted changes. Run: workspace-sync"
+    # Check cache age
+    local cache_age=999999
+    if [[ -f "$cache_file" ]]; then
+        local current_time=$(date +%s)
+        local file_time=$(stat -f %m "$cache_file" 2>/dev/null)
+        cache_age=$((current_time - file_time))
+    fi
 
-    local behind=$(git rev-list HEAD...origin/main --count 2>/dev/null)
-    [ "$behind" != "0" ] && [ -n "$behind" ] && echo "🔄 Workspace outdated ($behind commits). Run: workspace-sync pull"
-  ) 2>/dev/null
-fi
+    # Cache is fresh - just display it
+    if [[ $cache_age -lt $cache_ttl ]]; then
+        cat "$cache_file" 2>/dev/null
+        return 0
+    fi
+
+    # Cache is stale - refresh in background
+    (
+        cd "$repo_path" 2>/dev/null || exit
+
+        # Fetch remote (silent)
+        git fetch origin main >/dev/null 2>&1
+
+        local output=""
+
+        # Check uncommitted changes
+        if [[ -n "$(git status --porcelain 2>/dev/null)" ]]; then
+            output+="⚠️  $repo_name has uncommitted changes. Run: $alias_push"$'\n'
+        fi
+
+        # Check if behind remote
+        local behind=$(git rev-list HEAD...origin/main --count 2>/dev/null)
+        if [[ "$behind" != "0" && -n "$behind" ]]; then
+            output+="🔄 $repo_name outdated ($behind commits). Run: $alias_pull"$'\n'
+        fi
+
+        # Write to cache (remove trailing newline)
+        echo -n "$output" > "$cache_file.tmp"
+        mv "$cache_file.tmp" "$cache_file"
+    ) &
+
+    # Display old cache while refreshing (if exists)
+    if [[ -f "$cache_file" ]]; then
+        cat "$cache_file" 2>/dev/null
+    fi
+}
+
+# Dotfiles & Workspace sync check (MOTD with cache)
+check_repo_status "$HOME/Code/rodlc/dotfiles" "Dotfiles" "df-push" "df-pull"
+check_repo_status "$HOME/Code/rodlc/workspace" "Workspace" "workspace-push" "workspace-pull"
 
 . "$HOME/.local/bin/env"
