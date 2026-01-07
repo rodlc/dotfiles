@@ -224,7 +224,7 @@ check_repo_status() {
 
         # Write to cache (remove trailing newline)
         echo -n "$output" > "$cache_file.tmp"
-        mv "$cache_file.tmp" "$cache_file"
+        mv -f "$cache_file.tmp" "$cache_file"
     ) &
 
     # Display old cache while refreshing (if exists)
@@ -237,4 +237,31 @@ check_repo_status() {
 check_repo_status "$HOME/Code/rodlc/dotfiles" "Dotfiles" "df-push" "df-pull"
 check_repo_status "$HOME/Code/rodlc/workspace" "Workspace" "workspace-push" "workspace-pull"
 
-. "$HOME/.local/bin/env"
+# ============================================================================
+# LTS Version Check - Warn if Homebrew languages detected
+# ============================================================================
+
+check_version_managers() {
+    local warnings=""
+
+    # Node.js: should use nvm, not Homebrew
+    if command -v node &>/dev/null && [[ "$(which node)" == "/opt/homebrew"* ]]; then
+        warnings+="⚠️  Node.js via Homebrew. Run: brew uninstall node && nvm use default\n"
+    fi
+
+    # Python: should use pyenv, not Homebrew
+    if command -v python3 &>/dev/null && [[ "$(which python3)" == "/opt/homebrew"* ]]; then
+        warnings+="⚠️  Python via Homebrew. Run: brew uninstall python && pyenv global <version>\n"
+    fi
+
+    # Ruby: should use rbenv, not Homebrew
+    if command -v ruby &>/dev/null && [[ "$(which ruby)" == "/opt/homebrew"* ]]; then
+        warnings+="⚠️  Ruby via Homebrew. Run: brew uninstall ruby && rbenv global <version>\n"
+    fi
+
+    [[ -n "$warnings" ]] && echo -e "$warnings"
+}
+check_version_managers
+
+# Load local env if exists (optional personal config)
+[[ -f "$HOME/.local/bin/env" ]] && . "$HOME/.local/bin/env"

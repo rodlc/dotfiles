@@ -47,8 +47,6 @@ brew "pre-commit"
 brew "pyenv"
 # Generic syntax highlighter
 brew "pygments"
-# Interpreted, interactive, object-oriented programming language
-brew "python@3.12"
 # Ruby version manager
 brew "rbenv"
 # Display directories as trees (with optional color/HTML output)

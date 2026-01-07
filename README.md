@@ -200,6 +200,20 @@ Edit configs directly (via symlinks):
 
 Re-run `./install.sh` anytime (idempotent).
 
+## Language Version Policy
+
+Use **LTS/stable versions exclusively** via version managers. Brewfile excludes language packages to prevent auto-upgrades.
+
+| Language | Manager | Install | Default |
+|----------|---------|---------|---------|
+| Node.js | nvm | `nvm install --lts` | `nvm alias default lts/*` |
+| Python | pyenv | `pyenv install <stable>` | `pyenv global <version>` |
+| Ruby | rbenv | `rbenv install <stable>` | `rbenv global <version>` |
+
+**Why?** Homebrew's `brew upgrade` auto-upgrades languages (like Node v25), breaking dependencies. Version managers allow pinning and easy switching.
+
+**MOTD warning**: Shell startup warns if Homebrew language binaries detected.
+
 ## References
 
 - [Thoughtbot dotfiles](https://github.com/thoughtbot/dotfiles) - Inspiration
