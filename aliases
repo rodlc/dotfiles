@@ -9,9 +9,8 @@ alias serve='ruby -run -e httpd . -p 8000'
 # Open current directory in Zed
 alias z="zed ."
 
-# Git wrapper — Alert if main is behind origin before checkout
+# Git wrapper - Alert if main is behind origin before checkout
 git() {
-  # Alerte avant checkout si main est en retard
   if [[ "$1" =~ ^(checkout|co|switch)$ ]]; then
     command git fetch --quiet 2>/dev/null
     local default_branch=$(command git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | cut -d'/' -f4)
@@ -22,12 +21,12 @@ git() {
   command git "$@"
 }
 
-# Checkout main (passe par le wrapper → alerte incluse)
+# Checkout main (uses wrapper with alert)
 gm() {
   git checkout "$(command git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | cut -d'/' -f4 || echo main)"
 }
 
-# Nettoyage branches (passe par le wrapper → alerte incluse)
+# Clean merged branches
 gcleanup() {
   local db=$(command git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | cut -d'/' -f4)
   db="${db:-main}"
@@ -35,18 +34,16 @@ gcleanup() {
     command git branch --merged | grep -vE "^\*|$db" | xargs -n1 git branch -d
 }
 
-# Nettoyage complet : branches mergées + remotes disparus
+# Full cleanup: merged branches + gone remotes
 gpurge() {
   local db=$(command git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | cut -d'/' -f4)
   db="${db:-main}"
   git checkout "$db" && git pull origin "$db" && git fetch -p && \
-    # Supprime branches mergées (safe avec -d)
     command git branch --merged | grep -vE "^\*|$db" | xargs -n1 git branch -d
-    # Supprime branches dont le remote a disparu (force avec -D)
     command git branch -vv | grep ': gone]' | awk '{sub(/^[+* ]/, ""); print $1}' | xargs -r git branch -D
 }
 
-# Git worktree — Travailler sur plusieurs branches en parallèle
+# Git worktree - Work on multiple branches in parallel
 wt-new() {
   [[ -z "$1" ]] && echo "Usage: wt-new <branch>" && return 1
   local repo=$(basename "$(git rev-parse --show-toplevel)")
@@ -91,3 +88,20 @@ alias df-status='cd ~/Code/rodlc/dotfiles && git status'
 alias df-push='cd ~/Code/rodlc/dotfiles && git add -A && git commit -m "Update configs" && git push'
 alias df-pull='cd ~/Code/rodlc/dotfiles && git pull && echo "✅ Dotfiles updated. Restart Claude Code if needed."'
 alias mcp-sync='~/Code/rodlc/dotfiles/claude/mcp-sync.sh'
+
+# ============================================================================
+# Bitwarden Secrets Sync
+# ============================================================================
+alias bw-secrets='~/Code/rodlc/dotfiles/scripts/bw-secrets'
+
+# ============================================================================
+# Claude Context (Memory + Plans)
+# ============================================================================
+alias context-sync='~/Code/rodlc/claude-context/scripts/context-sync'
+alias context-status='~/Code/rodlc/claude-context/scripts/context-sync status'
+alias context-push='~/Code/rodlc/claude-context/scripts/context-sync push'
+alias context-pull='~/Code/rodlc/claude-context/scripts/context-sync pull'
+
+alias memory-export='~/Code/rodlc/claude-context/memory/sync-memory.sh export'
+alias memory-import='~/Code/rodlc/claude-context/memory/sync-memory.sh import'
+alias plans-sync='~/Code/rodlc/claude-context/scripts/plans-sync'

@@ -90,5 +90,9 @@ echo "$sessions_json" | jq --argjson reset "$last_reset" '{sessions: ., last_res
 # Calculer %
 quota=$(echo "scale=0; $total_cost * 100 / $COST_LIMIT" | bc 2>/dev/null || echo 0)
 
-printf "📁 %s  🌿 %s  🤖 %s  🧠 %d%%  📊 Max5 ~%d%%" \
-  "$dir" "$branch" "$model" "$ctx" "$quota"
+# Calculer prochaine reset (last_reset + 5h)
+next_reset=$((last_reset + 18000))
+reset_time=$(date -r "$next_reset" +%H:%M 2>/dev/null || echo "??:??")
+
+printf "📁 %s  🌿 %s  🤖 %s  🧠 %d%%  📊 Max5 ~%d%% 🔄 %s" \
+  "$dir" "$branch" "$model" "$ctx" "$quota" "$reset_time"

@@ -62,7 +62,7 @@ export PATH="./bin:./node_modules/.bin:${PATH}:/usr/local/sbin"
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
-# Zed comme éditeur par défaut
+# Default editor
 export BUNDLER_EDITOR="zed --wait"
 export EDITOR="zed --wait"
 export VISUAL="zed --wait"
@@ -82,20 +82,14 @@ type -a pyenv > /dev/null && eval "$(pyenv init -)" && eval "$(pyenv virtualenv-
 # MCP Notion timeout configuration (fix timeouts)
 export MCP_TIMEOUT=30000
 
-# Load environment variables from local .env (not versioned)
+# Secrets (Bitwarden → ~/.env). Sync: bw-sync-env. Never commit ~/.env
 [[ -f "$HOME/.env" ]] && source "$HOME/.env"
 
-# Répertoire de travail par défaut
+# Default working directory
 cd ~/Code
 
-# ============================================================================
-# CLAUDE_TERMINAL_TITLE_SETUP - Terminal Title Skill Configuration
-# ============================================================================
-
-# Préfixe personnalisé pour les titres Claude
+# Claude terminal title configuration
 export CLAUDE_TITLE_PREFIX="🤖"
-
-# Override macOS Terminal.app's update_terminal_cwd to preserve Claude titles
 update_terminal_cwd() {
     local title_file="${HOME}/.claude/terminal_title"
 
@@ -139,11 +133,7 @@ if [[ ! "${precmd_functions[(r)update_terminal_cwd]}" == "update_terminal_cwd" ]
     precmd_functions+=(update_terminal_cwd)
 fi
 
-# ============================================================================
-# MCP Memory - Dream Consolidation Configuration
-# ============================================================================
-
-# Enable dream-inspired consolidation system
+# MCP Memory - Dream consolidation configuration
 export MCP_CONSOLIDATION_ENABLED=true
 
 # Quality scoring with implicit signals (access_count, recency, ranking)
@@ -177,30 +167,29 @@ export MCP_CONSOLIDATION_RETENTION_REFERENCE=180   # T2 equivalent
 export MCP_CONSOLIDATION_RETENTION_STANDARD=90     # T3 equivalent
 export MCP_CONSOLIDATION_RETENTION_TEMPORARY=30    # T4 equivalent
 
-# ============================================================================
-# Dotfiles Sync Check (MOTD)
-# ============================================================================
-
+# Dotfiles & Claude context sync check (MOTD)
 if [ -d "$HOME/Code/rodlc/dotfiles/.git" ]; then
   (
     cd "$HOME/Code/rodlc/dotfiles" 2>/dev/null
-
-    # Async fetch pour détecter remote changes
     git fetch origin main >/dev/null 2>&1 &
 
-    # Check uncommitted local changes
-    if [ -n "$(git status --porcelain 2>/dev/null)" ]; then
-      echo "⚠️  Dotfiles have uncommitted changes. Run: df-push"
-    fi
+    [ -n "$(git status --porcelain 2>/dev/null)" ] && echo "⚠️  Dotfiles have uncommitted changes. Run: df-push"
 
-    # Check if behind remote
     local behind=$(git rev-list HEAD...origin/main --count 2>/dev/null)
-    if [ "$behind" != "0" ] && [ -n "$behind" ]; then
-      echo "🔄 Dotfiles outdated ($behind commits). Run: df-pull"
-    fi
+    [ "$behind" != "0" ] && [ -n "$behind" ] && echo "🔄 Dotfiles outdated ($behind commits). Run: df-pull"
   ) 2>/dev/null
 fi
 
-# ============================================================================
+if [ -d "$HOME/Code/rodlc/claude-context/.git" ]; then
+  (
+    cd "$HOME/Code/rodlc/claude-context" 2>/dev/null
+    git fetch origin main >/dev/null 2>&1 &
+
+    [ -n "$(git status --porcelain 2>/dev/null)" ] && echo "⚠️  Claude context has uncommitted changes. Run: context-sync"
+
+    local behind=$(git rev-list HEAD...origin/main --count 2>/dev/null)
+    [ "$behind" != "0" ] && [ -n "$behind" ] && echo "🔄 Claude context outdated ($behind commits). Run: context-sync pull"
+  ) 2>/dev/null
+fi
 
 . "$HOME/.local/bin/env"

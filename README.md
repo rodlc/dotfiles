@@ -34,6 +34,8 @@ dotfiles/
 ├── .git-hooks/             # Global git hook (dotfiles reminder)
 ├── aliases, zshrc, gitconfig, irbrc, pryrc, rspec, config
 ├── zed/                    # Zed editor configs
+├── scripts/                # Utility scripts
+│   └── bw-secrets          # Unified Bitwarden secrets management
 └── claude/                 # Claude Code configs + commands + MCPs
     ├── .mcp.json           # MCP servers template (GitHub, Notion, Slack, Gmail, Rails)
     ├── install-mcp-servers.sh  # Clone & build MCP repos from GitHub
@@ -51,6 +53,59 @@ dotfiles/
 **Secrets**: `.env.example` (versioned) → auto-copied to `~/.env` (gitignored). Edit `~/.env` with real API keys. SSH keys stay in `~/.ssh/`.
 
 **Pre-commit**: [Gitleaks](https://github.com/gitleaks/gitleaks) scans for secrets before each commit. Skip with `SKIP=gitleaks git commit -m "msg"`.
+
+## Secrets & Context Management
+
+### Bitwarden Secrets
+
+Secrets are stored in Bitwarden and synced to `~/.env` automatically. Scripts handle interactive unlock.
+
+**First-time setup**:
+```bash
+brew install bitwarden-cli
+bw login
+bw-secrets bootstrap  # Creates "Dotfiles Secrets" + "MCP Memory GPG" items
+```
+
+**Daily usage**:
+```bash
+bw-secrets sync       # Pull secrets from Bitwarden → ~/.env
+bw-secrets update     # Push ~/.env → Bitwarden
+bw-secrets status     # Check sync status
+```
+
+### Claude Context (Private Repo)
+
+Session context (plans + memory) lives in separate private repo: `rodlc/claude-context`.
+
+**Structure**:
+```
+~/Code/rodlc/claude-context/
+├── memory/                  # Encrypted MCP Memory backups
+│   └── memories.json.gpg   # GPG-encrypted (passphrase in Bitwarden)
+├── plans/                   # Claude Code plans (synced with ~/.claude/plans)
+└── scripts/                 # Sync utilities
+```
+
+**First-time setup**:
+```bash
+cd ~/Code/rodlc
+git clone git@github.com:rodlc/claude-context.git
+cd claude-context
+./scripts/setup
+```
+
+**Daily workflow**:
+```bash
+context-sync          # Full sync (memory + plans + git push/pull)
+context-status        # Check status
+context-push          # Push local → remote
+context-pull          # Pull remote → local
+```
+
+**Cross-machine sync**:
+1. **Machine A**: `context-sync` (auto-commits & pushes)
+2. **Machine B**: `context-pull` (pulls & imports)
 
 ## MCP Servers
 
@@ -115,13 +170,19 @@ Test: @notion, @gmail-pro, @filesystem
 
 ## Daily Workflow
 
-**Save config changes**:
+**Dotfiles management**:
 ```bash
-df-push        # Commit and push all dotfiles changes (formerly df-save)
+df-push        # Commit and push all dotfiles changes
 df-pull        # Pull latest dotfiles from remote
 df-status      # Check uncommitted changes
 dotfiles       # cd to dotfiles repo
 mcp-sync diff  # Check MCP config drift
+```
+
+**Secrets & context sync**:
+```bash
+bw-secrets sync    # Sync secrets from Bitwarden
+context-sync       # Sync context (memory + plans + git)
 ```
 
 The global git hook will remind you if dotfiles have uncommitted changes when you commit in other repos.

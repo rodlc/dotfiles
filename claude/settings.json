@@ -14,6 +14,19 @@
       "WebFetch",
       "Glob",
       "Grep",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(wc:*)",
+      "Bash(stat:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(echo:*)",
+      "Bash(basename:*)",
+      "Bash(dirname:*)",
+      "Bash(date:*)",
+      "Bash(pwd:*)",
       "mcp__notion__notion_search",
       "mcp__notion__notion_retrieve_database",
       "mcp__notion__notion_query_database",
@@ -94,5 +107,5 @@
     "type": "command",
     "command": "~/.claude/statusline.sh"
   },
-  "alwaysThinkingEnabled": false
+  "alwaysThinkingEnabled": true
 }
