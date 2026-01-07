@@ -85,19 +85,6 @@ export MCP_TIMEOUT=30000
 # Load environment variables from local .env (not versioned)
 [[ -f "$HOME/.env" ]] && source "$HOME/.env"
 
-# Claude Code monitoring aliases
-alias cc-global='npx ccusage@latest'
-alias cc-live='npx ccusage blocks --live'
-alias cc-daily='npx ccusage daily'
-alias cc-monthly='npx ccusage monthly'
-
-# Dotfiles management aliases
-alias dotfiles='cd ~/Code/rodlc/dotfiles'
-alias df-status='cd ~/Code/rodlc/dotfiles && git status'
-alias df-push='cd ~/Code/rodlc/dotfiles && git add -A && git commit -m "Update configs" && git push'
-alias df-pull='cd ~/Code/rodlc/dotfiles && git pull && echo "✅ Dotfiles updated. Restart Claude Code if needed."'
-alias mcp-sync='~/Code/rodlc/dotfiles/claude/mcp-sync.sh'
-
 # Répertoire de travail par défaut
 cd ~/Code
 
