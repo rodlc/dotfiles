@@ -3,16 +3,16 @@ description: Save session summary to Notion Tasks database
 argument-hint: "[priority] [title]"
 ---
 
-Save a structured summary of this conversation to Notion Tasks using plan-first workflow.
+Save structured summaries to Notion Tasks using plan-first workflow.
 
 ## Workflow
 
 1. **List Recent Plans**: Find all plans modified < 5h in `~/.claude/plans/`
-2. **Process Each Plan**:
+2. **Process Each Plan** (all plans, not just current session):
    - No marker → Retry x3 → CREATE task + append content (2 APIs)
    - Marker + plan newer (mtime) → Retry x3 → DELETE old + CREATE new (3 APIs)
    - Marker + plan same/older → SKIP (idempotent, 0 API)
-3. **Fallback**: If no plans found → Generate retroactive plan + CREATE task
+3. **Fallback**: If no plans found → Generate retroactive plan for current session + CREATE task
 4. **Update Markers**: Append `<!-- notion:posted:{page_id}:mtime:{timestamp} -->` to each plan
 
 **Principles**:
