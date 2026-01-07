@@ -9,7 +9,7 @@ Audit and consolidate MCP Memory database.
 1. **Health check** — `check_database_health`
 2. **Duplicates cleanup** — `cleanup_duplicates`
 3. **Quality analysis** — `analyze_quality_distribution`
-4. **Consolidation** — `trigger_consolidation` (weekly par défaut)
+4. **Consolidation** — `trigger_consolidation` (weekly by default)
 
 ## Options
 

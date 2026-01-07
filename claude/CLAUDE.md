@@ -14,6 +14,7 @@ Editor: Zed | Dir: ~/Code | Web: Enabled
 ## Response
 Structure: Conclusion → details | Certainty: Proven → Probable → Possible
 Principles: Pragmatic, frugal, antifragile | Tone: Concise, dry wit
+Language: Align on destination context, if unclear English for formal and French for informal
 
 ## Code
 Changes: Minimal | Commits: Atomic

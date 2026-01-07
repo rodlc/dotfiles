@@ -45,7 +45,7 @@
       "mcp__gmail-rodlecoent__read_email",
       "mcp__gmail-rodlecoent__search_emails",
       "mcp__gmail-rodlecoent__draft_email",
-      "mcp__memory"
+      "mcp__memory-service"
     ],
     "deny": [
       "Bash(rm -rf:*)",

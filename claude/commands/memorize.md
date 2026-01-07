@@ -4,48 +4,32 @@ description: Extract metadata to MCP Memory
 
 Extract metadata reusable across sessions, using tier-based storage.
 
-## Tiers de stockage
+## Storage Tiers
 
-| Tier | Tags | TTL | Critères |
+| Tier | Tags | TTL | Criteria |
 |------|------|-----|----------|
-| T1 Core | `reference`, `identity` | ∞ | IDs, paths critiques, jamais obsolète |
-| T2 Stable | `convention`, `preference` | 12 mois | Workflows, règles établies |
-| T3 Tooling | `tooling`, `project` | 6 mois | Commandes, contexte projet actif |
-| T4 Ephemeral | `temp`, `session` | 1 mois | Infos jetables, contexte immédiat |
+| T1 Core | `reference`, `identity` | ∞ | IDs, critical paths, never obsolete |
+| T2 Stable | `convention`, `preference` | 12 months | Workflows, established rules |
+| T3 Tooling | `tooling`, `project` | 6 months | Commands, active project context |
+| T4 Ephemeral | `temp`, `session` | 1 month | Disposable info, immediate context |
 
-**Stocker directement** avec tag approprié. Le decay gère l'obsolescence.
+**Store directly** with appropriate tag. Decay handles obsolescence.
 
-## Anti-patterns (ne PAS stocker)
+## Anti-patterns (DO NOT store)
 
-- ❌ Bugfixes techniques → code source = référence
-- ❌ Commandes CLI standard → découvrables via --help
-- ❌ Contenu de fichiers config → déjà persisté sur disque
-- ❌ Listes qui changent souvent → vite obsolète
-- ❌ Décisions projet-specific → /notion
+- ❌ Technical bugfixes → source code is reference
+- ❌ Standard CLI commands → discoverable via --help
+- ❌ Config file contents → already persisted on disk
+- ❌ Lists that change often → quickly obsolete
+- ❌ Project-specific decisions → use /notion
 
 ## Workflow
 
-1. Scan session pour candidats metadata
-2. Appliquer test de valeur (3 questions)
+1. Scan session for metadata candidates
+2. Apply value test (3 questions)
 3. Check duplicates via retrieve_memory
-4. Présenter avec justification OU conclure "Aucune"
+4. store_memory directly with appropriate tags
 
 ## Output
 
-### Si metadata trouvée :
-```
-## Proposed Memories
-
-**[tag] Titre**
-Contenu concis
-Justification: Pourquoi stockage permanent ?
-
-Store? (yes/no/numbers)
-```
-
-### Si rien de pertinent :
-```
-## Aucune metadata
-
-Raison: [explication courte]
-```
+✓ N memories stored (or "No relevant metadata")

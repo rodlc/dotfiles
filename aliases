@@ -93,6 +93,9 @@ alias mcp-sync='~/Code/rodlc/dotfiles/claude/mcp-sync.sh'
 # Bitwarden Secrets Sync
 # ============================================================================
 alias bw-secrets='~/Code/rodlc/dotfiles/scripts/bw-secrets'
+alias bw-pull='bw-secrets sync && source ~/.env && echo "✅ Secrets synced from Bitwarden"'
+alias bw-push='bw-secrets update && echo "✅ Secrets pushed to Bitwarden"'
+alias bw-status='bw-secrets status'
 
 # ============================================================================
 # Workspace (Memory + Plans + AI Context)

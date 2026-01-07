@@ -225,7 +225,8 @@ check_repo_status() {
         # Write to cache (remove trailing newline)
         echo -n "$output" > "$cache_file.tmp"
         mv -f "$cache_file.tmp" "$cache_file"
-    ) &
+    ) &>/dev/null &
+    disown
 
     # Display old cache while refreshing (if exists)
     if [[ -f "$cache_file" ]]; then
@@ -236,6 +237,13 @@ check_repo_status() {
 # Dotfiles & Workspace sync check (MOTD with cache)
 check_repo_status "$HOME/Code/rodlc/dotfiles" "Dotfiles" "df-push" "df-pull"
 check_repo_status "$HOME/Code/rodlc/workspace" "Workspace" "workspace-push" "workspace-pull"
+
+# Bitwarden secrets sync check
+if [[ -f "$HOME/.env" && -f "$HOME/.env.bw-synced" ]]; then
+    if [[ "$HOME/.env" -nt "$HOME/.env.bw-synced" ]]; then
+        echo "⚠️  ~/.env modified locally. Run: bw-push"
+    fi
+fi
 
 # ============================================================================
 # LTS Version Check - Warn if Homebrew languages detected
