@@ -1,0 +1,58 @@
+#!/bin/bash
+#
+# bw-bootstrap - First-time setup: create Bitwarden items (via bw CLI)
+#
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/.bw-lib.sh"
+
+ensure_unlocked_bw
+
+echo "🔧 Bootstrapping Bitwarden items..."
+
+# Check if items already exist
+if bw get item "$BW_ITEM_SECRETS" &>/dev/null; then
+    echo "⚠️  '$BW_ITEM_SECRETS' already exists. Skipping."
+else
+    if [[ ! -f "$ENV_FILE" ]]; then
+        echo "❌ $ENV_FILE not found. Create it first."
+        exit 1
+    fi
+
+    echo "📝 Creating '$BW_ITEM_SECRETS'..."
+    ENV_CONTENT=$(cat "$ENV_FILE")
+    bw get template item | jq \
+        --arg name "$BW_ITEM_SECRETS" \
+        --arg notes "$ENV_CONTENT" \
+        '.type = 2 | .name = $name | .secureNote = {"type": 0} | .notes = $notes' | \
+        bw encode | bw create item > /dev/null
+    echo "✅ '$BW_ITEM_SECRETS' created"
+fi
+
+if bw get item "$BW_ITEM_GPG" &>/dev/null; then
+    echo "⚠️  '$BW_ITEM_GPG' already exists. Skipping."
+else
+    echo "🔑 Creating '$BW_ITEM_GPG'..."
+    PASSPHRASE=$(bw generate -p --words 4 --separator -)
+    echo "   Generated passphrase: $PASSPHRASE"
+
+    bw get template item | jq \
+        --arg name "$BW_ITEM_GPG" \
+        --arg pass "$PASSPHRASE" \
+        '.type = 1 | .name = $name | .login = {"password": $pass} | .notes = "GPG passphrase for MCP Memory sync (also stored in ~/.env)"' | \
+        bw encode | bw create item > /dev/null
+
+    # Add to ~/.env if not already present
+    if [[ -f "$ENV_FILE" ]] && ! grep -q "^GPG_PASSPHRASE=" "$ENV_FILE"; then
+        echo "" >> "$ENV_FILE"
+        echo "# GPG passphrase for Memory encryption" >> "$ENV_FILE"
+        echo "GPG_PASSPHRASE=\"$PASSPHRASE\"" >> "$ENV_FILE"
+        echo "✅ '$BW_ITEM_GPG' created and added to ~/.env"
+    else
+        echo "✅ '$BW_ITEM_GPG' created"
+    fi
+fi
+
+echo ""
+echo "✅ Bootstrap complete!"

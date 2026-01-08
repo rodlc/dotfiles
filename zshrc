@@ -3,6 +3,10 @@ ZSH=$HOME/.oh-my-zsh
 # You can change the theme with another one from https://github.com/robbyrussell/oh-my-zsh/wiki/themes
 ZSH_THEME="robbyrussell"
 
+# Custom prompt: username (+ hostname if SSH) + robbyrussell style
+local ret_status="%(?:%{$fg_bold[green]%}➜ :%{$fg_bold[red]%}➜ )"
+PROMPT='%{$fg[cyan]%}%n${SSH_CONNECTION:+"@%m"}%{$reset_color%} ${ret_status}%{$fg[cyan]%}%c%{$reset_color%} $(git_prompt_info)'
+
 # Useful oh-my-zsh plugins for Le Wagon bootcamps
 plugins=(git gitfast last-working-dir common-aliases zsh-syntax-highlighting history-substring-search zsh-autosuggestions)
 
@@ -11,6 +15,9 @@ export HOMEBREW_NO_ANALYTICS=1
 
 # Disable warning about insecure completion-dependent directories
 ZSH_DISABLE_COMPFIX=true
+
+# Disable background job notifications
+setopt NO_NOTIFY
 
 # Actually load Oh-My-Zsh
 source "${ZSH}/oh-my-zsh.sh"
@@ -82,7 +89,7 @@ type -a pyenv > /dev/null && eval "$(pyenv init -)" && eval "$(pyenv virtualenv-
 # MCP Notion timeout configuration (fix timeouts)
 export MCP_TIMEOUT=30000
 
-# Secrets (Bitwarden → ~/.env). Sync: bw-sync-env. Never commit ~/.env
+# Secrets (Bitwarden → ~/.env). Sync: bw-pull. Never commit ~/.env
 [[ -f "$HOME/.env" ]] && source "$HOME/.env"
 
 # Default working directory

@@ -90,12 +90,12 @@ alias df-pull='cd ~/Code/rodlc/dotfiles && git pull && echo "✅ Dotfiles update
 alias mcp-sync='~/Code/rodlc/dotfiles/claude/mcp-sync.sh'
 
 # ============================================================================
-# Bitwarden Secrets Sync
+# Bitwarden Secrets Sync (rbw-based)
 # ============================================================================
-alias bw-secrets='~/Code/rodlc/dotfiles/scripts/bw-secrets'
-alias bw-pull='bw-secrets sync && source ~/.env && echo "✅ Secrets synced from Bitwarden"'
-alias bw-push='bw-secrets update && echo "✅ Secrets pushed to Bitwarden"'
-alias bw-status='bw-secrets status'
+alias bw-pull='~/Code/rodlc/dotfiles/scripts/bw-pull'
+alias bw-push='~/Code/rodlc/dotfiles/scripts/bw-push'
+alias bw-status='~/Code/rodlc/dotfiles/scripts/bw-status'
+alias bw-bootstrap='~/Code/rodlc/dotfiles/scripts/bw-bootstrap'
 
 # ============================================================================
 # Workspace (Memory + Plans + AI Context)

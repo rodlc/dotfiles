@@ -35,7 +35,7 @@ dotfiles/
 ├── aliases, zshrc, gitconfig, irbrc, pryrc, rspec, config
 ├── zed/                    # Zed editor configs
 ├── scripts/                # Utility scripts
-│   └── bw-secrets          # Unified Bitwarden secrets management
+│   └── bw-*                # Bitwarden secrets management (pull, push, status, bootstrap)
 └── claude/                 # Claude Code configs + commands + MCPs
     ├── .mcp.json           # MCP servers template (GitHub, Notion, Slack, Gmail, Rails)
     ├── install-mcp-servers.sh  # Clone & build MCP repos from GitHub
@@ -58,20 +58,22 @@ dotfiles/
 
 ### Bitwarden Secrets
 
-Secrets are stored in Bitwarden and synced to `~/.env` automatically. Scripts handle interactive unlock.
+Secrets are stored in Bitwarden and synced to `~/.env` via rbw (agent-based, no session management).
 
 **First-time setup**:
 ```bash
-brew install bitwarden-cli
-bw login
-bw-secrets bootstrap  # Creates "Dotfiles Secrets" + "MCP Memory GPG" items
+brew install rbw bitwarden-cli
+rbw config set email your@email.com
+rbw config set base_url https://vault.bitwarden.eu  # if EU server
+rbw login
+bw-bootstrap  # Creates "Dotfiles Env" + "MCP Memory GPG" items
 ```
 
 **Daily usage**:
 ```bash
-bw-secrets sync       # Pull secrets from Bitwarden → ~/.env
-bw-secrets update     # Push ~/.env → Bitwarden
-bw-secrets status     # Check sync status
+bw-pull       # Pull secrets from Bitwarden → ~/.env (via rbw)
+bw-push       # Push ~/.env → Bitwarden (via bw CLI)
+bw-status     # Check sync status (via rbw)
 ```
 
 ### Workspace (Private Repo)
@@ -184,8 +186,9 @@ mcp-sync diff  # Check MCP config drift
 
 **Secrets & workspace sync**:
 ```bash
-bw-secrets sync    # Sync secrets from Bitwarden
-workspace-sync     # Sync workspace (memory + plans + git)
+bw-pull            # Pull secrets from Bitwarden
+workspace-push     # Push workspace (memory + plans) to Git
+workspace-pull     # Pull workspace from Git
 ```
 
 The global git hook will remind you if dotfiles have uncommitted changes when you commit in other repos.

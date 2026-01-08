@@ -1,0 +1,36 @@
+#!/bin/bash
+#
+# bw-push - Update Bitwarden from ~/.env (via bw CLI)
+#
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/.bw-lib.sh"
+
+ensure_unlocked_bw
+
+if [[ ! -f "$ENV_FILE" ]]; then
+    echo "❌ $ENV_FILE not found"
+    exit 1
+fi
+
+echo "📤 Updating Bitwarden from ~/.env (via bw CLI)..."
+
+# Get item ID
+item_id=$(bw get item "$BW_ITEM_SECRETS" | jq -r .id)
+if [[ -z "$item_id" || "$item_id" == "null" ]]; then
+    echo "❌ Item '$BW_ITEM_SECRETS' not found"
+    exit 1
+fi
+
+# Get current item
+item=$(bw get item "$item_id")
+
+# Update notes field
+updated=$(echo "$item" | jq --arg notes "$(cat "$ENV_FILE")" '.secureNote.type = 0 | .notes = $notes')
+
+# Encode and update
+echo "$updated" | bw encode | bw edit item "$item_id" > /dev/null
+
+touch "$HOME/.env.bw-synced"
+echo "✅ Bitwarden updated"

@@ -1,0 +1,35 @@
+#!/bin/bash
+#
+# bw-status - Check Bitwarden sync status (via rbw)
+#
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/.bw-lib.sh"
+
+marker="$HOME/.env.bw-synced"
+
+if [[ -f "$marker" ]]; then
+    echo "Last sync: $(stat -f '%Sm' -t '%Y-%m-%d %H:%M' "$marker")"
+
+    if [[ -f "$ENV_FILE" && "$ENV_FILE" -nt "$marker" ]]; then
+        echo "⚠️  ~/.env modified since last sync"
+    fi
+else
+    echo "Never synced"
+fi
+
+echo ""
+ensure_rbw
+
+if rbw get "$BW_ITEM_SECRETS" &>/dev/null; then
+    echo "✅ '$BW_ITEM_SECRETS' exists in Bitwarden"
+else
+    echo "❌ '$BW_ITEM_SECRETS' not found. Run: bw-bootstrap"
+fi
+
+if rbw get "$BW_ITEM_GPG" &>/dev/null; then
+    echo "✅ '$BW_ITEM_GPG' exists in Bitwarden"
+else
+    echo "❌ '$BW_ITEM_GPG' not found. Run: bw-bootstrap"
+fi
