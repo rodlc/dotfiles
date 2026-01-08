@@ -78,11 +78,19 @@ bw-status     # Check sync status (via rbw)
 
 ### Workspace (Private Repo)
 
-Private workspace for AI context (plans, memory, notes) lives in: `rodlc/workspace`.
+Private workspace for AI context (plans, memory, notes) and MCP server source code: `rodlc/workspace`.
 
 **Structure**:
 ```
 ~/Code/rodlc/workspace/
+├── mcp-servers/             # MCP server source code (git submodules)
+│   ├── mcp-notion-server/   # Fork of makenotion/notion-mcp-server
+│   ├── Gmail-MCP-Server/    # Fork (rodlecoent + rodolphe accounts)
+│   ├── slack-mcp-server/    # Fork of tuananh/slack-mcp
+│   ├── rails-mcp-server/    # Custom Rails MCP
+│   ├── google-calendar-mcp/ # Fork of nspady/google-calendar-mcp
+│   ├── mcp-memory-service/  # Fork of dosuken123/mcp-memory-service
+│   └── mcp-raycast-clipboard/ # Custom Raycast clipboard MCP
 ├── claude/                  # Claude Code context
 │   ├── memory/             # Encrypted MCP Memory backups
 │   │   └── memories.json.gpg
@@ -114,40 +122,40 @@ workspace-pull        # Pull remote → local
 
 ## MCP Servers
 
-Claude Code MCP (Model Context Protocol) servers are managed via version-controlled templates with environment variable substitution.
+Claude Code MCP (Model Context Protocol) servers are managed as git submodules in the private workspace repository. All MCPs use personal forks for control over upstream updates.
 
-**Active servers** (6):
+**Active servers** (9):
 - **GitHub** (HTTP): Issues, PRs, repos, code search
-- **Notion** (stdio): Pages, databases, blocks
-- **Slack** (stdio): Messages, channels, threads
-- **Gmail×2** (stdio): Email for rodlecoent + rodolphe.lecoent
-- **Rails MCP** (stdio): Rails project analysis
+- **Notion** (stdio): Pages, databases, blocks (fork of makenotion/notion-mcp-server)
+- **Slack** (stdio): Messages, channels, threads (fork of tuananh/slack-mcp)
+- **Gmail×2** (stdio): Email for rodlecoent + rodolphe.lecoent (fork)
+- **Rails MCP** (stdio): Rails project analysis (custom)
+- **Google Calendar×2** (stdio): Calendar management for both accounts (fork of nspady/google-calendar-mcp)
+- **Memory Service** (stdio): Persistent memory with consolidation (fork of dosuken123/mcp-memory-service)
+- **Raycast Clipboard** (stdio): Clipboard and recent images access (custom)
 
-**Configuration files**:
+**Architecture**:
 ```
-~/.claude.json              # Active config (82KB: MCPs + OAuth + prefs)
-~/Code/rodlc/dotfiles/
-  └── claude/.mcp.json      # Template (versioned, with ${VARIABLES})
-~/.env                      # Secrets (CODE_DIR, tokens)
-```
-
-**Sync commands**:
-```bash
-mcp-sync install   # Install MCPs from dotfiles → ~/.claude.json
-mcp-sync export    # Export ~/.claude.json → dotfiles template
-mcp-sync diff      # Compare dotfiles vs active config
+~/Code/rodlc/workspace/mcp-servers/  # Git submodules (personal forks)
+~/Code/rodlc/dotfiles/claude/
+  ├── .mcp.json                      # Template (uses ${WORKSPACE_DIR})
+  └── install-mcp-servers.sh         # Build script (updates submodules)
+~/.env                                # Secrets (WORKSPACE_DIR, tokens)
+~/.claude.json                        # Active config (merged by Claude)
 ```
 
 **Variables in template**:
-- `${CODE_DIR}` → `/Users/rodlecoent/Code` (project paths)
-- `${HOME}` → `/Users/rodlecoent` (home paths)
+- `${WORKSPACE_DIR}` → `/Users/rodlecoent/Code/rodlc/workspace` (MCP sources)
+- `${HOME}` → `/Users/rodlecoent` (config paths, OAuth tokens)
 - `${GITHUB_TOKEN}`, `${NOTION_API_TOKEN}`, etc. → API tokens
 
-**Workflow**:
-1. Edit `claude/.mcp.json` template (add/remove servers)
-2. Run `mcp-sync install` to apply changes
-3. Restart Claude Code
-4. Run `df-push` to version changes
+**Build & update**:
+```bash
+install-mcp-servers.sh     # Update submodules + build all MCPs
+cd ~/Code/rodlc/workspace && git submodule update --remote  # Pull upstream
+```
+
+**Philosophy**: Personal forks prevent upstream changes from breaking local setup. Sync upstream manually when ready.
 
 ## Raycast MCP
 
