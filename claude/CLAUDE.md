@@ -22,24 +22,27 @@ Git: Team → branch/story | Personal → master direct
 Before PR: pull main → verify → check assets/migrations
 Rails TDD: test → route → controller → model → view
 
-## Memory Direct
+## Memory Storage
 
-Quand tu découvres une info réutilisable cross-session :
-1. **Stocke immédiatement** : `store_memory` avec tags appropriés
-2. **Pas de confirmation** : Le système natif fait le tri
+Store cross-session learnings immediately. Native consolidation handles cleanup.
 
-**Tags par rétention (native consolidation)** :
-- `critical` (365j) : Identité, références permanentes
-- `reference` (180j) : Conventions, préférences, paths
-- `standard` (90j) : Tooling, projets actifs
-- `temporary` (30j) : Contexte session, notes éphémères
+### Types and retention
 
-**Système automatique activé** :
-- Quality scoring : access_count (40%) + recency (30%) + ranking (30%)
-- Dream consolidation : Associations, compression, decay
-- Scheduling : Daily 3h, Weekly dimanche 4h, Monthly 1er à 5h
+| Type | Tag | Retention | Examples |
+|------|-----|-----------|----------|
+| **semantic** | reference | 180d | ☑️ Convention, API pattern, market data |
+| **episodic** | standard | 90d | ☑️ Decision with context, trade-off, bug fix |
+| **procedural** | critical | 365d | ☑️ Workflow, hook, shell command |
 
-Bias: Stocker > Ne pas stocker. Le decay/compression nettoient.
+### Format
+
+```python
+store_memory(content="[TYPE] Subject", metadata={"tags": "reference", "type": "semantic"})
+```
+
+### DO NOT store
+
+❌ Content already in git | ❌ Session temp data | ❌ Verbatim conversations
 
 ## Commands
 /notion [priority] [title] → Save to Notion Tasks
