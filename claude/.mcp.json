@@ -64,6 +64,22 @@
         "MCP_RETENTION_STANDARD": "90",
         "MCP_RETENTION_TEMPORARY": "30"
       }
+    },
+    "gcal-rodlecoent": {
+      "command": "node",
+      "args": ["${CODE_DIR}/google-calendar-mcp/build/index.js"],
+      "env": {
+        "GOOGLE_OAUTH_CREDENTIALS": "${HOME}/.gcal-mcp-rodlecoent/oauth.keys.json",
+        "GOOGLE_CALENDAR_MCP_TOKEN_PATH": "${HOME}/.gcal-mcp-rodlecoent/tokens.json"
+      }
+    },
+    "gcal-rodolphe": {
+      "command": "node",
+      "args": ["${CODE_DIR}/google-calendar-mcp/build/index.js"],
+      "env": {
+        "GOOGLE_OAUTH_CREDENTIALS": "${HOME}/.gcal-mcp-rodolphe/oauth.keys.json",
+        "GOOGLE_CALENDAR_MCP_TOKEN_PATH": "${HOME}/.gcal-mcp-rodolphe/tokens.json"
+      }
     }
   }
 }
