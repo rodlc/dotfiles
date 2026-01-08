@@ -7,7 +7,7 @@ ZSH_THEME="robbyrussell"
 local ret_status="%(?:%{$fg_bold[green]%}➜ :%{$fg_bold[red]%}➜ )"
 PROMPT='%{$fg[cyan]%}%n${SSH_CONNECTION:+"@%m"}%{$reset_color%} ${ret_status}%{$fg[cyan]%}%c%{$reset_color%} $(git_prompt_info)'
 
-# Useful oh-my-zsh plugins for Le Wagon bootcamps
+# Useful Oh-My-Zsh plugins for Le Wagon bootcamps
 plugins=(git gitfast last-working-dir common-aliases zsh-syntax-highlighting history-substring-search zsh-autosuggestions)
 
 # (macOS-only) Prevent Homebrew from reporting - https://github.com/Homebrew/brew/blob/master/docs/Analytics.md
@@ -22,7 +22,7 @@ setopt NO_NOTIFY
 # Actually load Oh-My-Zsh
 source "${ZSH}/oh-my-zsh.sh"
 unalias rm # No interactive rm by default (brought by plugins/common-aliases)
-unalias lt # we need `lt` for https://github.com/localtunnel/localtunnel
+unalias lt # We need `lt` for https://github.com/localtunnel/localtunnel
 unalias gm # Override git plugin alias (custom function in .aliases)
 
 # Load rbenv if installed (to manage your Ruby versions)
@@ -80,11 +80,11 @@ export SSL_CERT_FILE=/opt/homebrew/etc/openssl@3/cert.pem
 export SSL_CERT_DIR=/opt/homebrew/etc/openssl@3/certs
 export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
 
-# Load pyenv (to manage your Python versions) - AFTER Homebrew to override python3
+# Load pyenv (to manage your Python versions) - after Homebrew to override python3
 export PYENV_ROOT="$HOME/.pyenv"
 [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
 export PYENV_VIRTUALENV_DISABLE_PROMPT=1
-type -a pyenv > /dev/null && eval "$(pyenv init -)" && eval "$(pyenv virtualenv-init - 2> /dev/null)" && RPROMPT='[🐍 $(pyenv version-name)]'
+type -a pyenv > /dev/null && eval "$(pyenv init -)" && eval "$(pyenv virtualenv-init - 2> /dev/null)"
 
 # MCP Notion timeout configuration (fix timeouts)
 export MCP_TIMEOUT=30000
@@ -232,8 +232,7 @@ check_repo_status() {
         # Write to cache (remove trailing newline)
         echo -n "$output" > "$cache_file.tmp"
         mv -f "$cache_file.tmp" "$cache_file"
-    ) &>/dev/null &
-    disown
+    ) &>/dev/null &!
 
     # Display old cache while refreshing (if exists)
     if [[ -f "$cache_file" ]]; then
@@ -241,19 +240,86 @@ check_repo_status() {
     fi
 }
 
-# Dotfiles & Workspace sync check (MOTD with cache)
+# Dotfiles & workspace sync check (MOTD with cache)
 check_repo_status "$HOME/Code/rodlc/dotfiles" "Dotfiles" "df-push" "df-pull"
 check_repo_status "$HOME/Code/rodlc/workspace" "Workspace" "workspace-push" "workspace-pull"
+
+# System info compact - health metrics & language versions (cached 5min)
+show_system_info() {
+    local cache_dir="$HOME/.cache"
+    mkdir -p "$cache_dir"
+    local cache_file="$cache_dir/zsh-system-info"
+    local cache_ttl=300  # 5 minutes
+
+    # Check cache age
+    local cache_age=999999
+    if [[ -f "$cache_file" ]]; then
+        local current_time=$(date +%s)
+        local file_time=$(stat -f %m "$cache_file" 2>/dev/null)
+        cache_age=$((current_time - file_time))
+    fi
+
+    # Use cache if fresh
+    if [[ $cache_age -lt $cache_ttl ]]; then
+        cat "$cache_file" 2>/dev/null
+        return 0
+    fi
+
+    # Refresh cache in background
+    (
+        local output=""
+        output+="⏱️  $(uptime | sed 's/.*up //' | sed 's/, [0-9]* user.*//' | xargs)"
+
+        # CPU load percentage (pure shell)
+        local load=$(sysctl -n vm.loadavg | awk '{print $2}')
+        local cores=$(sysctl -n hw.ncpu)
+        local cpu_pct=$(awk -v l="$load" -v c="$cores" 'BEGIN {printf "%.0f", (l/c)*100}')
+        output+=" | ⚡ ${cpu_pct}%"
+
+        # RAM usage
+        output+=" | 🧠 $(top -l 1 | grep PhysMem | awk '{used=$2; total=16; gsub(/G/, "", used); printf "%.0f%%", (used/total)*100}')"
+
+        # Disk usage
+        output+=" | 💾 $(df -h ~ | tail -1 | awk '{print $5}')"
+
+        # Language versions
+        command -v ruby &>/dev/null && output+=" | 💎 $(ruby --version 2>/dev/null | awk '{print $2}')"
+        command -v node &>/dev/null && output+=" | 📦 $(node --version 2>/dev/null)"
+        command -v python3 &>/dev/null && output+=" | 🐍 $(python3 --version 2>/dev/null | awk '{print $2}')"
+        command -v go &>/dev/null && output+=" | 🔷 $(go version 2>/dev/null | awk '{print $3}' | sed 's/go//')"
+        java -version &>/dev/null && output+=" | ☕ $(java -version 2>&1 | head -1 | awk -F'"' '{print $2}')"
+
+        echo "$output" > "$cache_file.tmp"
+        mv -f "$cache_file.tmp" "$cache_file"
+    ) &>/dev/null &!
+
+    # Display cached version or empty if first run
+    if [[ -f "$cache_file" ]]; then
+        cat "$cache_file" 2>/dev/null
+    fi
+}
+show_system_info
 
 # Bitwarden secrets sync check
 if [[ -f "$HOME/.env" && -f "$HOME/.env.bw-synced" ]]; then
     if [[ "$HOME/.env" -nt "$HOME/.env.bw-synced" ]]; then
-        echo "⚠️  ~/.env modified locally. Run: bw-push"
+        echo "⚠️  Secrets modified locally. Run: bw-push"
+    fi
+fi
+
+# System cleanup reminder (if last cleanup > 30 days)
+CLEANUP_TRACKER="$HOME/Code/rodlc/dotfiles/scripts/.cleanup-tracker"
+if [[ -f "$CLEANUP_TRACKER" ]]; then
+    source "$CLEANUP_TRACKER"
+    CURRENT_TIME=$(date +%s)
+    DAYS_SINCE=$((($CURRENT_TIME - ${LAST_CLEANUP:-0}) / 86400))
+    if [[ $DAYS_SINCE -gt 30 ]]; then
+        echo "🧹 Last system cleanup: ${DAYS_SINCE} days ago. Run: cleanup-caches"
     fi
 fi
 
 # ============================================================================
-# LTS Version Check - Warn if Homebrew languages detected
+# LTS Version Check - Warn if Homebrew Languages Detected
 # ============================================================================
 
 check_version_managers() {

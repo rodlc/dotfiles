@@ -1,7 +1,9 @@
 # Network utilities
-alias myip="curl https://ipinfo.io/json"
-alias speedtest="curl -s https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py | python -"  # Ookla servers
-alias fastcom="npx fast-cli"  # Netflix CDN (fast.com)
+alias myip="curl https://ipinfo.io/json"  # Public IP + location
+alias localip="ifconfig | grep 'inet ' | grep -v 127.0.0.1 | awk '{print \$2}'"  # Local network IP
+alias gateway="netstat -rn | grep default"  # Network gateway
+alias speedtest="/opt/homebrew/bin/speedtest --accept-license --accept-gdpr"  # Ookla official CLI (download/upload/latency/jitter)
+alias fastcom="npx fast-cli --upload --verbose"  # Netflix CDN (download/upload/latency/server)
 
 # Development server
 alias serve='ruby -run -e httpd . -p 8000'
@@ -107,3 +109,8 @@ alias workspace-status='~/Code/rodlc/workspace/scripts/context-sync status'
 alias memory-export='~/Code/rodlc/workspace/memory/sync-memory.sh export'
 alias memory-import='~/Code/rodlc/workspace/memory/sync-memory.sh import'
 alias plans-sync='~/Code/rodlc/workspace/scripts/plans-sync'
+
+# ============================================================================
+# System Maintenance
+# ============================================================================
+alias cleanup-caches='~/Code/rodlc/dotfiles/scripts/cleanup-caches.sh'
