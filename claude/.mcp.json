@@ -49,9 +49,9 @@
       "args": ["@playwright/mcp@latest"],
       "disabled": true
     },
-    "memory": {
+    "memory-service": {
       "command": "${CODE_DIR}/mcp-memory-service/bin/python",
-      "args": ["-m", "mcp_memory_service.mcp_server"],
+      "args": ["-m", "mcp_memory_service.server_impl"],
       "env": {
         "MCP_MEMORY_CHROMA_PATH": "${HOME}/.claude/memory-chroma",
         "MCP_MEMORY_BACKUPS_PATH": "${HOME}/.claude/memory-backups",
