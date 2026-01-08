@@ -2,14 +2,14 @@
   "mcpServers": {
     "notion": {
       "command": "node",
-      "args": ["${CODE_DIR}/mcp-notion-server/build/index.js"],
+      "args": ["${WORKSPACE_DIR}/mcp-servers/mcp-notion-server/build/index.js"],
       "env": {
         "NOTION_API_TOKEN": "${NOTION_API_TOKEN}",
         "NOTION_MARKDOWN_CONVERSION": "true"
       }
     },
     "rails-mcp": {
-      "command": "${CODE_DIR}/rails-mcp-server/exe/rails-mcp-server",
+      "command": "${WORKSPACE_DIR}/mcp-servers/rails-mcp-server/exe/rails-mcp-server",
       "args": [],
       "env": {}
     },
@@ -22,7 +22,7 @@
     },
     "gmail-rodlecoent": {
       "command": "node",
-      "args": ["${CODE_DIR}/Gmail-MCP-Server/dist/index.js"],
+      "args": ["${WORKSPACE_DIR}/mcp-servers/Gmail-MCP-Server/dist/index.js"],
       "env": {
         "GMAIL_OAUTH_PATH": "${HOME}/.gmail-mcp-rodlecoent/gcp-oauth.keys.json",
         "GMAIL_CREDENTIALS_PATH": "${HOME}/.gmail-mcp-rodlecoent/credentials.json"
@@ -30,14 +30,14 @@
     },
     "gmail-rodolphe": {
       "command": "node",
-      "args": ["${CODE_DIR}/Gmail-MCP-Server/dist/index.js"],
+      "args": ["${WORKSPACE_DIR}/mcp-servers/Gmail-MCP-Server/dist/index.js"],
       "env": {
         "GMAIL_OAUTH_PATH": "${HOME}/.gmail-mcp-rodolphe/gcp-oauth.keys.json",
         "GMAIL_CREDENTIALS_PATH": "${HOME}/.gmail-mcp-rodolphe/credentials.json"
       }
     },
     "slack": {
-      "command": "${CODE_DIR}/slack-mcp-server/slack-mcp-server",
+      "command": "${WORKSPACE_DIR}/mcp-servers/slack-mcp-server/slack-mcp-server",
       "args": ["--transport", "stdio"],
       "env": {
         "SLACK_MCP_XOXC_TOKEN": "${SLACK_XOXC_TOKEN}",
@@ -50,7 +50,7 @@
       "disabled": true
     },
     "memory-service": {
-      "command": "${CODE_DIR}/mcp-memory-service/bin/python",
+      "command": "${WORKSPACE_DIR}/mcp-servers/mcp-memory-service/bin/python",
       "args": ["-m", "mcp_memory_service.server_impl"],
       "env": {
         "MCP_MEMORY_CHROMA_PATH": "${HOME}/.claude/memory-chroma",
@@ -67,7 +67,7 @@
     },
     "gcal-rodlecoent": {
       "command": "node",
-      "args": ["${CODE_DIR}/google-calendar-mcp/build/index.js"],
+      "args": ["${WORKSPACE_DIR}/mcp-servers/google-calendar-mcp/build/index.js"],
       "env": {
         "GOOGLE_OAUTH_CREDENTIALS": "${HOME}/.gcal-mcp-rodlecoent/oauth.keys.json",
         "GOOGLE_CALENDAR_MCP_TOKEN_PATH": "${HOME}/.gcal-mcp-rodlecoent/tokens.json"
@@ -75,11 +75,15 @@
     },
     "gcal-rodolphe": {
       "command": "node",
-      "args": ["${CODE_DIR}/google-calendar-mcp/build/index.js"],
+      "args": ["${WORKSPACE_DIR}/mcp-servers/google-calendar-mcp/build/index.js"],
       "env": {
         "GOOGLE_OAUTH_CREDENTIALS": "${HOME}/.gcal-mcp-rodolphe/oauth.keys.json",
         "GOOGLE_CALENDAR_MCP_TOKEN_PATH": "${HOME}/.gcal-mcp-rodolphe/tokens.json"
       }
+    },
+    "mcp-raycast-clipboard": {
+      "command": "bun",
+      "args": ["run", "${WORKSPACE_DIR}/mcp-servers/mcp-raycast-clipboard/src/index.ts"]
     }
   }
 }
