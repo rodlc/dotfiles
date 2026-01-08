@@ -244,6 +244,94 @@ check_repo_status() {
 check_repo_status "$HOME/Code/rodlc/dotfiles" "Dotfiles" "df-push" "df-pull"
 check_repo_status "$HOME/Code/rodlc/workspace" "Workspace" "workspace-push" "workspace-pull"
 
+# MCP upstream sync check (MOTD with cache)
+check_mcp_upstream() {
+    local workspace_dir="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}"
+    local mcp_dir="$workspace_dir/mcp-servers"
+
+    # Check if workspace/mcp-servers exists
+    if [[ ! -d "$mcp_dir" ]]; then
+        return 0
+    fi
+
+    # Cache setup
+    local cache_dir="$HOME/.cache"
+    mkdir -p "$cache_dir"
+    local cache_file="$cache_dir/git-status-mcp-upstream"
+    local cache_ttl=300  # 5 minutes
+
+    # Check cache age
+    local cache_age=999999
+    if [[ -f "$cache_file" ]]; then
+        local current_time=$(date +%s)
+        local file_time=$(stat -f %m "$cache_file" 2>/dev/null)
+        cache_age=$((current_time - file_time))
+    fi
+
+    # Cache is fresh - just display it
+    if [[ $cache_age -lt $cache_ttl ]]; then
+        cat "$cache_file" 2>/dev/null
+        return 0
+    fi
+
+    # Cache is stale - refresh in background
+    (
+        cd "$workspace_dir" 2>/dev/null || exit
+
+        local output=""
+        local divergence_threshold_days=30
+
+        # Iterate through submodules
+        git submodule foreach --quiet '
+            # Skip if no upstream remote
+            if ! git remote get-url upstream >/dev/null 2>&1; then
+                exit 0
+            fi
+
+            # Fetch upstream (silent)
+            git fetch upstream >/dev/null 2>&1 || exit 0
+
+            # Get default branch from upstream
+            upstream_branch=$(git remote show upstream 2>/dev/null | grep "HEAD branch" | cut -d" " -f5)
+            [[ -z "$upstream_branch" ]] && upstream_branch="main"
+
+            # Check if behind upstream
+            behind=$(git rev-list HEAD...upstream/$upstream_branch --count 2>/dev/null)
+
+            if [[ "$behind" != "0" && -n "$behind" ]]; then
+                # Get date of last upstream commit
+                last_upstream_commit_date=$(git log upstream/$upstream_branch -1 --format=%ct 2>/dev/null)
+                current_time=$(date +%s)
+                days_old=$(( (current_time - last_upstream_commit_date) / 86400 ))
+
+                # Only warn if divergence is older than threshold
+                if [[ $days_old -ge '"$divergence_threshold_days"' ]]; then
+                    mcp_name=$(basename $(pwd))
+                    echo "🔼 MCP $mcp_name behind upstream by $behind commits (${days_old}d old)"
+                fi
+            fi
+        ' > /tmp/mcp-upstream-check.txt 2>/dev/null
+
+        if [[ -s /tmp/mcp-upstream-check.txt ]]; then
+            output=$(cat /tmp/mcp-upstream-check.txt)
+            output+=$'\n'"   Run: cd $workspace_dir && git submodule update --remote"
+        fi
+
+        rm -f /tmp/mcp-upstream-check.txt
+
+        # Write to cache (remove trailing newline)
+        echo -n "$output" > "$cache_file.tmp"
+        mv -f "$cache_file.tmp" "$cache_file"
+    ) &>/dev/null &!
+
+    # Display old cache while refreshing (if exists)
+    if [[ -f "$cache_file" ]]; then
+        cat "$cache_file" 2>/dev/null
+    fi
+}
+
+check_mcp_upstream
+
 # System info compact - health metrics & language versions (cached 5min)
 show_system_info() {
     local cache_dir="$HOME/.cache"
@@ -346,3 +434,10 @@ check_version_managers
 
 # Load local env if exists (optional personal config)
 [[ -f "$HOME/.local/bin/env" ]] && . "$HOME/.local/bin/env"
+
+# bun completions
+[ -s "/Users/rodlecoent/.bun/_bun" ] && source "/Users/rodlecoent/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
