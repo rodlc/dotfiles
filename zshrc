@@ -244,21 +244,6 @@ check_repo_status() {
     fi
 }
 
-# Run SSH check first
-ssh_status_code=0
-check_ssh_status
-ssh_status_code=$?
-
-# Only run git checks if SSH is OK
-if [[ $ssh_status_code -eq 0 ]]; then
-    # Launch background fetch job (disown to hide job notification)
-    "$HOME/Code/rodlc/dotfiles/scripts/git-fetch-background.sh" &>/dev/null & disown
-
-    # Display git status from cache
-    check_repo_status "$HOME/Code/rodlc/dotfiles" "Dotfiles" "df-push" "df-pull"
-    check_repo_status "$HOME/Code/rodlc/workspace" "Workspace" "workspace-push" "workspace-pull"
-fi
-
 # System info compact (cached 5min)
 show_system_info() {
     local cache_dir="$HOME/.cache"
@@ -310,6 +295,21 @@ show_system_info() {
     [[ -f "$cache_file" ]] && cat "$cache_file" 2>/dev/null
 }
 show_system_info
+
+# Run SSH check first
+ssh_status_code=0
+check_ssh_status
+ssh_status_code=$?
+
+# Only run git checks if SSH is OK
+if [[ $ssh_status_code -eq 0 ]]; then
+    # Launch background fetch job (zsh &! = disown immediately)
+    "$HOME/Code/rodlc/dotfiles/scripts/git-fetch-background.sh" &>/dev/null &!
+
+    # Display git status from cache
+    check_repo_status "$HOME/Code/rodlc/dotfiles" "Dotfiles" "df-push" "df-pull"
+    check_repo_status "$HOME/Code/rodlc/workspace" "Workspace" "workspace-push" "workspace-pull"
+fi
 
 # Bitwarden secrets sync check
 if [[ -f "$HOME/.env" && -f "$HOME/.env.bw-synced" ]]; then
