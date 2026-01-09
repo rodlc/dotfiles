@@ -235,7 +235,7 @@ check_repo_status() {
         if [[ -n "$content" ]]; then
             # Display each line with age suffix
             echo "$content" | while IFS= read -r line; do
-                [[ -n "$line" ]] && echo "$line  [$age_display]"
+                [[ -n "$line" ]] && echo "$line [$age_display]"
             done
         fi
     else
@@ -268,32 +268,86 @@ show_system_info() {
     # Refresh cache in background
     (
         local output=""
-        output+="⏱️  $(uptime | sed 's/.*up //' | sed 's/, [0-9]* user.*//' | xargs)"
+        # Compact uptime format: "1 day, 40 mins" → "1d 40m", "1:04" → "1h 4m"
+        local uptime_raw=$(uptime | sed 's/.*up //' | sed 's/, [0-9]* user.*//')
+        local uptime_compact=$(echo "$uptime_raw" | awk '{
+            # Handle "X day(s), Y:Z" or "X day(s), Y mins" format
+            if ($0 ~ /day/) {
+                day = $1
+                sub(/day.*,/, day "d", $0)
+            }
+            # Handle "H:MM" format (hours:minutes)
+            if ($0 ~ /[0-9]+:[0-9]+/) {
+                match($0, /([0-9]+):([0-9]+)/, time)
+                sub(/[0-9]+:[0-9]+/, time[1] "h " time[2] "m", $0)
+            }
+            # Handle "X mins" format
+            gsub(/ mins?/, "m", $0)
+            gsub(/ hrs?/, "h", $0)
+            gsub(/,/, "", $0)
+            gsub(/  +/, " ", $0)
+            print $0
+        }' | xargs)
+        output+="⏱️ $uptime_compact"
 
         # CPU load percentage
         local load=$(sysctl -n vm.loadavg 2>/dev/null | awk '{print $2}')
         local cores=$(sysctl -n hw.ncpu 2>/dev/null)
         local cpu_pct=$(awk -v l="$load" -v c="$cores" 'BEGIN {printf "%.0f", (l/c)*100}')
-        output+=" | ⚡ ${cpu_pct}%"
+        output+=" | ⚡${cpu_pct}%"
 
-        # RAM usage
-        output+=" | 🧠 $(top -l 1 | grep PhysMem | awk '{used=$2; total=16; gsub(/G/, "", used); printf "%.0f%%", (used/total)*100}')"
+        # RAM usage - dynamic total memory detection
+        local total_ram=$(sysctl -n hw.memsize 2>/dev/null | awk '{printf "%.0f", $1/1024/1024/1024}')
+        output+=" | 🧠 $(top -l 1 | grep PhysMem | awk -v total="$total_ram" '{used=$2; gsub(/G/, "", used); printf "%.0f%%", (used/total)*100}')"
 
         # Disk usage
         output+=" | 💾 $(df -h ~ | tail -1 | awk '{print $5}')"
 
-        # Language versions
-        command -v ruby &>/dev/null && output+=" | 💎 $(ruby --version 2>/dev/null | awk '{print $2}')"
-        command -v node &>/dev/null && output+=" | 📦 $(node --version 2>/dev/null)"
-        command -v python3 &>/dev/null && output+=" | 🐍 $(python3 --version 2>/dev/null | awk '{print $2}')"
-
         echo "$output" > "$cache_file.tmp"
         mv -f "$cache_file.tmp" "$cache_file"
-    ) &>/dev/null &
+    ) &>/dev/null &!
 
     # Display cached version
     [[ -f "$cache_file" ]] && cat "$cache_file" 2>/dev/null
 }
+
+# Contextual RPROMPT for language versions
+update_rprompt() {
+    local versions=""
+
+    # Ruby - show if Gemfile exists
+    if [[ -f "Gemfile" ]] && command -v ruby &>/dev/null; then
+        local ruby_ver=$(ruby --version 2>/dev/null | awk '{print $2}' | cut -d'p' -f1)
+        versions+="[💎 $ruby_ver]"
+    fi
+
+    # Node - show if package.json exists
+    if [[ -f "package.json" ]] && command -v node &>/dev/null; then
+        local node_ver=$(node --version 2>/dev/null | sed 's/^v//')
+        [[ -n "$versions" ]] && versions+=" "
+        versions+="[📦 $node_ver]"
+    fi
+
+    # Python - show if requirements.txt, pyproject.toml, or .python-version exists
+    if [[ -f "requirements.txt" || -f "pyproject.toml" || -f ".python-version" ]] && command -v python3 &>/dev/null; then
+        local python_ver=$(python3 --version 2>/dev/null | awk '{print $2}')
+        [[ -n "$versions" ]] && versions+=" "
+        versions+="[🐍 $python_ver]"
+    fi
+
+    RPROMPT="$versions"
+}
+
+# Hook to update RPROMPT on directory change
+autoload -U add-zsh-hook
+add-zsh-hook chpwd update_rprompt
+add-zsh-hook precmd update_rprompt
+
+# Initial RPROMPT
+update_rprompt
+
+# Display greeting and system info
+echo "Hello, world!"
 show_system_info
 
 # Run SSH check first
