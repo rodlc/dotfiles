@@ -196,7 +196,7 @@ check_ssh_status() {
 
     # Check if SSH agent has keys loaded
     if ssh-add -l &>/dev/null; then
-        return 0  # SSH OK
+        return 0  # SSH OK - background fetch will run
     fi
 
     # Agent empty - check if key exists
@@ -247,8 +247,8 @@ ssh_status_code=$?
 
 # Only run git checks if SSH is OK
 if [[ $ssh_status_code -eq 0 ]]; then
-    # Launch background fetch job
-    "$HOME/Code/rodlc/dotfiles/scripts/git-fetch-background.sh" &>/dev/null &
+    # Launch background fetch job (subshell to hide job notification)
+    ( "$HOME/Code/rodlc/dotfiles/scripts/git-fetch-background.sh" &>/dev/null & )
 
     # Display git status from cache
     check_repo_status "$HOME/Code/rodlc/dotfiles" "Dotfiles" "df-push" "df-pull"
