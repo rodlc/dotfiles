@@ -175,8 +175,39 @@ export MCP_CONSOLIDATION_RETENTION_STANDARD=90     # T3 equivalent
 export MCP_CONSOLIDATION_RETENTION_TEMPORARY=30    # T4 equivalent
 
 # ============================================================================
-# MOTD - Git Repository Status with Cache (5min TTL)
+# MOTD - SSH-aware Git Status with Background Fetch
 # ============================================================================
+
+# Format cache age for display
+format_cache_age() {
+    local age_seconds=$1
+    if [[ $age_seconds -lt 60 ]]; then
+        echo "${age_seconds}s"
+    elif [[ $age_seconds -lt 3600 ]]; then
+        echo "$((age_seconds / 60))m"
+    else
+        echo "$((age_seconds / 3600))h"
+    fi
+}
+
+# Check SSH agent status
+check_ssh_status() {
+    local ssh_key="$HOME/.ssh/id_ed25519"
+
+    # Check if SSH agent has keys loaded
+    if ssh-add -l &>/dev/null; then
+        return 0  # SSH OK
+    fi
+
+    # Agent empty - check if key exists
+    if [[ ! -f "$ssh_key" ]]; then
+        echo "🔑 SSH key missing. Run: bw-pull"
+        return 2  # Key missing
+    else
+        echo "🔑 SSH key not loaded. Run: ssh-add"
+        return 1  # Key exists but not loaded
+    fi
+}
 
 check_repo_status() {
     local repo_path="$1"
@@ -191,51 +222,38 @@ check_repo_status() {
     local cache_dir="$HOME/.cache"
     mkdir -p "$cache_dir"
     local cache_file="$cache_dir/git-status-$repo_name"
-    local cache_ttl=300  # 5 minutes
 
-    # Check cache age
-    local cache_age=999999
+    # Read and display cache with age
     if [[ -f "$cache_file" ]]; then
-        local current_time=$(date +%s)
-        local file_time=$(stat -f %m "$cache_file" 2>/dev/null || echo 0)
-        cache_age=$((current_time - file_time))
-    fi
+        local content=$(cat "$cache_file" 2>/dev/null)
+        if [[ -n "$content" ]]; then
+            local current_time=$(date +%s)
+            local file_time=$(stat -f %m "$cache_file" 2>/dev/null || echo 0)
+            local age=$((current_time - file_time))
+            local age_display=$(format_cache_age $age)
 
-    # Cache is fresh - just display it
-    if [[ $cache_age -lt $cache_ttl ]]; then
-        cat "$cache_file" 2>/dev/null
-        return 0
-    fi
-
-    # Cache is stale - refresh (NO git fetch to avoid hangs)
-    (
-        cd "$repo_path" 2>/dev/null || exit
-
-        local output=""
-
-        # Check uncommitted changes (local only)
-        if [[ -n "$(git status --porcelain 2>/dev/null)" ]]; then
-            output+="⚠️  $repo_name has uncommitted changes. Run: $alias_push"$'\n'
+            # Display each line with age suffix
+            echo "$content" | while IFS= read -r line; do
+                [[ -n "$line" ]] && echo "$line  [$age_display]"
+            done
         fi
-
-        # Check if behind remote (based on last fetch, no new fetch)
-        local behind=$(git rev-list HEAD...origin/main --count 2>/dev/null)
-        if [[ "$behind" != "0" && -n "$behind" ]]; then
-            output+="🔄 $repo_name outdated ($behind commits). Run: $alias_pull"$'\n'
-        fi
-
-        # Write to cache
-        echo -n "$output" > "$cache_file.tmp"
-        mv -f "$cache_file.tmp" "$cache_file"
-    ) &>/dev/null &
-
-    # Display old cache while refreshing
-    [[ -f "$cache_file" ]] && cat "$cache_file" 2>/dev/null
+    fi
 }
 
-# Dotfiles & workspace sync check
-check_repo_status "$HOME/Code/rodlc/dotfiles" "Dotfiles" "df-push" "df-pull"
-check_repo_status "$HOME/Code/rodlc/workspace" "Workspace" "workspace-push" "workspace-pull"
+# Run SSH check first
+ssh_status_code=0
+check_ssh_status
+ssh_status_code=$?
+
+# Only run git checks if SSH is OK
+if [[ $ssh_status_code -eq 0 ]]; then
+    # Launch background fetch job
+    "$HOME/Code/rodlc/dotfiles/scripts/git-fetch-background.sh" &>/dev/null &
+
+    # Display git status from cache
+    check_repo_status "$HOME/Code/rodlc/dotfiles" "Dotfiles" "df-push" "df-pull"
+    check_repo_status "$HOME/Code/rodlc/workspace" "Workspace" "workspace-push" "workspace-pull"
+fi
 
 # System info compact (cached 5min)
 show_system_info() {
