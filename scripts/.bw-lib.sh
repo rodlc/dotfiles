@@ -3,6 +3,7 @@
 
 ENV_FILE="$HOME/.env"
 BW_ITEM_SECRETS="Dotfiles Env"
+BW_ITEM_SSH="SSH Key"
 
 ensure_unlocked_bw() {
     # Only for bw CLI (bootstrap, push)

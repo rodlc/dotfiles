@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# bw-push - Update Bitwarden from ~/.env (via bw CLI)
+# bw-push - Sync local → Bitwarden (env + SSH)
 #
 set -euo pipefail
 
@@ -9,28 +9,99 @@ source "$SCRIPT_DIR/.bw-lib.sh"
 
 ensure_unlocked_bw
 
+echo "📤 Syncing local → Bitwarden..."
+echo ""
+
+# === ~/.env sync ===
 if [[ ! -f "$ENV_FILE" ]]; then
-    echo "❌ $ENV_FILE not found"
-    exit 1
+    echo "⚠️  $ENV_FILE not found. Skipping env sync."
+else
+    if ! bw get item "$BW_ITEM_SECRETS" &>/dev/null; then
+        # Create new
+        echo "📝 Creating '$BW_ITEM_SECRETS' in Bitwarden..."
+        bw get template item | jq \
+            --arg name "$BW_ITEM_SECRETS" \
+            --arg notes "$(cat "$ENV_FILE")" \
+            '.type = 2 | .name = $name | .secureNote = {"type": 0} | .notes = $notes' | \
+            bw encode | bw create item > /dev/null
+        echo "✅ '$BW_ITEM_SECRETS' created"
+    else
+        # Compare and update if different
+        item_id=$(bw get item "$BW_ITEM_SECRETS" | jq -r .id)
+        bw_content=$(bw get item "$item_id" | jq -r '.notes')
+        local_content=$(cat "$ENV_FILE")
+
+        if [[ "$bw_content" == "$local_content" ]]; then
+            echo "✅ ~/.env in sync"
+        else
+            echo "⚠️  ~/.env CONFLICT: local ≠ Bitwarden"
+            echo ""
+            read -p "[O]verwrite Bitwarden / [S]kip / [D]iff ? " choice
+            case "$choice" in
+                [Oo]*)
+                    item=$(bw get item "$item_id")
+                    updated=$(echo "$item" | jq --arg notes "$local_content" '.notes = $notes')
+                    echo "$updated" | bw encode | bw edit item "$item_id" > /dev/null
+                    echo "✅ Bitwarden updated"
+                    ;;
+                [Dd]*)
+                    diff -u <(echo "$bw_content") <(echo "$local_content") || true
+                    ;;
+                *)
+                    echo "⏭️  Skipped"
+                    ;;
+            esac
+        fi
+    fi
 fi
 
-echo "📤 Updating Bitwarden from ~/.env (via bw CLI)..."
+echo ""
 
-# Get item ID
-item_id=$(bw get item "$BW_ITEM_SECRETS" | jq -r .id)
-if [[ -z "$item_id" || "$item_id" == "null" ]]; then
-    echo "❌ Item '$BW_ITEM_SECRETS' not found"
-    exit 1
+# === SSH key sync ===
+SSH_KEY="$HOME/.ssh/id_ed25519"
+if [[ ! -f "$SSH_KEY" ]]; then
+    echo "⚠️  $SSH_KEY not found. Skipping SSH sync."
+else
+    if ! bw get item "$BW_ITEM_SSH" &>/dev/null; then
+        # Create new
+        echo "🔑 Creating '$BW_ITEM_SSH' in Bitwarden..."
+        bw get template item | jq \
+            --arg name "$BW_ITEM_SSH" \
+            --arg notes "$(cat "$SSH_KEY")" \
+            '.type = 2 | .name = $name | .secureNote = {"type": 0} | .notes = $notes' | \
+            bw encode | bw create item > /dev/null
+        echo "✅ '$BW_ITEM_SSH' created"
+    else
+        # Compare and update if different
+        ssh_item_id=$(bw get item "$BW_ITEM_SSH" | jq -r .id)
+        bw_key=$(bw get item "$ssh_item_id" | jq -r '.notes')
+        local_key=$(cat "$SSH_KEY")
+
+        if [[ "$bw_key" == "$local_key" ]]; then
+            echo "✅ SSH key in sync"
+        else
+            echo "⚠️  SSH key CONFLICT: local ≠ Bitwarden"
+            local_fp=$(ssh-keygen -lf "$SSH_KEY" 2>/dev/null | awk '{print $2}')
+            bw_fp=$(echo "$bw_key" | ssh-keygen -lf /dev/stdin 2>/dev/null | awk '{print $2}')
+            echo "   Local:     $local_fp"
+            echo "   Bitwarden: $bw_fp"
+            echo ""
+            read -p "[O]verwrite Bitwarden / [S]kip ? " choice
+            case "$choice" in
+                [Oo]*)
+                    ssh_item=$(bw get item "$ssh_item_id")
+                    ssh_updated=$(echo "$ssh_item" | jq --arg notes "$local_key" '.notes = $notes')
+                    echo "$ssh_updated" | bw encode | bw edit item "$ssh_item_id" > /dev/null
+                    echo "✅ Bitwarden updated"
+                    ;;
+                *)
+                    echo "⏭️  Skipped"
+                    ;;
+            esac
+        fi
+    fi
 fi
-
-# Get current item
-item=$(bw get item "$item_id")
-
-# Update notes field
-updated=$(echo "$item" | jq --arg notes "$(cat "$ENV_FILE")" '.secureNote.type = 0 | .notes = $notes')
-
-# Encode and update
-echo "$updated" | bw encode | bw edit item "$item_id" > /dev/null
 
 touch "$HOME/.env.bw-synced"
-echo "✅ Bitwarden updated"
+echo ""
+echo "✅ Sync complete"

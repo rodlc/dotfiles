@@ -18,6 +18,22 @@ else
   echo "       Skipping submodule update. MCPs must be manually cloned to $MCP_DIR"
 fi
 
+# Helper function to configure upstream remote
+configure_upstream() {
+  local name="$1" upstream_url="$2"
+
+  if [ ! -d "$MCP_DIR/$name" ]; then
+    return 0
+  fi
+
+  cd "$MCP_DIR/$name"
+  if ! git remote get-url upstream &>/dev/null; then
+    git remote add upstream "$upstream_url" 2>/dev/null || true
+    # Disable push to upstream (read-only)
+    git remote set-url --push upstream DISABLE 2>/dev/null || true
+  fi
+}
+
 # Helper function to build MCPs
 build_mcp() {
   local name="$1" build_cmd="$2" build_check="$3"
@@ -81,6 +97,13 @@ if [ -d "$MEMORY_DIR" ]; then
 else
   echo "⚠️  mcp-memory-service not found in $MCP_DIR, skipping"
 fi
+
+# Configure upstream remotes for forks
+echo "-----> Configuring upstream remotes..."
+configure_upstream "mcp-notion-server" "git@github.com:makenotion/notion-mcp-server.git"
+configure_upstream "slack-mcp-server" "git@github.com:tuananh/slack-mcp.git"
+configure_upstream "google-calendar-mcp" "git@github.com:nspady/google-calendar-mcp.git"
+configure_upstream "mcp-memory-service" "git@github.com:dosuken123/mcp-memory-service.git"
 
 echo "✓ MCP servers built successfully"
 echo ""
