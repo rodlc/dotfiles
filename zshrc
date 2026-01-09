@@ -225,18 +225,22 @@ check_repo_status() {
 
     # Read and display cache with age
     if [[ -f "$cache_file" ]]; then
+        local current_time=$(date +%s)
+        local file_time=$(stat -f %m "$cache_file" 2>/dev/null || echo 0)
+        local age=$((current_time - file_time))
+        local age_display=$(format_cache_age $age)
+
+        # Display content with age (always, regardless of staleness)
         local content=$(cat "$cache_file" 2>/dev/null)
         if [[ -n "$content" ]]; then
-            local current_time=$(date +%s)
-            local file_time=$(stat -f %m "$cache_file" 2>/dev/null || echo 0)
-            local age=$((current_time - file_time))
-            local age_display=$(format_cache_age $age)
-
             # Display each line with age suffix
             echo "$content" | while IFS= read -r line; do
                 [[ -n "$line" ]] && echo "$line  [$age_display]"
             done
         fi
+    else
+        # No cache yet - first run
+        echo "🔄 $repo_name: checking status for first time..."
     fi
 }
 
@@ -247,8 +251,8 @@ ssh_status_code=$?
 
 # Only run git checks if SSH is OK
 if [[ $ssh_status_code -eq 0 ]]; then
-    # Launch background fetch job (subshell to hide job notification)
-    ( "$HOME/Code/rodlc/dotfiles/scripts/git-fetch-background.sh" &>/dev/null & )
+    # Launch background fetch job (disown to hide job notification)
+    "$HOME/Code/rodlc/dotfiles/scripts/git-fetch-background.sh" &>/dev/null & disown
 
     # Display git status from cache
     check_repo_status "$HOME/Code/rodlc/dotfiles" "Dotfiles" "df-push" "df-pull"
