@@ -17,11 +17,12 @@ ensure_unlocked_bw() {
             exit 1
         fi
         echo "✅ Unlocked"
-        bw sync > /dev/null
     elif [[ "$status" == "unauthenticated" ]]; then
         echo "❌ Not logged in. Run: bw login"
         exit 1
     fi
+    # Always sync, even if already unlocked
+    bw sync > /dev/null
 }
 
 ensure_rbw() {

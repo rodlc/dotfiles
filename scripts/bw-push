@@ -39,6 +39,7 @@ else
             read -p "[O]verwrite Bitwarden / [S]kip / [D]iff ? " choice
             case "$choice" in
                 [Oo]*)
+                    bw sync > /dev/null
                     item=$(bw get item "$item_id")
                     updated=$(echo "$item" | jq --arg notes "$local_content" '.notes = $notes')
                     echo "$updated" | bw encode | bw edit item "$item_id" > /dev/null
@@ -50,6 +51,7 @@ else
                     read -p "[O]verwrite Bitwarden / [S]kip ? " choice2
                     case "$choice2" in
                         [Oo]*)
+                            bw sync > /dev/null
                             item=$(bw get item "$item_id")
                             updated=$(echo "$item" | jq --arg notes "$local_content" '.notes = $notes')
                             echo "$updated" | bw encode | bw edit item "$item_id" > /dev/null
@@ -139,6 +141,7 @@ else
                     fi
 
                     # Update to type 4 format
+                    bw sync > /dev/null
                     ssh_updated=$(echo "$ssh_item" | jq \
                         --arg private_key "$private_key" \
                         --arg public_key "$public_key" \
