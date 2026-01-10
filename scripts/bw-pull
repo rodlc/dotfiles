@@ -7,6 +7,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/.bw-lib.sh"
 
+# Use rbw for env (faster), bw for SSH (needs JSON parsing)
 ensure_rbw
 
 echo "📥 Syncing Bitwarden → local..."
@@ -52,19 +53,42 @@ fi
 echo ""
 
 # === SSH key sync ===
+# Use bw CLI for SSH to handle type 4 (sshKey) format
+ensure_unlocked_bw
+
 SSH_KEY="$HOME/.ssh/id_ed25519"
-if ! rbw get "$BW_ITEM_SSH" &>/dev/null; then
+SSH_PUB="$HOME/.ssh/id_ed25519.pub"
+
+if ! bw get item "$BW_ITEM_SSH" &>/dev/null; then
     echo "⚠️  '$BW_ITEM_SSH' not found in Bitwarden"
 else
-    bw_key=$(rbw get "$BW_ITEM_SSH")
+    ssh_item=$(bw get item "$BW_ITEM_SSH")
+    item_type=$(echo "$ssh_item" | jq -r .type)
 
-    if [[ ! -f "$SSH_KEY" ]]; then
+    # Extract private key based on type
+    if [[ "$item_type" == "4" ]]; then
+        bw_key=$(echo "$ssh_item" | jq -r '.sshKey.privateKey // empty')
+        bw_pub=$(echo "$ssh_item" | jq -r '.sshKey.publicKey // empty')
+    else
+        bw_key=$(echo "$ssh_item" | jq -r '.notes // empty')
+        bw_pub=""
+    fi
+
+    if [[ -z "$bw_key" ]]; then
+        echo "⚠️  SSH private key empty in Bitwarden"
+    elif [[ ! -f "$SSH_KEY" ]]; then
         # Restore from Bitwarden
         echo "🔑 Restoring SSH key from Bitwarden..."
         mkdir -p "$HOME/.ssh" && chmod 700 "$HOME/.ssh"
         echo "$bw_key" > "$SSH_KEY"
         chmod 600 "$SSH_KEY"
-        ssh-keygen -y -f "$SSH_KEY" > "$SSH_KEY.pub"
+
+        if [[ -n "$bw_pub" ]]; then
+            echo "$bw_pub" > "$SSH_PUB"
+        else
+            ssh-keygen -y -f "$SSH_KEY" > "$SSH_PUB"
+        fi
+
         ssh-add --apple-use-keychain "$SSH_KEY" 2>/dev/null || true
         echo "✅ SSH key restored"
     else
@@ -73,7 +97,13 @@ else
             echo "✅ SSH key in sync"
         else
             echo "⚠️  SSH key CONFLICT: Bitwarden ≠ local"
-            bw_fp=$(echo "$bw_key" | ssh-keygen -lf /dev/stdin 2>/dev/null | awk '{print $2}')
+
+            if [[ -n "$bw_key" ]]; then
+                bw_fp=$(echo "$bw_key" | ssh-keygen -lf /dev/stdin 2>/dev/null | awk '{print $2}')
+            else
+                bw_fp="(empty)"
+            fi
+
             local_fp=$(ssh-keygen -lf "$SSH_KEY" 2>/dev/null | awk '{print $2}')
             echo "   Bitwarden: $bw_fp"
             echo "   Local:     $local_fp"
@@ -84,7 +114,13 @@ else
                     cp "$SSH_KEY" "$SSH_KEY.backup.$(date +%Y%m%d)"
                     echo "$bw_key" > "$SSH_KEY"
                     chmod 600 "$SSH_KEY"
-                    ssh-keygen -y -f "$SSH_KEY" > "$SSH_KEY.pub"
+
+                    if [[ -n "$bw_pub" ]]; then
+                        echo "$bw_pub" > "$SSH_PUB"
+                    else
+                        ssh-keygen -y -f "$SSH_KEY" > "$SSH_PUB"
+                    fi
+
                     ssh-add --apple-use-keychain "$SSH_KEY" 2>/dev/null || true
                     echo "✅ Local updated (backup saved)"
                     ;;

@@ -46,6 +46,19 @@ else
                     ;;
                 [Dd]*)
                     diff -u <(echo "$bw_content") <(echo "$local_content") || true
+                    echo ""
+                    read -p "[O]verwrite Bitwarden / [S]kip ? " choice2
+                    case "$choice2" in
+                        [Oo]*)
+                            item=$(bw get item "$item_id")
+                            updated=$(echo "$item" | jq --arg notes "$local_content" '.notes = $notes')
+                            echo "$updated" | bw encode | bw edit item "$item_id" > /dev/null
+                            echo "✅ Bitwarden updated"
+                            ;;
+                        *)
+                            echo "⏭️  Skipped"
+                            ;;
+                    esac
                     ;;
                 *)
                     echo "⏭️  Skipped"
@@ -59,22 +72,43 @@ echo ""
 
 # === SSH key sync ===
 SSH_KEY="$HOME/.ssh/id_ed25519"
+SSH_PUB="$HOME/.ssh/id_ed25519.pub"
 if [[ ! -f "$SSH_KEY" ]]; then
     echo "⚠️  $SSH_KEY not found. Skipping SSH sync."
 else
     if ! bw get item "$BW_ITEM_SSH" &>/dev/null; then
-        # Create new
+        # Create new SSH Key (type 4)
         echo "🔑 Creating '$BW_ITEM_SSH' in Bitwarden..."
+        local private_key=$(cat "$SSH_KEY")
+        local public_key=""
+        local fingerprint=""
+
+        if [[ -f "$SSH_PUB" ]]; then
+            public_key=$(cat "$SSH_PUB")
+            fingerprint=$(ssh-keygen -lf "$SSH_KEY" 2>/dev/null | awk '{print $2}')
+        fi
+
         bw get template item | jq \
             --arg name "$BW_ITEM_SSH" \
-            --arg notes "$(cat "$SSH_KEY")" \
-            '.type = 2 | .name = $name | .secureNote = {"type": 0} | .notes = $notes' | \
+            --arg private_key "$private_key" \
+            --arg public_key "$public_key" \
+            --arg fingerprint "$fingerprint" \
+            '.type = 4 | .name = $name | .sshKey = {"privateKey": $private_key, "publicKey": $public_key, "fingerprint": $fingerprint}' | \
             bw encode | bw create item > /dev/null
         echo "✅ '$BW_ITEM_SSH' created"
     else
         # Compare and update if different
         ssh_item_id=$(bw get item "$BW_ITEM_SSH" | jq -r .id)
-        bw_key=$(bw get item "$ssh_item_id" | jq -r '.notes')
+        ssh_item=$(bw get item "$ssh_item_id")
+        item_type=$(echo "$ssh_item" | jq -r .type)
+
+        # Handle both old (type 2, notes) and new (type 4, sshKey) formats
+        if [[ "$item_type" == "4" ]]; then
+            bw_key=$(echo "$ssh_item" | jq -r '.sshKey.privateKey // empty')
+        else
+            bw_key=$(echo "$ssh_item" | jq -r '.notes // empty')
+        fi
+
         local_key=$(cat "$SSH_KEY")
 
         if [[ "$bw_key" == "$local_key" ]]; then
@@ -82,15 +116,34 @@ else
         else
             echo "⚠️  SSH key CONFLICT: local ≠ Bitwarden"
             local_fp=$(ssh-keygen -lf "$SSH_KEY" 2>/dev/null | awk '{print $2}')
-            bw_fp=$(echo "$bw_key" | ssh-keygen -lf /dev/stdin 2>/dev/null | awk '{print $2}')
+
+            if [[ -n "$bw_key" ]]; then
+                bw_fp=$(echo "$bw_key" | ssh-keygen -lf /dev/stdin 2>/dev/null | awk '{print $2}')
+            else
+                bw_fp="(empty)"
+            fi
+
             echo "   Local:     $local_fp"
             echo "   Bitwarden: $bw_fp"
             echo ""
             read -p "[O]verwrite Bitwarden / [S]kip ? " choice
             case "$choice" in
                 [Oo]*)
-                    ssh_item=$(bw get item "$ssh_item_id")
-                    ssh_updated=$(echo "$ssh_item" | jq --arg notes "$local_key" '.notes = $notes')
+                    local private_key=$(cat "$SSH_KEY")
+                    local public_key=""
+                    local fingerprint=""
+
+                    if [[ -f "$SSH_PUB" ]]; then
+                        public_key=$(cat "$SSH_PUB")
+                        fingerprint=$(ssh-keygen -lf "$SSH_KEY" 2>/dev/null | awk '{print $2}')
+                    fi
+
+                    # Update to type 4 format
+                    ssh_updated=$(echo "$ssh_item" | jq \
+                        --arg private_key "$private_key" \
+                        --arg public_key "$public_key" \
+                        --arg fingerprint "$fingerprint" \
+                        '.type = 4 | .sshKey = {"privateKey": $private_key, "publicKey": $public_key, "fingerprint": $fingerprint} | del(.notes, .secureNote)')
                     echo "$ssh_updated" | bw encode | bw edit item "$ssh_item_id" > /dev/null
                     echo "✅ Bitwarden updated"
                     ;;
