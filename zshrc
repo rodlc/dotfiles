@@ -196,6 +196,7 @@ check_ssh_status() {
 
     # Check if SSH agent has keys loaded
     if ssh-add -l &>/dev/null; then
+        echo "🔑 SSH key loaded. Fetching git status..."
         return 0  # SSH OK - background fetch will run
     fi
 
@@ -223,14 +224,14 @@ check_repo_status() {
     mkdir -p "$cache_dir"
     local cache_file="$cache_dir/git-status-$repo_name"
 
-    # Read and display cache with age
+    # Read and display cache with age (only if there are issues)
     if [[ -f "$cache_file" ]]; then
         local current_time=$(date +%s)
         local file_time=$(stat -f %m "$cache_file" 2>/dev/null || echo 0)
         local age=$((current_time - file_time))
         local age_display=$(format_cache_age $age)
 
-        # Display content with age (always, regardless of staleness)
+        # Display content with age only if not empty (i.e., there are issues)
         local content=$(cat "$cache_file" 2>/dev/null)
         if [[ -n "$content" ]]; then
             # Display each line with age suffix
@@ -238,9 +239,6 @@ check_repo_status() {
                 [[ -n "$line" ]] && echo "$line [$age_display]"
             done
         fi
-    else
-        # No cache yet - first run
-        echo "🔄 $repo_name: checking status for first time..."
     fi
 }
 
@@ -265,47 +263,37 @@ show_system_info() {
         return 0
     fi
 
-    # Refresh cache in background
+    # Refresh cache in background (silent)
     (
-        local output=""
-        # Compact uptime format: "1 day, 40 mins" → "1d 40m", "1:04" → "1h 4m"
-        local uptime_raw=$(uptime | sed 's/.*up //' | sed 's/, [0-9]* user.*//')
-        local uptime_compact=$(echo "$uptime_raw" | awk '{
-            # Handle "X day(s), Y:Z" or "X day(s), Y mins" format
-            if ($0 ~ /day/) {
-                day = $1
-                sub(/day.*,/, day "d", $0)
-            }
-            # Handle "H:MM" format (hours:minutes)
-            if ($0 ~ /[0-9]+:[0-9]+/) {
-                match($0, /([0-9]+):([0-9]+)/, time)
-                sub(/[0-9]+:[0-9]+/, time[1] "h " time[2] "m", $0)
-            }
-            # Handle "X mins" format
-            gsub(/ mins?/, "m", $0)
-            gsub(/ hrs?/, "h", $0)
-            gsub(/,/, "", $0)
-            gsub(/  +/, " ", $0)
-            print $0
-        }' | xargs)
-        output+="⏱️ $uptime_compact"
+        setopt LOCAL_OPTIONS NO_MONITOR
+        (
+            local output=""
+            # Compact uptime - calculate from boot time
+            local boot=$(sysctl -n kern.boottime | awk '{print $4}' | tr -d ',')
+            local up=$(($(date +%s) - boot))
+            local d=$((up/86400)) h=$(((up%86400)/3600)) m=$(((up%3600)/60))
+            local uptime_compact="${d}d ${h}h ${m}m"
+            [[ $d -eq 0 ]] && uptime_compact="${h}h ${m}m"
+            [[ $d -eq 0 && $h -eq 0 ]] && uptime_compact="${m}m"
+            output+="⏱️  ${uptime_compact}"
 
-        # CPU load percentage
-        local load=$(sysctl -n vm.loadavg 2>/dev/null | awk '{print $2}')
-        local cores=$(sysctl -n hw.ncpu 2>/dev/null)
-        local cpu_pct=$(awk -v l="$load" -v c="$cores" 'BEGIN {printf "%.0f", (l/c)*100}')
-        output+=" | ⚡${cpu_pct}%"
+            # CPU load percentage
+            local load=$(sysctl -n vm.loadavg 2>/dev/null | awk '{print $2}')
+            local cores=$(sysctl -n hw.ncpu 2>/dev/null)
+            local cpu_pct=$(awk -v l="$load" -v c="$cores" 'BEGIN {printf "%.0f", (l/c)*100}')
+            output+=" | ⚡${cpu_pct}%"
 
-        # RAM usage - dynamic total memory detection
-        local total_ram=$(sysctl -n hw.memsize 2>/dev/null | awk '{printf "%.0f", $1/1024/1024/1024}')
-        output+=" | 🧠 $(top -l 1 | grep PhysMem | awk -v total="$total_ram" '{used=$2; gsub(/G/, "", used); printf "%.0f%%", (used/total)*100}')"
+            # RAM usage - dynamic total memory detection
+            local total_ram=$(sysctl -n hw.memsize 2>/dev/null | awk '{printf "%.0f", $1/1024/1024/1024}')
+            output+=" | 🧠 $(top -l 1 | grep PhysMem | awk -v total="$total_ram" '{used=$2; gsub(/G/, "", used); printf "%.0f%%", (used/total)*100}')"
 
-        # Disk usage
-        output+=" | 💾 $(df -h ~ | tail -1 | awk '{print $5}')"
+            # Disk usage
+            output+=" | 💾 $(df -h ~ | tail -1 | awk '{print $5}')"
 
-        echo "$output" > "$cache_file.tmp"
-        mv -f "$cache_file.tmp" "$cache_file"
-    ) &>/dev/null &!
+            echo "$output" > "$cache_file.tmp"
+            mv -f "$cache_file.tmp" "$cache_file"
+        ) &
+    ) &>/dev/null
 
     # Display cached version
     [[ -f "$cache_file" ]] && cat "$cache_file" 2>/dev/null
@@ -357,10 +345,13 @@ ssh_status_code=$?
 
 # Only run git checks if SSH is OK
 if [[ $ssh_status_code -eq 0 ]]; then
-    # Launch background fetch job (zsh &! = disown immediately)
-    "$HOME/Code/rodlc/dotfiles/scripts/git-fetch-background.sh" &>/dev/null &!
+    # Launch background fetch job (silent)
+    (
+        setopt LOCAL_OPTIONS NO_MONITOR
+        "$HOME/Code/rodlc/dotfiles/scripts/git-fetch-background.sh" &
+    ) &>/dev/null
 
-    # Display git status from cache
+    # Display git status from cache (only shows if there are issues)
     check_repo_status "$HOME/Code/rodlc/dotfiles" "Dotfiles" "df-push" "df-pull"
     check_repo_status "$HOME/Code/rodlc/workspace" "Workspace" "workspace-push" "workspace-pull"
 fi

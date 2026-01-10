@@ -6,6 +6,7 @@
 # Only runs if SSH agent has keys loaded
 
 set -euo pipefail
+set +m  # Disable job control (no job completion messages)
 
 CACHE_DIR="$HOME/.cache"
 mkdir -p "$CACHE_DIR"
