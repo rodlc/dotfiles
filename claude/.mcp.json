@@ -87,7 +87,17 @@
     },
     "filesystem": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "${HOME}/Code", "${HOME}/Downloads", "${HOME}/Documents"]
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "${HOME}/Code",
+        "${HOME}/Documents",
+        "${HOME}/Downloads",
+        "${HOME}/Desktop",
+        "${HOME}/.claude",
+        "/tmp",
+        "/private/tmp"
+      ]
     }
   }
 }
