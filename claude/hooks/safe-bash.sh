@@ -6,11 +6,13 @@ command=$(echo "$input" | jq -r '.tool_input.command // empty')
 echo "DEBUG: command='$command'" >> /tmp/claude-hook-debug.log
 
 # DENY: Git destructif (vérifier AVANT les allows)
-if [[ $command =~ git.*reset.*--hard ]] || \
-   [[ $command =~ git.*push.*(-f|--force) ]] || \
-   [[ $command =~ git.*checkout.*--[[:space:]] ]] || \
-   [[ $command =~ git.*clean.*-f ]] || \
-   [[ $command =~ git.*branch.*-D ]]; then
+# Patterns stricts : flags doivent être des arguments séparés (pas dans noms de branches)
+# Format: (FLAG_DIRECT|.*[[:space:]]FLAG)([[:space:]]|$) = flag juste après subcommand OU après espace, suivi d'espace ou fin
+if [[ $command =~ git[[:space:]]+reset[[:space:]]+(--hard|.*[[:space:]]--hard)([[:space:]]|$) ]] || \
+   [[ $command =~ git[[:space:]]+push[[:space:]]+((-f|--force)|.*[[:space:]](-f|--force))([[:space:]]|$) ]] || \
+   [[ $command =~ git[[:space:]]+checkout[[:space:]]+--[[:space:]] ]] || \
+   [[ $command =~ git[[:space:]]+clean[[:space:]]+(-[fFdDxX]|.*[[:space:]]-[fFdDxX])([[:space:]]|$) ]] || \
+   [[ $command =~ git[[:space:]]+branch[[:space:]]+(-D|.*[[:space:]]-D)([[:space:]]|$) ]]; then
   echo "DEBUG: DENY! Destructive git command" >> /tmp/claude-hook-debug.log
   echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Destructive git command blocked for safety"}}'
   exit 0
