@@ -83,14 +83,34 @@ build_mcp "mcp-raycast-clipboard" \
   "bun install" \
   "node_modules/.bin/bun"
 
-# Memory MCP (Python virtualenv) - Special case
+# Memory MCP (Python virtualenv via pyenv)
 MEMORY_DIR="$MCP_DIR/mcp-memory-service"
 if [ -d "$MEMORY_DIR" ]; then
-  if [ ! -f "$MEMORY_DIR/bin/python" ]; then
-    echo "-----> mcp-memory-service exists but not a virtualenv, setting up..."
+  VENV_DIR="$MEMORY_DIR/.venv"
+
+  if [ ! -f "$VENV_DIR/bin/python" ]; then
+    echo "-----> Setting up mcp-memory-service virtualenv..."
     cd "$MEMORY_DIR"
-    python -m venv .
-    ./bin/pip install --quiet -e .
+
+    # Use pyenv Python 3.12 (must have SQLite extensions compiled)
+    PYENV_PYTHON="$HOME/.pyenv/versions/3.12.8/bin/python"
+    if [ ! -f "$PYENV_PYTHON" ]; then
+      echo "❌ Error: pyenv Python 3.12.8 not found"
+      echo "   Run: pyenv install 3.12.8 (with SQLite extensions)"
+      exit 1
+    fi
+
+    # Verify SQLite extension support
+    if ! $PYENV_PYTHON -c "import sqlite3; sqlite3.connect(':memory:').enable_load_extension(True)" 2>/dev/null; then
+      echo "❌ Error: pyenv Python 3.12.8 missing SQLite extension support"
+      echo "   Reinstall with: PYTHON_CONFIGURE_OPTS=\"--enable-loadable-sqlite-extensions\" pyenv install 3.12.8"
+      exit 1
+    fi
+
+    $PYENV_PYTHON -m venv .venv
+    .venv/bin/pip install --quiet --upgrade pip
+    .venv/bin/pip install --quiet -e .
+    echo "✓ mcp-memory-service installed"
   else
     echo "-----> mcp-memory-service virtualenv already exists, skipping"
   fi

@@ -50,7 +50,7 @@
       "disabled": true
     },
     "memory-service": {
-      "command": "${WORKSPACE_DIR}/mcp-servers/mcp-memory-service/bin/python",
+      "command": "${WORKSPACE_DIR}/mcp-servers/mcp-memory-service/.venv/bin/python",
       "args": ["-m", "mcp_memory_service.server_impl"],
       "env": {
         "MCP_MEMORY_CHROMA_PATH": "${HOME}/.claude/memory-chroma",
@@ -84,6 +84,10 @@
     "mcp-raycast-clipboard": {
       "command": "bun",
       "args": ["run", "${WORKSPACE_DIR}/mcp-servers/mcp-raycast-clipboard/src/index.ts"]
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "${HOME}/Code", "${HOME}/Downloads", "${HOME}/Documents"]
     }
   }
 }
