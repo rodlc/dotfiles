@@ -90,24 +90,14 @@ else
             fingerprint=$(ssh-keygen -lf "$SSH_KEY" 2>/dev/null | awk '{print $2}')
         fi
 
-        # Create SSH Key with full template structure
-        cat <<EOF | bw encode | bw create item > /dev/null
-{
-  "organizationId": null,
-  "collectionIds": null,
-  "folderId": null,
-  "type": 4,
-  "name": "$BW_ITEM_SSH",
-  "notes": null,
-  "favorite": false,
-  "sshKey": {
-    "privateKey": $(echo "$private_key" | jq -Rs .),
-    "publicKey": $(echo "$public_key" | jq -Rs .),
-    "fingerprint": "$fingerprint"
-  },
-  "reprompt": 0
-}
-EOF
+        # Create as SecureNote (type 2) - store only private key
+        ssh_note="$private_key"
+
+        bw get template item | jq \
+            --arg name "$BW_ITEM_SSH" \
+            --arg notes "$ssh_note" \
+            '.type = 2 | .name = $name | .secureNote = {"type": 0} | .notes = $notes' | \
+            bw encode | bw create item > /dev/null
         echo "✅ '$BW_ITEM_SSH' created"
     else
         # Compare and update if different
@@ -151,13 +141,9 @@ EOF
                         fingerprint=$(ssh-keygen -lf "$SSH_KEY" 2>/dev/null | awk '{print $2}')
                     fi
 
-                    # Update to type 4 format
+                    # Update SecureNote (type 2) - keep it simple
                     bw sync > /dev/null
-                    ssh_updated=$(echo "$ssh_item" | jq \
-                        --argjson private_key "$(echo "$private_key" | jq -Rs .)" \
-                        --argjson public_key "$(echo "$public_key" | jq -Rs .)" \
-                        --arg fingerprint "$fingerprint" \
-                        '.type = 4 | .sshKey = {"privateKey": $private_key, "publicKey": $public_key, "fingerprint": $fingerprint} | del(.notes, .secureNote)')
+                    ssh_updated=$(echo "$ssh_item" | jq --arg notes "$private_key" '.notes = $notes')
                     echo "$ssh_updated" | bw encode | bw edit item "$ssh_item_id" > /dev/null
                     echo "✅ Bitwarden updated"
                     ;;
