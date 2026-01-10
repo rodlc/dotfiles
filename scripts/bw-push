@@ -81,9 +81,9 @@ else
     if ! bw get item "$BW_ITEM_SSH" &>/dev/null; then
         # Create new SSH Key (type 4)
         echo "🔑 Creating '$BW_ITEM_SSH' in Bitwarden..."
-        local private_key=$(cat "$SSH_KEY")
-        local public_key=""
-        local fingerprint=""
+        private_key=$(cat "$SSH_KEY")
+        public_key=""
+        fingerprint=""
 
         if [[ -f "$SSH_PUB" ]]; then
             public_key=$(cat "$SSH_PUB")
@@ -131,9 +131,9 @@ else
             read -p "[O]verwrite Bitwarden / [S]kip ? " choice
             case "$choice" in
                 [Oo]*)
-                    local private_key=$(cat "$SSH_KEY")
-                    local public_key=""
-                    local fingerprint=""
+                    private_key=$(cat "$SSH_KEY")
+                    public_key=""
+                    fingerprint=""
 
                     if [[ -f "$SSH_PUB" ]]; then
                         public_key=$(cat "$SSH_PUB")
