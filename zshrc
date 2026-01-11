@@ -1,8 +1,11 @@
 # Modular ZSH Configuration with Antidote
 # Modules: ~/.config/zsh/conf.d/
 
+# Disable insecure directory check BEFORE compinit
+ZSH_DISABLE_COMPFIX=true
+
 # Initialize completions (required before loading plugins)
-autoload -Uz compinit && compinit
+autoload -Uz compinit && compinit -i  # -i to ignore insecure directories
 
 # Antidote plugin manager
 source /opt/homebrew/opt/antidote/share/antidote/antidote.zsh
@@ -14,7 +17,6 @@ antidote load ${ZDOTDIR:-~}/.config/zsh/.zsh_plugins.txt
 ZSH_THEME="robbyrussell"
 
 # Oh-My-Zsh settings
-ZSH_DISABLE_COMPFIX=true
 setopt NO_NOTIFY
 
 # Remove conflicting aliases

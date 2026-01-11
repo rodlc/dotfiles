@@ -53,26 +53,20 @@ fi
 echo ""
 
 # === SSH key sync ===
-# Use bw CLI for SSH to handle type 4 (sshKey) format
-ensure_unlocked_bw
+# Use rbw for SSH key
+ensure_rbw
 
 SSH_KEY="$HOME/.ssh/id_ed25519"
 SSH_PUB="$HOME/.ssh/id_ed25519.pub"
 
-if ! bw get item "$BW_ITEM_SSH" &>/dev/null; then
+if ! rbw get "$BW_ITEM_SSH" &>/dev/null; then
     echo "⚠️  '$BW_ITEM_SSH' not found in Bitwarden"
 else
-    ssh_item=$(bw get item "$BW_ITEM_SSH")
-    item_type=$(echo "$ssh_item" | jq -r .type)
+    # Get private key (stored as password/note in rbw)
+    bw_key=$(rbw get "$BW_ITEM_SSH")
 
-    # Extract private key based on type
-    if [[ "$item_type" == "4" ]]; then
-        bw_key=$(echo "$ssh_item" | jq -r '.sshKey.privateKey // empty')
-        bw_pub=$(echo "$ssh_item" | jq -r '.sshKey.publicKey // empty')
-    else
-        bw_key=$(echo "$ssh_item" | jq -r '.notes // empty')
-        bw_pub=""
-    fi
+    # Try to get public key from custom field
+    bw_pub=$(rbw get "$BW_ITEM_SSH" --field "public key" 2>/dev/null || rbw get "$BW_ITEM_SSH" --field "Public Key" 2>/dev/null || echo "")
 
     if [[ -z "$bw_key" ]]; then
         echo "⚠️  SSH private key empty in Bitwarden"

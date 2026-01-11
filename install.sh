@@ -50,8 +50,9 @@ fi
 # Bitwarden setup (secrets + SSH key)
 echo "=====> Bitwarden secrets setup"
 
-# Check if rbw is configured
-if ! rbw unlocked 2>/dev/null; then
+# Configure rbw if not already done
+RBW_CONFIG="$HOME/Library/Application Support/rbw/config.json"
+if [ ! -f "$RBW_CONFIG" ]; then
     echo ""
     echo "Bitwarden setup required for secrets (SSH key, API tokens)."
     echo ""
@@ -59,20 +60,25 @@ if ! rbw unlocked 2>/dev/null; then
 
     if [[ -n "$bw_email" ]]; then
         rbw config set email "$bw_email"
-        rbw config set base_url https://vault.bitwarden.eu
+        rbw config set base_url https://api.bitwarden.eu/
         echo "-----> Registering with Bitwarden..."
         rbw register
-        echo "-----> Unlocking vault..."
-        rbw unlock
     else
         echo "⚠️  Skipping Bitwarden. You can run install.sh again later."
     fi
 fi
 
-# Restore secrets from Bitwarden if unlocked
-if rbw unlocked 2>/dev/null; then
-    echo "-----> Syncing secrets from Bitwarden..."
-    "$DOTFILES_DIR/scripts/bw-pull"
+# Unlock and sync if configured
+if [ -f "$RBW_CONFIG" ]; then
+    if ! rbw unlocked 2>/dev/null; then
+        echo "-----> Unlocking vault..."
+        rbw unlock
+    fi
+
+    if rbw unlocked 2>/dev/null; then
+        echo "-----> Syncing secrets from Bitwarden..."
+        "$DOTFILES_DIR/scripts/bw-pull"
+    fi
 fi
 
 echo "=====> Creating symlinks"
@@ -102,6 +108,22 @@ symlink "$DOTFILES_DIR/zed/settings.json" "$ZED_DIR/settings.json"
 backup "$ZED_DIR/keymap.json"
 symlink "$DOTFILES_DIR/zed/keymap.json" "$ZED_DIR/keymap.json"
 
+# Zsh modular config + Starship
+ZSH_CONFIG_DIR="$HOME/.config/zsh"
+mkdir -p "$ZSH_CONFIG_DIR/conf.d"
+backup "$ZSH_CONFIG_DIR/.zsh_plugins.txt"
+symlink "$DOTFILES_DIR/zsh/.zsh_plugins.txt" "$ZSH_CONFIG_DIR/.zsh_plugins.txt"
+for conf in "$DOTFILES_DIR/zsh/conf.d"/*.zsh; do
+  backup "$ZSH_CONFIG_DIR/conf.d/$(basename "$conf")"
+  symlink "$conf" "$ZSH_CONFIG_DIR/conf.d/$(basename "$conf")"
+done
+backup "$HOME/.config/starship.toml"
+symlink "$DOTFILES_DIR/starship.toml" "$HOME/.config/starship.toml"
+
+# Finicky
+backup "$HOME/.finicky.js"
+symlink "$DOTFILES_DIR/finicky.js" "$HOME/.finicky.js"
+
 # Claude Code
 mkdir -p "$HOME/.claude/commands" "$HOME/.claude/hooks" "$HOME/.claude/skills"
 backup "$HOME/.claude/CLAUDE.md"
@@ -112,8 +134,13 @@ backup "$HOME/.claude/commands/summarize.md"
 symlink "$DOTFILES_DIR/claude/commands/summarize.md" "$HOME/.claude/commands/summarize.md"
 backup "$HOME/.claude/hooks/safe-bash.sh"
 symlink "$DOTFILES_DIR/claude/hooks/safe-bash.sh" "$HOME/.claude/hooks/safe-bash.sh"
-backup "$HOME/.claude/skills/playwright.md"
-symlink "$DOTFILES_DIR/claude/skills/playwright.md" "$HOME/.claude/skills/playwright.md"
+backup "$HOME/.claude/hooks/auto-approve-skills.sh"
+symlink "$DOTFILES_DIR/claude/hooks/auto-approve-skills.sh" "$HOME/.claude/hooks/auto-approve-skills.sh"
+backup "$HOME/.claude/hooks/session-init.sh"
+symlink "$DOTFILES_DIR/claude/hooks/session-init.sh" "$HOME/.claude/hooks/session-init.sh"
+if [ -d "$DOTFILES_DIR/claude/skills/terminal-title" ]; then
+  symlink "$DOTFILES_DIR/claude/skills/terminal-title" "$HOME/.claude/skills/terminal-title"
+fi
 backup "$HOME/.claude/statusline.sh"
 symlink "$DOTFILES_DIR/claude/statusline.sh" "$HOME/.claude/statusline.sh"
 backup "$HOME/.claude/settings.json"

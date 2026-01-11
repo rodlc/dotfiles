@@ -5,26 +5,6 @@ ENV_FILE="$HOME/.env"
 BW_ITEM_SECRETS="Dotfiles Env"
 BW_ITEM_SSH="SSH Key"
 
-ensure_unlocked_bw() {
-    # Only for bw CLI (bootstrap, push)
-    local status=$(bw status | jq -r .status)
-
-    if [[ "$status" == "locked" ]]; then
-        echo "🔐 Bitwarden locked. Unlocking..."
-        export BW_SESSION=$(bw unlock --raw)
-        if [[ $? -ne 0 ]]; then
-            echo "❌ Unlock failed"
-            exit 1
-        fi
-        echo "✅ Unlocked"
-    elif [[ "$status" == "unauthenticated" ]]; then
-        echo "❌ Not logged in. Run: bw login"
-        exit 1
-    fi
-    # Always sync, even if already unlocked
-    bw sync > /dev/null
-}
-
 ensure_rbw() {
     # Check rbw is unlocked (no action needed, just verify)
     if ! rbw unlocked &>/dev/null; then
