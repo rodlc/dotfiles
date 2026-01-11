@@ -1,6 +1,9 @@
 # Modular ZSH Configuration with Antidote
 # Modules: ~/.config/zsh/conf.d/
 
+# Enable true color support for Starship
+export COLORTERM=truecolor
+
 # Initialize completions (required before loading plugins)
 autoload -Uz compinit && compinit
 
