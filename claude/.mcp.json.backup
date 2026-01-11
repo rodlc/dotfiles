@@ -2,10 +2,7 @@
   "mcpServers": {
     "notion": {
       "command": "node",
-      "args": [
-        "${WORKSPACE_DIR}/mcp-servers/mcp-notion-server/build/index.js",
-        "--enabledTools=notion_retrieve_page,notion_query_database,notion_append_block_children,notion_update_page_properties,notion_create_database_item,notion_search"
-      ],
+      "args": ["${WORKSPACE_DIR}/mcp-servers/mcp-notion-server/build/index.js"],
       "env": {
         "NOTION_API_TOKEN": "${NOTION_API_TOKEN}",
         "NOTION_MARKDOWN_CONVERSION": "true"
@@ -14,8 +11,7 @@
     "rails-mcp": {
       "command": "${WORKSPACE_DIR}/mcp-servers/rails-mcp-server/exe/rails-mcp-server",
       "args": [],
-      "env": {},
-      "disabled": true
+      "env": {}
     },
     "github": {
       "type": "http",
@@ -46,8 +42,7 @@
       "env": {
         "SLACK_MCP_XOXC_TOKEN": "${SLACK_XOXC_TOKEN}",
         "SLACK_MCP_XOXD_TOKEN": "${SLACK_XOXD_TOKEN}"
-      },
-      "disabled": true
+      }
     },
     "playwright": {
       "command": "npx",
@@ -70,12 +65,20 @@
         "MCP_RETENTION_TEMPORARY": "30"
       }
     },
-    "gcal": {
+    "gcal-rodlecoent": {
       "command": "node",
       "args": ["${WORKSPACE_DIR}/mcp-servers/google-calendar-mcp/build/index.js"],
       "env": {
-        "GOOGLE_OAUTH_CREDENTIALS": "${HOME}/.gcal-mcp/oauth.keys.json",
-        "GOOGLE_CALENDAR_MCP_TOKEN_PATH": "${HOME}/.gcal-mcp/tokens.json"
+        "GOOGLE_OAUTH_CREDENTIALS": "${HOME}/.gcal-mcp-rodlecoent/oauth.keys.json",
+        "GOOGLE_CALENDAR_MCP_TOKEN_PATH": "${HOME}/.gcal-mcp-rodlecoent/tokens.json"
+      }
+    },
+    "gcal-rodolphe": {
+      "command": "node",
+      "args": ["${WORKSPACE_DIR}/mcp-servers/google-calendar-mcp/build/index.js"],
+      "env": {
+        "GOOGLE_OAUTH_CREDENTIALS": "${HOME}/.gcal-mcp-rodolphe/oauth.keys.json",
+        "GOOGLE_CALENDAR_MCP_TOKEN_PATH": "${HOME}/.gcal-mcp-rodolphe/tokens.json"
       }
     },
     "mcp-raycast-clipboard": {
