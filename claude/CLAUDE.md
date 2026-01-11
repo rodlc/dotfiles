@@ -10,6 +10,7 @@ MCP Memory stores all personal context. Query via `mcp__memory__retrieve_memory`
 
 ## Environment
 Editor: Zed | Dir: ~/Code | Web: Enabled
+MCP/Dotfiles: Query memory before changes (tags: mcp, dotfiles, critical)
 
 ## Response
 Structure: Conclusion → details | Certainty: Proven → Probable → Possible
