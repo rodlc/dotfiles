@@ -31,14 +31,6 @@ echo "=====> Installing Homebrew packages"
 brew install --quiet pyenv rbenv nvm git pre-commit rbw bitwarden-cli 2>/dev/null || true
 brew install --cask --quiet zed 2>/dev/null || true
 
-# Install Bun if not present
-if ! command -v bun &> /dev/null; then
-  echo "=====> Installing Bun"
-  curl -fsSL https://bun.sh/install | bash
-else
-  echo "=====> Bun already installed"
-fi
-
 # Install oh-my-zsh if not present
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
   echo "=====> Installing oh-my-zsh"
@@ -164,37 +156,6 @@ symlink "$DOTFILES_DIR/claude/statusline.sh" "$HOME/.claude/statusline.sh"
 backup "$HOME/.claude/settings.json"
 cp "$DOTFILES_DIR/claude/settings.json" "$HOME/.claude/settings.json" 2>/dev/null && echo "-----> Copied settings.json" || true
 
-# Setup workspace
-echo "=====> Setting up workspace"
-WORKSPACE_DIR="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}"
-
-if [ ! -d "$WORKSPACE_DIR" ]; then
-    if [ -f "$HOME/.ssh/id_ed25519" ]; then
-        echo "-----> Cloning workspace repository"
-        mkdir -p "$(dirname "$WORKSPACE_DIR")"
-        git clone --recurse-submodules git@github.com:rodlc/workspace.git "$WORKSPACE_DIR"
-    else
-        echo "⚠️  SSH key not found. Workspace clone skipped."
-        echo "   Run install.sh again after Bitwarden setup."
-    fi
-else
-    echo "-----> Workspace already exists"
-fi
-
-# Add WORKSPACE_DIR to ~/.env if not present (local, not from Bitwarden)
-if ! grep -q "^export WORKSPACE_DIR=" "$HOME/.env"; then
-    echo "export WORKSPACE_DIR=\"$WORKSPACE_DIR\"" >> "$HOME/.env"
-    echo "-----> Added WORKSPACE_DIR to ~/.env"
-fi
-
-# Install MCP server repositories
-echo "=====> Installing MCP server repositories"
-"$DOTFILES_DIR/claude/install-mcp-servers.sh"
-
-# Install MCPs from dotfiles
-echo "=====> Configuring MCP servers"
-"$DOTFILES_DIR/claude/mcp-sync.sh" install
-
 # Install pre-commit hooks (Gitleaks)
 if [ -f "$DOTFILES_DIR/.pre-commit-config.yaml" ]; then
   echo "=====> Installing pre-commit hooks"
@@ -215,5 +176,10 @@ else
   echo "Warning: .git-hooks/pre-commit not found"
 fi
 
-echo "✓ Done"
+echo ""
+echo "✓ Dotfiles installed"
+echo ""
+echo "💡 To install workspace + MCP servers, run: ./workspace-install.sh"
+echo ""
+
 exec zsh
