@@ -1,0 +1,71 @@
+# Starship prompt configuration
+# Docs: https://starship.rs/config/
+
+# Format string
+format = """
+$username\
+$hostname\
+$directory\
+$git_branch\
+$git_status\
+$ruby\
+$nodejs\
+$python\
+$character"""
+
+# Timeout for starship
+scan_timeout = 10
+
+[character]
+success_symbol = "[➜](bold green)"
+error_symbol = "[➜](bold red)"
+
+[username]
+style_user = "cyan bold"
+style_root = "red bold"
+format = "[$user]($style) "
+disabled = false
+show_always = true
+
+[hostname]
+ssh_only = true
+format = "[@$hostname]($style) "
+style = "cyan bold"
+disabled = false
+
+[directory]
+truncation_length = 1
+truncate_to_repo = false
+format = "[$path]($style) "
+style = "cyan"
+
+[git_branch]
+symbol = " "
+format = "[$symbol$branch]($style) "
+style = "purple bold"
+
+[git_status]
+format = "([\\[$all_status$ahead_behind\\]]($style) )"
+style = "red bold"
+
+# Language versions (contextual)
+[ruby]
+format = "[\\[💎 $version\\]]($style) "
+style = "red"
+detect_extensions = []
+detect_files = ["Gemfile"]
+detect_folders = []
+
+[nodejs]
+format = "[\\[📦 $version\\]]($style) "
+style = "green"
+detect_extensions = []
+detect_files = ["package.json"]
+detect_folders = []
+
+[python]
+format = "[\\[🐍 $version\\]]($style) "
+style = "yellow"
+detect_extensions = []
+detect_files = ["requirements.txt", "pyproject.toml", ".python-version"]
+detect_folders = []

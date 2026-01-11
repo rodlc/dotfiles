@@ -1,0 +1,15 @@
+# Antidote plugin manifest
+# Loaded in order. Supports oh-my-zsh plugins via path: syntax.
+
+# Oh-My-Zsh core library
+ohmyzsh/ohmyzsh path:lib
+
+# Oh-My-Zsh plugins
+ohmyzsh/ohmyzsh path:plugins/git
+ohmyzsh/ohmyzsh path:plugins/gitfast
+ohmyzsh/ohmyzsh path:plugins/common-aliases
+
+# Community plugins (fast, maintained)
+zsh-users/zsh-syntax-highlighting
+zsh-users/zsh-history-substring-search
+zsh-users/zsh-autosuggestions
