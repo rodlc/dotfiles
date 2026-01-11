@@ -29,6 +29,14 @@ if [[ $command =~ ^rm[[:space:]] ]] && [[ $command =~ -[rRfF]*[rR][rRfF]* ]]; th
   fi
 fi
 
+# DENY: Lecture fichiers sensibles
+if [[ $command =~ (cat|head|tail|less|more|bat|strings)[[:space:]]+(.*/)?(\.env|\.env\.[^[:space:]]*|id_rsa|id_ed25519|.*\.pem|.*\.key|credentials\.yml\.enc|master\.key)([[:space:]]|$) ]] || \
+   [[ $command =~ (cat|head|tail|less|more|bat|strings)[[:space:]]+.*/(\.(ssh|gnupg|aws|kube))/ ]]; then
+  echo "DEBUG: DENY! Sensitive file read blocked" >> /tmp/claude-hook-debug.log
+  echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Sensitive file access blocked for security"}}'
+  exit 0
+fi
+
 # Commandes safe (même avec pipes/redirections)
 if [[ $command =~ ^ls([[:space:]]|$) ]] || \
    [[ $command =~ ^find([[:space:]]|$) ]] || \

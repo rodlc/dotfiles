@@ -32,7 +32,8 @@
       "mcp__gmail-rodlecoent__search_emails",
       "mcp__gmail-rodlecoent__draft_email",
       "mcp__memory-service",
-      "mcp__mcp-raycast-clipboard"
+      "mcp__mcp-raycast-clipboard",
+      "mcp__filesystem"
     ],
     "deny": [
       "Bash(rm -rf|sudo|chmod 777:*)",
