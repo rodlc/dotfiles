@@ -138,10 +138,15 @@ symlink "$DOTFILES_DIR/finicky.js" "$HOME/.finicky.js"
 mkdir -p "$HOME/.claude/commands" "$HOME/.claude/hooks" "$HOME/.claude/skills"
 backup "$HOME/.claude/CLAUDE.md"
 symlink "$DOTFILES_DIR/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
-backup "$HOME/.claude/commands/notion.md"
-symlink "$DOTFILES_DIR/claude/commands/notion.md" "$HOME/.claude/commands/notion.md"
-backup "$HOME/.claude/commands/summarize.md"
-symlink "$DOTFILES_DIR/claude/commands/summarize.md" "$HOME/.claude/commands/summarize.md"
+
+# Claude commands (all .md files)
+for cmd in "$DOTFILES_DIR/claude/commands"/*.md; do
+  [ -f "$cmd" ] || continue
+  backup "$HOME/.claude/commands/$(basename "$cmd")"
+  symlink "$cmd" "$HOME/.claude/commands/$(basename "$cmd")"
+done
+
+# Claude hooks
 backup "$HOME/.claude/hooks/safe-bash.sh"
 symlink "$DOTFILES_DIR/claude/hooks/safe-bash.sh" "$HOME/.claude/hooks/safe-bash.sh"
 backup "$HOME/.claude/hooks/auto-approve-skills.sh"
