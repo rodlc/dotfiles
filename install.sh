@@ -31,6 +31,14 @@ echo "=====> Installing Homebrew packages"
 brew install --quiet pyenv rbenv nvm git pre-commit rbw bitwarden-cli 2>/dev/null || true
 brew install --cask --quiet zed 2>/dev/null || true
 
+# Install Bun if not present
+if ! command -v bun &> /dev/null; then
+  echo "=====> Installing Bun"
+  curl -fsSL https://bun.sh/install | bash
+else
+  echo "=====> Bun already installed"
+fi
+
 # Install oh-my-zsh if not present
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
   echo "=====> Installing oh-my-zsh"

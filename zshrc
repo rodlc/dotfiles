@@ -40,3 +40,6 @@ cd ~/Code
 
 # Load local env if exists (optional personal config)
 [[ -f "$HOME/.local/bin/env" ]] && . "$HOME/.local/bin/env"
+
+# bun completions
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"

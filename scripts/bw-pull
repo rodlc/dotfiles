@@ -143,4 +143,41 @@ else
 fi
 
 echo ""
+
+# === OAuth credentials sync ===
+echo "🔐 Restoring OAuth credentials..."
+
+# gcal
+GCAL_DIR="$HOME/.gcal-mcp"
+if gcal_oauth=$(rbw get "MCP OAuth Credentials" --field "gcal-oauth" 2>/dev/null) && [ -n "$gcal_oauth" ]; then
+  if [ ! -f "$GCAL_DIR/oauth.keys.json" ]; then
+    mkdir -p "$GCAL_DIR"
+    echo "$gcal_oauth" > "$GCAL_DIR/oauth.keys.json"
+    chmod 600 "$GCAL_DIR/oauth.keys.json"
+    echo "✅ gcal OAuth restored (run gcal MCP once to complete OAuth flow)"
+  else
+    echo "✅ gcal OAuth exists"
+  fi
+else
+  echo "⚠️  gcal OAuth not found in Bitwarden (optional)"
+fi
+
+# gmail (same oauth.keys.json for both accounts)
+for gmail_dir in "$HOME/.gmail-mcp-rodolphe" "$HOME/.gmail-mcp-rodlecoent"; do
+  if gmail_oauth=$(rbw get "MCP OAuth Credentials" --field "gmail-oauth" 2>/dev/null) && [ -n "$gmail_oauth" ]; then
+    if [ ! -f "$gmail_dir/gcp-oauth.keys.json" ]; then
+      mkdir -p "$gmail_dir"
+      echo "$gmail_oauth" > "$gmail_dir/gcp-oauth.keys.json"
+      chmod 600 "$gmail_dir/gcp-oauth.keys.json"
+      echo "✅ $(basename $gmail_dir) OAuth restored"
+    else
+      echo "✅ $(basename $gmail_dir) OAuth exists"
+    fi
+  else
+    echo "⚠️  gmail OAuth not found in Bitwarden (optional)"
+    break  # Only show warning once
+  fi
+done
+
+echo ""
 echo "✅ Sync complete"
