@@ -15,12 +15,12 @@ right_format = """$ruby$nodejs$python$bun$golang"""
 scan_timeout = 10
 
 [character]
-success_symbol = "[➜](#A3BE8C bold)"
-error_symbol = "[➜](#BF616A bold)"
+success_symbol = "[➜](bold green)"
+error_symbol = "[➜](bold red)"
 
 [username]
-style_user = "#88C0D0"
-style_root = "#BF616A bold"
+style_user = "cyan"
+style_root = "red bold"
 format = "[\\$$user]($style) "
 disabled = false
 show_always = true
@@ -28,19 +28,19 @@ show_always = true
 [hostname]
 ssh_only = true
 format = "[@$hostname]($style) "
-style = "#88C0D0 bold"
+style = "cyan bold"
 disabled = false
 
 [directory]
 truncation_length = 1
 truncate_to_repo = false
 format = "[$path]($style) "
-style = "#88C0D0"
+style = "cyan"
 
 [git_branch]
 symbol = ""
 format = "[\\($branch\\)]($style)"
-style = "#B48EAD bold"
+style = "purple bold"
 
 [git_status]
 disabled = true
@@ -48,35 +48,35 @@ disabled = true
 # Language versions (contextual)
 [ruby]
 format = "[\\[💎 $version\\]]($style) "
-style = "#BF616A"
+style = "red"
 detect_extensions = []
 detect_files = ["Gemfile", ".ruby-version"]
 detect_folders = []
 
 [nodejs]
 format = "[\\[📦 $version\\]]($style) "
-style = "#A3BE8C"
+style = "green"
 detect_extensions = []
 detect_files = ["package.json", ".nvmrc"]
 detect_folders = []
 
 [python]
 format = "[\\[🐍 $version\\]]($style) "
-style = "#EBCB8B"
+style = "yellow"
 detect_extensions = []
 detect_files = ["requirements.txt", "pyproject.toml", ".python-version"]
 detect_folders = []
 
 [bun]
 format = "[\\[🥟 $version\\]]($style) "
-style = "#D08770"
+style = "yellow"
 detect_extensions = []
 detect_files = ["bun.lockb", "bunfig.toml"]
 detect_folders = []
 
 [golang]
 format = "[\\[🐹 $version\\]]($style) "
-style = "#88C0D0"
+style = "cyan"
 detect_extensions = []
 detect_files = ["go.mod", "go.sum"]
 detect_folders = []
