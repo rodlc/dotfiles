@@ -39,7 +39,7 @@ style = "cyan"
 
 [git_branch]
 symbol = ""
-format = "[\\($branch\\)]($style)"
+format = "[\\($branch\\)]($style) "
 style = "purple bold"
 
 [git_status]
