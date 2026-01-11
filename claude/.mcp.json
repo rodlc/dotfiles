@@ -86,10 +86,9 @@
       "args": ["run", "${WORKSPACE_DIR}/mcp-servers/mcp-raycast-clipboard/src/index.ts"]
     },
     "filesystem": {
-      "command": "npx",
+      "command": "node",
       "args": [
-        "-y",
-        "@modelcontextprotocol/server-filesystem",
+        "${WORKSPACE_DIR}/mcp-servers/server-filesystem/node_modules/@modelcontextprotocol/server-filesystem/dist/index.js",
         "${HOME}/Code",
         "${HOME}/Documents",
         "${HOME}/Downloads",
