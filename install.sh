@@ -81,6 +81,16 @@ if [ -f "$RBW_CONFIG" ]; then
     fi
 fi
 
+# Ensure ~/.env exists (even if Bitwarden skipped)
+if [ ! -f "$HOME/.env" ]; then
+    echo "-----> Creating minimal ~/.env"
+    touch "$HOME/.env"
+    chmod 600 "$HOME/.env"
+    echo ""
+    echo "💡 To sync secrets later, run: bw-pull"
+    echo ""
+fi
+
 echo "=====> Creating symlinks"
 
 # Shell config
@@ -163,9 +173,10 @@ else
     echo "-----> Workspace already exists"
 fi
 
-# Add WORKSPACE_DIR to ~/.env if not present
-if [ -f "$HOME/.env" ] && ! grep -q "^export WORKSPACE_DIR=" "$HOME/.env"; then
+# Add WORKSPACE_DIR to ~/.env if not present (local, not from Bitwarden)
+if ! grep -q "^export WORKSPACE_DIR=" "$HOME/.env"; then
     echo "export WORKSPACE_DIR=\"$WORKSPACE_DIR\"" >> "$HOME/.env"
+    echo "-----> Added WORKSPACE_DIR to ~/.env"
 fi
 
 # Install MCP server repositories

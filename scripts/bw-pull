@@ -24,6 +24,14 @@ else
         echo "📝 Restoring ~/.env from Bitwarden..."
         echo "$bw_content" > "$ENV_FILE"
         chmod 600 "$ENV_FILE"
+
+        # Re-add local variables (not stored in Bitwarden)
+        if ! grep -q "^export WORKSPACE_DIR=" "$ENV_FILE"; then
+            WORKSPACE_DIR="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}"
+            echo "export WORKSPACE_DIR=\"$WORKSPACE_DIR\"" >> "$ENV_FILE"
+            echo "-----> Added WORKSPACE_DIR (local variable)"
+        fi
+
         echo "✅ ~/.env restored"
     else
         local_content=$(cat "$ENV_FILE")
@@ -37,6 +45,14 @@ else
                 [Oo]*)
                     cp "$ENV_FILE" "$ENV_FILE.backup.$(date +%Y%m%d)"
                     echo "$bw_content" > "$ENV_FILE"
+
+                    # Re-add local variables (not stored in Bitwarden)
+                    if ! grep -q "^export WORKSPACE_DIR=" "$ENV_FILE"; then
+                        WORKSPACE_DIR="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}"
+                        echo "export WORKSPACE_DIR=\"$WORKSPACE_DIR\"" >> "$ENV_FILE"
+                        echo "-----> Added WORKSPACE_DIR (local variable)"
+                    fi
+
                     echo "✅ Local updated (backup saved)"
                     ;;
                 [Dd]*)
