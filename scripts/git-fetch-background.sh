@@ -54,7 +54,7 @@ check_and_cache_repo() {
 
 # Check dotfiles and workspace
 check_and_cache_repo "$HOME/Code/rodlc/dotfiles" "Dotfiles" "df-push" "df-pull"
-check_and_cache_repo "$HOME/Code/rodlc/workspace" "Workspace" "workspace-push" "workspace-pull"
+check_and_cache_repo "$HOME/Code/rodlc/workspace" "Workspace" "ws-push" "ws-pull"
 
 # Wait for all background jobs
 wait

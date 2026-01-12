@@ -110,15 +110,14 @@ cd workspace
 
 **Daily workflow**:
 ```bash
-workspace-sync        # Full sync (memory + plans + git push/pull)
-workspace-status      # Check status
-workspace-push        # Push local → remote
-workspace-pull        # Pull remote → local
+ws-status      # Check status
+ws-push        # Push local → remote
+ws-pull        # Pull remote → local
 ```
 
 **Cross-machine sync**:
-1. **Machine A**: `workspace-sync` (auto-commits & pushes)
-2. **Machine B**: `workspace-pull` (pulls & imports)
+1. **Machine A**: `ws-push` (auto-commits & pushes)
+2. **Machine B**: `ws-pull` (pulls & imports)
 
 ## MCP Servers
 
@@ -194,9 +193,9 @@ mcp-sync diff  # Check MCP config drift
 
 **Secrets & workspace sync**:
 ```bash
-bw-pull            # Pull secrets from Bitwarden
-workspace-push     # Push workspace (memory + plans) to Git
-workspace-pull     # Pull workspace from Git
+bw-pull      # Pull secrets from Bitwarden
+ws-push      # Push workspace (memory + plans) to Git
+ws-pull      # Pull workspace from Git
 ```
 
 The global git hook will remind you if dotfiles have uncommitted changes when you commit in other repos.

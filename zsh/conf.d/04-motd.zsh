@@ -126,7 +126,7 @@ if [[ $ssh_status_code -eq 0 ]]; then
     ) &>/dev/null
 
     check_repo_status "$HOME/Code/rodlc/dotfiles" "Dotfiles" "df-push" "df-pull"
-    check_repo_status "$HOME/Code/rodlc/workspace" "Workspace" "workspace-push" "workspace-pull"
+    check_repo_status "$HOME/Code/rodlc/workspace" "Workspace" "ws-push" "ws-pull"
 fi
 
 # Bitwarden secrets sync check

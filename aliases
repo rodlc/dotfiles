@@ -102,9 +102,9 @@ alias bw-bootstrap='~/Code/rodlc/dotfiles/scripts/bw-bootstrap'
 # ============================================================================
 # Workspace (Memory + Plans + AI Context)
 # ============================================================================
-alias workspace-push='~/Code/rodlc/workspace/scripts/context-sync push'
-alias workspace-pull='~/Code/rodlc/workspace/scripts/context-sync pull'
-alias workspace-status='~/Code/rodlc/workspace/scripts/context-sync status'
+alias ws-push='~/Code/rodlc/workspace/scripts/context-sync push'
+alias ws-pull='~/Code/rodlc/workspace/scripts/context-sync pull'
+alias ws-status='~/Code/rodlc/workspace/scripts/context-sync status'
 
 alias memory-export='~/Code/rodlc/workspace/memory/sync-memory.sh export'
 alias memory-import='~/Code/rodlc/workspace/memory/sync-memory.sh import'

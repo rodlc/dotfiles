@@ -134,6 +134,16 @@ symlink "$DOTFILES_DIR/starship.toml" "$HOME/.config/starship.toml"
 backup "$HOME/.finicky.js"
 symlink "$DOTFILES_DIR/finicky.js" "$HOME/.finicky.js"
 
+# Terminal profile
+TERMINAL_PROFILE="$DOTFILES_DIR/terminal/Pro Nord.terminal"
+if [ -f "$TERMINAL_PROFILE" ]; then
+  echo "=====> Importing Terminal profile"
+  open "$TERMINAL_PROFILE"
+  sleep 1
+  defaults write com.apple.Terminal "Default Window Settings" -string "Pro Nord"
+  defaults write com.apple.Terminal "Startup Window Settings" -string "Pro Nord"
+fi
+
 # Claude Code
 mkdir -p "$HOME/.claude/commands" "$HOME/.claude/hooks" "$HOME/.claude/skills"
 backup "$HOME/.claude/CLAUDE.md"

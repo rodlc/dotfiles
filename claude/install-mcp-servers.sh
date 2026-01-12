@@ -128,6 +128,27 @@ build_mcp "mcp-raycast-clipboard" \
   "node_modules" \
   "bun"
 
+# Ensure pyenv Python 3.12.8 has SQLite extension support
+install_python_with_sqlite() {
+  local version="3.12.8"
+  local pyenv_python="$HOME/.pyenv/versions/$version/bin/python"
+
+  # Skip if already correctly compiled
+  if [ -f "$pyenv_python" ] && $pyenv_python -c "import sqlite3; sqlite3.connect(':memory:').enable_load_extension(True)" 2>/dev/null; then
+    return 0
+  fi
+
+  echo "-----> Installing Python $version with SQLite extension support..."
+
+  # Remove existing broken install if present
+  [ -d "$HOME/.pyenv/versions/$version" ] && pyenv uninstall -f "$version"
+
+  # Install with SQLite extensions enabled
+  PYTHON_CONFIGURE_OPTS="--enable-loadable-sqlite-extensions" pyenv install "$version"
+}
+
+command -v pyenv >/dev/null && install_python_with_sqlite
+
 # Memory MCP (Python virtualenv via pyenv)
 MEMORY_DIR="$MCP_DIR/mcp-memory-service"
 if [ -d "$MEMORY_DIR" ]; then
