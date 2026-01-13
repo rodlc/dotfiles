@@ -1,0 +1,29 @@
+#!/bin/bash
+# Fix Homebrew permissions for multi-user setup on same machine
+# Safe to run on single-user machines (no-op if already correct)
+
+set -e
+
+BREW_PREFIX="${HOMEBREW_PREFIX:-/opt/homebrew}"
+
+if [[ ! -d "$BREW_PREFIX" ]]; then
+    echo "Homebrew not installed at $BREW_PREFIX"
+    exit 0
+fi
+
+CURRENT_USER=$(whoami)
+BREW_OWNER=$(stat -f '%Su' "$BREW_PREFIX")
+
+if [[ "$BREW_OWNER" == "$CURRENT_USER" ]]; then
+    echo "✓ Homebrew already owned by $CURRENT_USER"
+    exit 0
+fi
+
+echo "Homebrew owned by $BREW_OWNER, current user is $CURRENT_USER"
+echo "Fixing permissions for multi-user access..."
+
+# Group-based access (recommended for multi-user)
+sudo chgrp -R admin "$BREW_PREFIX"
+sudo chmod -R g+w "$BREW_PREFIX"
+
+echo "✓ Homebrew permissions fixed (group admin)"

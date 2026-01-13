@@ -26,6 +26,11 @@ else
   echo "=====> Homebrew already installed"
 fi
 
+# Fix Homebrew permissions for multi-user setup
+if [[ -f "$DOTFILES_DIR/scripts/brew-fix-permissions" ]]; then
+    "$DOTFILES_DIR/scripts/brew-fix-permissions"
+fi
+
 # Install Homebrew packages
 echo "=====> Installing Homebrew packages"
 brew install --quiet pyenv rbenv nvm git pre-commit rbw bitwarden-cli 2>/dev/null || true
