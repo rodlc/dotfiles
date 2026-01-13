@@ -8,20 +8,21 @@ Save structured summaries to Notion Tasks using plan-first workflow.
 ## Workflow
 
 1. **List Recent Plans**: Find all plans modified < 5h in `~/.claude/plans/`
-2. **Process Each Plan** (< 5h modified):
-   - No marker → CREATE (current session)
-   - hook:ignored only → CREATE (archived override)
-   - notion:posted + plan newer → DELETE + CREATE
-   - notion:posted + plan same/older → SKIP
-3. **Fallback**: If no plans found → Generate retroactive plan for current session + CREATE task
-4. **Update Markers**: Append `<!-- notion:posted:{page_id}:mtime:{timestamp} -->` to each plan
+2. **Update Plan**: Finalize plan with session changes (Actions, Résultat, Learnings)
+3. **Local Export**: Save to `~/Downloads/{YYYYMMDD}-notion-{title-slug}.md`
+   - Extract title from `# Title` line in plan
+   - Slugify: lowercase, spaces→hyphens, remove special chars
+   - Example: `# /notion + /wrap Improvements` → `notion-wrap-improvements`
+   - Full formatted content ready for manual paste
+4. **Create Notion Shell**: Create task with properties only (NO content blocks)
+   - Title, Priority, Do date, Done, Area/Project
+5. **Update Marker**: Append `<!-- notion:posted:{page_id}:mtime:{timestamp} -->` to plan
+6. **Output**: Show paths to both local file and Notion task URL
 
 **Principles**:
-- Plan = source of truth (persisted locally before Notion)
-- Auto-update idempotent (mtime comparison)
-- Delete + Recreate strategy (3 APIs vs 12-32 for clearing children)
-- Multi-plans → Multi-tasks
-- Retry x3 with exponential backoff (2s, 4s) before fallback
+- Plan = source of truth (local file in Downloads)
+- Notion = metadata shell only (no content)
+- Manual copy-paste workflow (reliable, no API limits)
 
 ## Plan Detection
 
@@ -107,23 +108,13 @@ Bullet lists, definitions, minimal structure
 
 **Default to 🔧 if type unclear**
 
-## Markdown → Notion Conversion
+## Local File Format
 
-| Markdown | Notion Block | Notes |
-|----------|--------------|-------|
-| `# Title` | Ignored | Used for Task title only |
-| `## Section` | heading_2 | Main sections |
-| `### Subsection` | heading_3 | Subsections |
-| `- item` | bulleted_list_item | Unordered lists |
-| `1. item` | numbered_list_item | Ordered lists |
-| `\`\`\`code\`\`\`` | code | Truncate if > 500 chars |
-| `| table |` | Preserved | Notion markdown tables |
-| `---` | divider | Horizontal rules |
-
-**Limits**:
-- 2000 chars max per rich_text element
-- 100 blocks max per append_block_children call
-- If plan > 100 blocks, split by sections (rare)
+Export complete plan to `~/Downloads/{YYYYMMDD}-notion-{slug}.md`:
+- Use same formatting as plan file (markdown)
+- Keep full content (no truncation)
+- Include all sections: Contexte, Actions, Résultat, Learnings
+- Ready for manual copy-paste to Notion
 
 ## Marker System
 
@@ -135,27 +126,19 @@ Bullet lists, definitions, minimal structure
 
 | Situation | Action | API Calls |
 |-----------|--------|-----------|
-| No marker | Create task + append content | 2 |
-| Marker + plan modified | Delete old + create new | 3 |
+| No marker | Export local + create shell | 1 |
+| Marker + plan modified | Export local + update shell | 1 |
 | Marker + plan unchanged | Skip (idempotent) | 0 |
 
-**Why Delete+Recreate?**
-- Notion API has no bulk "delete children"
-- Clearing children = 1 retrieve + N deletes + 1 append = 12-32 APIs
-- Delete page + recreate = 1 delete + 1 create + 1 append = 3 APIs
-- **10x more economical** and conceptually cleaner
+**No content sync** - shell properties only (title, priority, date, done)
 
-## Retry Strategy
+## Error Handling
 
-**Exponential Backoff**:
-- Attempt 1 → fail → wait 2s
-- Attempt 2 → fail → wait 4s
-- Attempt 3 → fail → Fallback to Downloads
+**Single API call** (create/update task):
+- Success → Show Notion URL + local path
+- Failure → Warn but local file always saved
 
-**Applied to**:
-- Create task (mcp__notion__notion_create_database_item)
-- Append content (mcp__notion__notion_append_block_children)
-- Delete task (mcp__notion__notion_delete_page)
+**No retry needed** - no content sync = minimal API surface
 
 ## Style Guide
 
@@ -190,17 +173,16 @@ Bullet lists, definitions, minimal structure
 - Area not found → Leave empty, user links manually
 - Duplicate tasks → Search first before creating
 
-**Timeout Fallback**:
-If ANY Notion MCP call fails after 3 retries (timeout, 404, rate limit):
-1. Infer concise filename from plan title (e.g., `notion-refactor`)
-2. Create `~/Downloads/{YYYYMMDDHHmmss}-notion-{filename}.md`
-3. Use same formatting as would be posted to Notion
-4. Show user: "⚠️ Notion MCP failed after 3 retries - saved to ~/Downloads/{filename} for manual paste"
-5. Include full structured content ready to copy
+**Output Format**:
+```
+✅ Notion shell created: https://notion.so/...
+📋 Local content: ~/Downloads/{YYYYMMDD}-notion-{slug}.md
 
-**Error Types Triggering Fallback**:
-- Timeout (no response)
-- 404 (database not found)
-- 400 (invalid properties)
-- Rate limit (429)
-- Any non-2xx response
+Copy content from local file to Notion task.
+```
+
+**On Notion failure**:
+```
+⚠️ Notion task creation failed
+📋 Local content saved: ~/Downloads/{YYYYMMDD}-notion-{slug}.md
+```

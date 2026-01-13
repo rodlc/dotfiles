@@ -4,15 +4,15 @@ argument-hint: "[priority] [title]"
 ---
 
 Wrap up this session by:
-1. Extracting cross-session learnings to Memory
-2. Saving summary to Notion
+1. Saving summary to Notion + local file
+2. Extracting cross-session learnings to Memory
 3. Exiting cleanly
 
 ## Workflow
 
-1. Execute /memorize - extract and store learnings
-2. Execute /consolidate-memory daily - quick consolidation
-3. Execute /notion with arguments: `$ARGUMENTS`
+1. Execute /notion with arguments: `$ARGUMENTS`
+2. Execute /memorize - extract and store learnings
+3. Execute /consolidate-memory daily - quick consolidation
 4. Confirm all saves completed
 5. Display: "✅ Wrap-up complete. Type /exit or Ctrl+D to quit."
 
