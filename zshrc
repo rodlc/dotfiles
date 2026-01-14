@@ -1,11 +1,13 @@
 # Modular ZSH Configuration with Antidote
 # Modules: ~/.config/zsh/conf.d/
 
-# Disable insecure directory check BEFORE compinit
-ZSH_DISABLE_COMPFIX=true
-
-# Initialize completions (required before loading plugins)
-autoload -Uz compinit && compinit -i  # -i to ignore insecure directories
+# Initialize completions with daily cache optimization
+autoload -Uz compinit
+if [[ -n ${ZDOTDIR:-~}/.zcompdump(#qN.mh+24) ]]; then
+  compinit -i  # Rebuild cache once per day
+else
+  compinit -i -C  # Use existing cache
+fi
 
 # Antidote plugin manager
 source /opt/homebrew/opt/antidote/share/antidote/antidote.zsh
