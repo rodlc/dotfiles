@@ -24,7 +24,7 @@ When invoked without arguments (`/summarize`):
 ## Input Detection
 
 Automatically detect input type:
-- **PDF**: Use `pdftotext` (poppler) or Read tool for < 32MB files
+- **PDF**: Use PDF skill for extraction (preferred) or Read tool for < 32MB files
 - **SRT**: Extract text content, ignore timestamps
 - **MHTML**: Decode quoted-printable, extract substantive paragraphs
 - **TXT**: Direct read
@@ -107,7 +107,7 @@ For each unsummarized file:
 1. **Detect input type** from file extension
 
 2. **Extract content**:
-   - PDF: Check size → if > 32MB use `pdftotext`, else Read tool
+   - PDF: Use PDF skill for extraction (preferred) or Read tool for smaller files
    - SRT: Read + strip timestamps (lines matching `\d{2}:\d{2}:\d{2}`)
    - MHTML: Decode quoted-printable encoding, extract `<p>` tags > 50 chars
    - TXT: Direct read

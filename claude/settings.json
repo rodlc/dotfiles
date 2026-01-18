@@ -1,7 +1,6 @@
 {
   "env": {
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4-5-20251101",
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-4-5-20250929"
+    "CLAUDE_CODE_TMPDIR": "/var/folders/qw/4d71_ssj61s671zf9wqv_3f80000gn/T/claude"
   },
   "permissions": {
     "allow": [
@@ -33,7 +32,9 @@
       "mcp__gmail-rodlecoent__draft_email",
       "mcp__memory-service",
       "mcp__mcp-raycast-clipboard",
-      "mcp__filesystem"
+      "mcp__filesystem",
+      "Read(//**)",
+      "Read(~/**)"
     ],
     "deny": [
       "Bash(rm -rf|sudo|chmod 777:*)",
@@ -49,9 +50,26 @@
       "Write(**/.ssh/*)",
       "Write(**/credentials.yml.enc)",
       "Write(**/config/master.key)",
-      "Bash(git reset --hard|git push -f|git push --force|git clean -f|git branch -D:*)"
+      "Bash(git reset --hard|git push -f|git push --force|git clean -f|git branch -D:*)",
+      "Bash(rm -rf:*)",
+      "Bash(sudo:*)",
+      "Bash(chmod 777:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(git push -f:*)",
+      "Bash(git push --force:*)",
+      "Bash(git clean -f:*)",
+      "Bash(git branch -D:*)",
+      "Read(//.env)",
+      "Read(~/.env)",
+      "Read(~/.ssh/*)",
+      "Read(//**/.ssh/*)",
+      "Read(~/id_rsa*)",
+      "Write(//.env)",
+      "Write(~/.env)",
+      "Write(~/.ssh/*)",
+      "Write(//**/.ssh/*)"
     ],
-    "defaultMode": "acceptEdits"
+    "defaultMode": "plan"
   },
   "model": "opusplan",
   "hooks": {
@@ -91,6 +109,9 @@
   "statusLine": {
     "type": "command",
     "command": "~/.claude/statusline.sh"
+  },
+  "enabledPlugins": {
+    "document-skills@anthropic-agent-skills": true
   },
   "alwaysThinkingEnabled": true
 }
