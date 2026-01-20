@@ -18,6 +18,7 @@ shopt -u nullglob
 for dir in commands skills; do
   for f in "$HOME/.claude/$dir"/*.md "$HOME/.claude/$dir"/*/; do
     [ -e "$f" ] || continue
+    [ -f "$f" ] || continue  # Skip directories
     [ -L "$f" ] || echo "[WARN] Local file not in dotfiles: $f" >&2
   done
 done
