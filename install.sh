@@ -34,7 +34,26 @@ fi
 # Install Homebrew packages
 echo "=====> Installing Homebrew packages"
 brew install --quiet pyenv rbenv nvm git pre-commit rbw bitwarden-cli 2>/dev/null || true
-brew install --cask --quiet zed 2>/dev/null || true
+brew install --cask --quiet zed battery 2>/dev/null || true
+
+# Battery configuration (Apple Silicon only)
+if [[ $(uname -m) == "arm64" ]] && command -v battery &> /dev/null; then
+  echo "=====> Configuring Battery (charge limit)"
+  # Set 80% charge limit if not already configured
+  if [ ! -f "$HOME/.battery/maintain.percentage" ]; then
+    echo "-----> Opening Battery app for initial setup (enter admin password when prompted)"
+    open -a battery
+    sleep 3
+    echo "-----> Setting charge limit to 80%"
+    battery maintain 80 2>/dev/null || true
+  else
+    echo "-----> Battery already configured"
+  fi
+  echo ""
+  echo "💡 Run 'battery visudo' manually for sudo-free operation"
+  echo "💡 Disable 'Optimized Battery Charging' in System Settings > Battery"
+  echo ""
+fi
 
 # Install oh-my-zsh if not present
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
