@@ -7,7 +7,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/.bw-lib.sh"
 
-ensure_unlocked_bw
+ensure_rbw
 
 echo "📤 Syncing local → Bitwarden..."
 echo ""
@@ -16,19 +16,18 @@ echo ""
 if [[ ! -f "$ENV_FILE" ]]; then
     echo "⚠️  $ENV_FILE not found. Skipping env sync."
 else
-    if ! bw get item "$BW_ITEM_SECRETS" &>/dev/null; then
+    if ! rbw get "$BW_ITEM_SECRETS" &>/dev/null; then
         # Create new
         echo "📝 Creating '$BW_ITEM_SECRETS' in Bitwarden..."
-        bw get template item | jq \
-            --arg name "$BW_ITEM_SECRETS" \
-            --arg notes "$(cat "$ENV_FILE")" \
-            '.type = 2 | .name = $name | .secureNote = {"type": 0} | .notes = $notes' | \
-            bw encode | bw create item > /dev/null
-        echo "✅ '$BW_ITEM_SECRETS' created"
+        local_content=$(cat "$ENV_FILE")
+        if rbw_create_notes "$BW_ITEM_SECRETS" "$local_content"; then
+            echo "✅ '$BW_ITEM_SECRETS' created"
+        else
+            echo "❌ Failed to create '$BW_ITEM_SECRETS'"
+        fi
     else
         # Compare and update if different
-        item_id=$(bw get item "$BW_ITEM_SECRETS" | jq -r .id)
-        bw_content=$(bw get item "$item_id" | jq -r '.notes')
+        bw_content=$(rbw get --full "$BW_ITEM_SECRETS" 2>/dev/null | tail -n +2)
         local_content=$(cat "$ENV_FILE")
 
         if [[ "$bw_content" == "$local_content" ]]; then
@@ -39,11 +38,11 @@ else
             read -p "[O]verwrite Bitwarden / [S]kip / [D]iff ? " choice
             case "$choice" in
                 [Oo]*)
-                    bw sync > /dev/null
-                    item=$(bw get item "$item_id")
-                    updated=$(echo "$item" | jq --arg notes "$local_content" '.notes = $notes')
-                    echo "$updated" | bw encode | bw edit item "$item_id" > /dev/null
-                    echo "✅ Bitwarden updated"
+                    if rbw_edit_notes "$BW_ITEM_SECRETS" "$local_content"; then
+                        echo "✅ Bitwarden updated"
+                    else
+                        echo "❌ Failed to update Bitwarden"
+                    fi
                     ;;
                 [Dd]*)
                     diff -u <(echo "$bw_content") <(echo "$local_content") || true
@@ -51,11 +50,11 @@ else
                     read -p "[O]verwrite Bitwarden / [S]kip ? " choice2
                     case "$choice2" in
                         [Oo]*)
-                            bw sync > /dev/null
-                            item=$(bw get item "$item_id")
-                            updated=$(echo "$item" | jq --arg notes "$local_content" '.notes = $notes')
-                            echo "$updated" | bw encode | bw edit item "$item_id" > /dev/null
-                            echo "✅ Bitwarden updated"
+                            if rbw_edit_notes "$BW_ITEM_SECRETS" "$local_content"; then
+                                echo "✅ Bitwarden updated"
+                            else
+                                echo "❌ Failed to update Bitwarden"
+                            fi
                             ;;
                         *)
                             echo "⏭️  Skipped"
@@ -78,40 +77,19 @@ SSH_PUB="$HOME/.ssh/id_ed25519.pub"
 if [[ ! -f "$SSH_KEY" ]]; then
     echo "⚠️  $SSH_KEY not found. Skipping SSH sync."
 else
-    if ! bw get item "$BW_ITEM_SSH" &>/dev/null; then
-        # Create new SSH Key (type 4)
+    if ! rbw get "$BW_ITEM_SSH" &>/dev/null; then
+        # Create new SSH Key
         echo "🔑 Creating '$BW_ITEM_SSH' in Bitwarden..."
         private_key=$(cat "$SSH_KEY")
-        public_key=""
-        fingerprint=""
 
-        if [[ -f "$SSH_PUB" ]]; then
-            public_key=$(cat "$SSH_PUB")
-            fingerprint=$(ssh-keygen -lf "$SSH_KEY" 2>/dev/null | awk '{print $2}')
+        if rbw_create_notes "$BW_ITEM_SSH" "$private_key"; then
+            echo "✅ '$BW_ITEM_SSH' created"
+        else
+            echo "❌ Failed to create '$BW_ITEM_SSH'"
         fi
-
-        # Create as SecureNote (type 2) - store only private key
-        ssh_note="$private_key"
-
-        bw get template item | jq \
-            --arg name "$BW_ITEM_SSH" \
-            --arg notes "$ssh_note" \
-            '.type = 2 | .name = $name | .secureNote = {"type": 0} | .notes = $notes' | \
-            bw encode | bw create item > /dev/null
-        echo "✅ '$BW_ITEM_SSH' created"
     else
         # Compare and update if different
-        ssh_item_id=$(bw get item "$BW_ITEM_SSH" | jq -r .id)
-        ssh_item=$(bw get item "$ssh_item_id")
-        item_type=$(echo "$ssh_item" | jq -r .type)
-
-        # Handle both old (type 2, notes) and new (type 4, sshKey) formats
-        if [[ "$item_type" == "4" ]]; then
-            bw_key=$(echo "$ssh_item" | jq -r '.sshKey.privateKey // empty')
-        else
-            bw_key=$(echo "$ssh_item" | jq -r '.notes // empty')
-        fi
-
+        bw_key=$(rbw get --full "$BW_ITEM_SSH" 2>/dev/null | tail -n +2)
         local_key=$(cat "$SSH_KEY")
 
         if [[ "$bw_key" == "$local_key" ]]; then
@@ -133,19 +111,11 @@ else
             case "$choice" in
                 [Oo]*)
                     private_key=$(cat "$SSH_KEY")
-                    public_key=""
-                    fingerprint=""
-
-                    if [[ -f "$SSH_PUB" ]]; then
-                        public_key=$(cat "$SSH_PUB")
-                        fingerprint=$(ssh-keygen -lf "$SSH_KEY" 2>/dev/null | awk '{print $2}')
+                    if rbw_edit_notes "$BW_ITEM_SSH" "$private_key"; then
+                        echo "✅ Bitwarden updated"
+                    else
+                        echo "❌ Failed to update Bitwarden"
                     fi
-
-                    # Update SecureNote (type 2) - keep it simple
-                    bw sync > /dev/null
-                    ssh_updated=$(echo "$ssh_item" | jq --arg notes "$private_key" '.notes = $notes')
-                    echo "$ssh_updated" | bw encode | bw edit item "$ssh_item_id" > /dev/null
-                    echo "✅ Bitwarden updated"
                     ;;
                 *)
                     echo "⏭️  Skipped"
