@@ -36,6 +36,13 @@ export PYENV_ROOT="$HOME/.pyenv"
 export PYENV_VIRTUALENV_DISABLE_PROMPT=1
 type -a pyenv > /dev/null && eval "$(pyenv init -)" && eval "$(pyenv virtualenv-init - 2> /dev/null)"
 
+# Go (goenv)
+export GOENV_ROOT="$HOME/.goenv"
+[[ -d $GOENV_ROOT/bin ]] && export PATH="$GOENV_ROOT/bin:$PATH"
+type -a goenv > /dev/null && eval "$(goenv init -)"
+[[ -n $(goenv version 2>/dev/null) ]] && export PATH="$GOROOT/bin:$PATH"
+[[ -n $(goenv version 2>/dev/null) ]] && export PATH="$GOPATH/bin:$PATH"
+
 # Bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
