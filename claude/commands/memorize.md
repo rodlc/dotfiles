@@ -29,7 +29,8 @@ Extract metadata reusable across sessions, using tier-based storage.
 2. Apply value test (3 questions)
 3. Check duplicates via retrieve_memory
 4. store_memory directly with appropriate tags
+5. Auto-rate: `rate_memory(hash, rating=1, feedback="Curated learning")`
 
 ## Output
 
-✓ N memories stored (or "No relevant metadata")
+✓ N memories stored and rated +1 (or "No relevant metadata")

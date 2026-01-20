@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "notion": {
+    "notion-rodlecoent": {
       "command": "node",
       "args": [
         "${WORKSPACE_DIR}/mcp-servers/mcp-notion-server/build/index.js",
@@ -8,6 +8,17 @@
       ],
       "env": {
         "NOTION_API_TOKEN": "${NOTION_API_TOKEN}",
+        "NOTION_MARKDOWN_CONVERSION": "true"
+      }
+    },
+    "notion-alfec": {
+      "command": "node",
+      "args": [
+        "${WORKSPACE_DIR}/mcp-servers/mcp-notion-server/build/index.js",
+        "--enabledTools=notion_retrieve_page,notion_query_database,notion_append_block_children,notion_update_page_properties,notion_create_database_item,notion_search"
+      ],
+      "env": {
+        "NOTION_API_TOKEN": "${NOTION_ALFEC_TOKEN}",
         "NOTION_MARKDOWN_CONVERSION": "true"
       }
     },

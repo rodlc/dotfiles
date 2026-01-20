@@ -4,12 +4,12 @@ description: Quick memory store with auto-classification
 
 Store memory with automatic type/tag inference.
 
-## Auto-classification
+## Auto-classification + Rating
 
 **By content pattern:**
-- Workflow/command → `procedural` + `critical` (365d)
-- Convention/API → `semantic` + `reference` (180d)
-- Decision/context → `episodic` + `standard` (90d)
+- Workflow/command → `procedural` + `critical` (365d) + **rate=1**
+- Convention/API → `semantic` + `reference` (180d) + **rate=1**
+- Decision/context → `episodic` + `standard` (90d) + *(no rating)*
 
 ## Usage
 
@@ -35,3 +35,4 @@ Type optional, auto-inferred if omitted.
 ## Output
 
 ✓ Stored as [type] with tags [tags]
+✓ Quality: rated +1 (curated)  ← for critical/reference only
