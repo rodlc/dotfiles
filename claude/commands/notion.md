@@ -90,6 +90,22 @@ When generating a retroactive plan (no existing plan found):
 - ✅ "🔬 Obat / PlayPlay / Alan"
 - ❌ "Setup optimisé Claude Code - Terminal + Workflow /notion"
 
+## Title Generation
+
+**Règle** : Le titre Notion dérive du slug du fichier staging.
+
+**Process** :
+1. Générer slug depuis `# Title` du plan : lowercase, `-` pour espaces
+2. Humaniser pour titre Notion : capitaliser, séparer en 2 parties
+3. Format : `{emoji} {Thème} | {Détail}`
+
+**Exemples** :
+| Slug | Titre Notion |
+|------|--------------|
+| `mcp-memory-quality` | 🔧 MCP Memory \| Quality |
+| `tiny-house-chassis-analysis` | 🔬 Tiny House \| Chassis |
+| `vinci-email-correction` | 🔧 Vinci \| Email correction |
+
 ## Content Templates
 
 **Detect type, adapt structure. Number sections with 1️⃣ 2️⃣ 3️⃣**
@@ -153,6 +169,41 @@ Export complete plan to `~/Downloads/{YYYYMMDD}-notion-{slug}.md`:
 **Closing**: Research/Analysis = quote/summary | Technical = next actions
 
 **Concise**: Actionable info only, code refs as file:line
+
+## Mode Audit
+
+**Trigger** : `/notion audit` ou `/notion audit {date}`
+
+**Workflow** :
+1. Query Notion Tasks avec Do date = {date} (défaut: aujourd'hui)
+2. Lister fichiers Downloads `{YYYYMMDD}-notion-*.md`
+3. Comparer et proposer factorisation :
+   - Identifier thèmes communs (préfixe slug)
+   - Proposer regroupements (ex: 3 notes MCP → 1 tâche "MCP | Session {date}")
+   - Afficher mapping avant/après
+4. Sur confirmation :
+   - Renommer tâches Notion selon mapping
+   - Optionnel: fusionner fichiers Downloads similaires
+
+**Output** :
+```
+📊 Audit {YYYY-MM-DD}
+━━━━━━━━━━━━━━━━━━━━
+
+Notion Tasks (Do date = {date}): 4
+Downloads files ({date}): 9
+
+📦 Regroupements proposés:
+┌─────────────────────────────────┬────────────────────────────┐
+│ Thème                           │ Tâches/Notes               │
+├─────────────────────────────────┼────────────────────────────┤
+│ 🔧 Infra Claude/MCP             │ 6 notes → 1 tâche          │
+│ 🔬 Tiny House                   │ 1 note (conserver)         │
+│ 🔧 Admin                        │ 2 notes → 1 tâche          │
+└─────────────────────────────────┴────────────────────────────┘
+
+Appliquer ? (confirmer pour renommer)
+```
 
 ## Technical Notes
 

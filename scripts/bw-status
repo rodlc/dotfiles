@@ -28,8 +28,8 @@ else
     echo "❌ '$BW_ITEM_SECRETS' not found. Run: bw-bootstrap"
 fi
 
-if rbw get "$BW_ITEM_GPG" &>/dev/null; then
-    echo "✅ '$BW_ITEM_GPG' exists in Bitwarden"
+if rbw get "$BW_ITEM_SSH" &>/dev/null; then
+    echo "✅ '$BW_ITEM_SSH' exists in Bitwarden"
 else
-    echo "❌ '$BW_ITEM_GPG' not found. Run: bw-bootstrap"
+    echo "❌ '$BW_ITEM_SSH' not found. Run: bw-bootstrap"
 fi
