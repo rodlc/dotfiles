@@ -44,7 +44,7 @@ rbw_edit_notes() {
     EDITOR="cp $tmp" rbw edit "$item_name" 2>/dev/null
     local result=$?
     rm -f "$tmp"
-    rbw sync -q
+    rbw sync >/dev/null 2>&1
     return $result
 }
 
@@ -60,7 +60,7 @@ rbw_create_notes() {
     EDITOR="cp $tmp" rbw add "$item_name" 2>/dev/null
     local result=$?
     rm -f "$tmp"
-    rbw sync -q
+    rbw sync >/dev/null 2>&1
     return $result
 }
 

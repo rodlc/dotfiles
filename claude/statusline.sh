@@ -1,5 +1,5 @@
 #!/bin/bash
-COST_LIMIT=36.00  # Limite Claude de base (sans promo)
+COST_LIMIT=35.00  # Max 5x estimé
 
 input=$(cat)
 dir=$(echo "$input" | jq -r '.workspace.current_dir' | xargs basename)
@@ -90,9 +90,31 @@ echo "$sessions_json" | jq --argjson reset "$last_reset" '{sessions: ., last_res
 # Calculer %
 quota=$(echo "scale=0; $total_cost * 100 / $COST_LIMIT" | bc 2>/dev/null || echo 0)
 
+# Temps écoulé dans la fenêtre (secondes)
+elapsed=$((now - last_reset))
+
+# Burn rate ($/h) et temps restant
+if [ "$elapsed" -gt 300 ] && [ "$(echo "$total_cost > 0.01" | bc)" -eq 1 ]; then
+  burn_rate=$(echo "scale=4; $total_cost * 3600 / $elapsed" | bc)
+  remaining=$(echo "scale=2; $COST_LIMIT - $total_cost" | bc)
+  hours_left=$(echo "scale=2; $remaining / $burn_rate" | bc 2>/dev/null || echo "0")
+  # Formater en XhYYm avec awk (gère .85 et 9.85)
+  time_left=$(echo "$hours_left" | awk '{
+    h = int($1)
+    m = int(($1 - h) * 60)
+    printf "%dh%dm", h, m
+  }')
+else
+  time_left="--"
+fi
+
+# Formater le coût en dollars
+cost_display=$(printf "%.2f" "$total_cost")
+
 # Calculer prochaine reset (last_reset + 5h)
 next_reset=$((last_reset + 18000))
 reset_time=$(date -r "$next_reset" +%H:%M 2>/dev/null || echo "??:??")
 
-printf "📁 %s  🌿 %s  🤖 %s  🧠 %d%%  📊 Max5 ~%d%% 🔄 %s" \
-  "$dir" "$branch" "$model" "$ctx" "$quota" "$reset_time"
+printf "📁 %s 🌿 %s 🤖 %s 🧠 %d%% 💰 \$%s (%d%%) 🔥 %s 🔄 %s" \
+  "$dir" "$branch" "$model" "$ctx" \
+  "$cost_display" "$quota" "$time_left" "$reset_time"

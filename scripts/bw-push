@@ -27,7 +27,7 @@ else
         fi
     else
         # Compare and update if different
-        bw_content=$(rbw get --full "$BW_ITEM_SECRETS" 2>/dev/null | tail -n +2)
+        bw_content=$(rbw get "$BW_ITEM_SECRETS" 2>/dev/null)
         local_content=$(cat "$ENV_FILE")
 
         if [[ "$bw_content" == "$local_content" ]]; then
@@ -89,7 +89,7 @@ else
         fi
     else
         # Compare and update if different
-        bw_key=$(rbw get --full "$BW_ITEM_SSH" 2>/dev/null | tail -n +2)
+        bw_key=$(rbw get "$BW_ITEM_SSH" 2>/dev/null)
         local_key=$(cat "$SSH_KEY")
 
         if [[ "$bw_key" == "$local_key" ]]; then
