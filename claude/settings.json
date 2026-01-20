@@ -148,5 +148,5 @@
   "enabledPlugins": {
     "document-skills@anthropic-agent-skills": true
   },
-  "alwaysThinkingEnabled": true
+  "alwaysThinkingEnabled": false
 }
