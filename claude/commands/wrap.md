@@ -12,7 +12,7 @@ Wrap up this session by:
 
 1. Execute /notion with arguments: `$ARGUMENTS`
 2. Execute /memorize - extract and store learnings (auto-rated +1)
-3. Execute /consolidate-memory daily - quick consolidation
+3. Execute cleanup_duplicates() - remove exact duplicates
 4. Quick quality snapshot:
    - `analyze_quality_distribution` (top 3 / bottom 3)
    - If bottom 3 contains memories from session → warning

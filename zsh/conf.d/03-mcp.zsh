@@ -4,9 +4,11 @@ export MCP_TIMEOUT=30000
 # MCP Memory - Dream consolidation
 export MCP_CONSOLIDATION_ENABLED=true
 
-# Quality scoring with implicit signals (access_count, recency, ranking)
-export MCP_QUALITY_BOOST_ENABLED=true
-export MCP_QUALITY_BOOST_WEIGHT=0.3  # 30% implicit signals, 70% semantic
+# Quality scoring optimized for technical content
+# Disable AI scoring (DeBERTa/MS-MARCO have prose bias, undervalue technical content)
+export MCP_QUALITY_AI_PROVIDER=none
+export MCP_QUALITY_SYSTEM_ENABLED=true
+export MCP_QUALITY_BOOST_ENABLED=false  # Rely on implicit signals only (access, recency, ranking)
 
 # Association-based quality boost
 export MCP_CONSOLIDATION_QUALITY_BOOST_ENABLED=true
@@ -24,8 +26,9 @@ export MCP_CONSOLIDATION_SCHEDULE_QUARTERLY="disabled"
 export MCP_CONSOLIDATION_SCHEDULE_YEARLY="disabled"
 
 # Enabled phases per horizon
-export MCP_CONSOLIDATION_ENABLED_PHASES_ASSOCIATIONS="weekly,monthly"
-export MCP_CONSOLIDATION_ENABLED_PHASES_COMPRESSION="weekly,monthly"
+# DISABLED: Associations/Compression create additive noise (771 associations + 26 clusters cleaned 2025-01)
+export MCP_CONSOLIDATION_ENABLED_PHASES_ASSOCIATIONS="disabled"
+export MCP_CONSOLIDATION_ENABLED_PHASES_COMPRESSION="disabled"
 export MCP_CONSOLIDATION_ENABLED_PHASES_CLUSTERING="disabled"
 export MCP_CONSOLIDATION_ENABLED_PHASES_FORGETTING="disabled"
 
