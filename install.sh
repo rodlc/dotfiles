@@ -45,7 +45,7 @@ if [[ $(uname -m) == "arm64" ]] && command -v battery &> /dev/null; then
     open -a battery
     sleep 3
     echo "-----> Setting charge limit to 80%"
-    battery maintain 80 2>/dev/null || true
+    battery maintain 15-85 2>/dev/null || true
   else
     echo "-----> Battery already configured"
   fi
