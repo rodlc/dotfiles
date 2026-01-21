@@ -55,8 +55,8 @@ install() {
   # Backup current config
   backup
 
-  # Merge mcpServers into ~/.claude.json
-  jq -s '.[0] * {mcpServers: .[1].mcpServers}' \
+  # Replace mcpServers in ~/.claude.json
+  jq -s '(.[0] | del(.mcpServers)) * {mcpServers: .[1].mcpServers}' \
     "$CLAUDE_JSON" \
     <(echo "$expanded") \
     > "$CLAUDE_JSON.tmp"

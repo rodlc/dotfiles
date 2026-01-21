@@ -28,13 +28,6 @@
       "env": {},
       "disabled": true
     },
-    "github": {
-      "type": "http",
-      "url": "https://api.githubcopilot.com/mcp",
-      "headers": {
-        "Authorization": "Bearer ${GITHUB_TOKEN}"
-      }
-    },
     "gmail-rodlecoent": {
       "command": "node",
       "args": ["${WORKSPACE_DIR}/mcp-servers/Gmail-MCP-Server/dist/index.js"],
@@ -67,7 +60,11 @@
     },
     "memory-service": {
       "command": "${WORKSPACE_DIR}/mcp-servers/mcp-memory-service/.venv/bin/python",
-      "args": ["-m", "mcp_memory_service.server_impl"],
+      "args": [
+        "-m",
+        "mcp_memory_service.server_impl",
+        "--enabledTools=store_memory,retrieve_memory,recall_memory,search_by_tag,delete_memory,update_memory_metadata,consolidate_memories,consolidation_status,consolidation_recommendations,trigger_consolidation,cleanup_duplicates,check_database_health"
+      ],
       "env": {
         "MCP_MEMORY_CHROMA_PATH": "${HOME}/.claude/memory-chroma",
         "MCP_MEMORY_BACKUPS_PATH": "${HOME}/.claude/memory-backups",
@@ -92,19 +89,6 @@
     "mcp-raycast-clipboard": {
       "command": "bun",
       "args": ["run", "${WORKSPACE_DIR}/mcp-servers/mcp-raycast-clipboard/src/index.ts"]
-    },
-    "filesystem": {
-      "command": "node",
-      "args": [
-        "${WORKSPACE_DIR}/mcp-servers/server-filesystem/node_modules/@modelcontextprotocol/server-filesystem/dist/index.js",
-        "${HOME}/Code",
-        "${HOME}/Documents",
-        "${HOME}/Downloads",
-        "${HOME}/Desktop",
-        "${HOME}/.claude",
-        "/tmp",
-        "/private/tmp"
-      ]
     }
   }
 }
