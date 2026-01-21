@@ -27,7 +27,7 @@ check_ssh_status() {
         echo "🔑 SSH key missing. Run: bw-pull"
         return 2
     else
-        echo "🔑 SSH key not loaded. Run: ssh-add"
+        echo "🔑 SSH key not loaded. Run: bw-pull"
         return 1
     fi
 }
@@ -135,3 +135,18 @@ if [[ -f "$HOME/.env" && -f "$HOME/.env.bw-synced" ]]; then
         echo "⚠️  Secrets modified locally. Run: bw-push"
     fi
 fi
+
+# Dotfiles symlink health check
+check_dotfiles_symlinks() {
+    local expected="$HOME/Code/rodlc/dotfiles"
+    for link in ~/.claude/settings.json ~/.claude/CLAUDE.md ~/.claude/statusline.sh ~/.claude/hooks/*.sh; do
+        [[ ! -L "$link" ]] && continue
+        local target=$(readlink "$link")
+        # Broken or points to wrong user
+        if [[ ! -e "$link" ]] || [[ "$target" != "$expected"* ]]; then
+            echo "🌊 Drifting symlinks. Run: df-install"
+            return
+        fi
+    done
+}
+check_dotfiles_symlinks
