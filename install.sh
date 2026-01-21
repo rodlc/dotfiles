@@ -193,7 +193,7 @@ fi
 backup "$HOME/.claude/statusline.sh"
 symlink "$DOTFILES_DIR/claude/statusline.sh" "$HOME/.claude/statusline.sh"
 backup "$HOME/.claude/settings.json"
-cp "$DOTFILES_DIR/claude/settings.json" "$HOME/.claude/settings.json" 2>/dev/null && echo "-----> Copied settings.json" || true
+symlink "$DOTFILES_DIR/claude/settings.json" "$HOME/.claude/settings.json"
 
 # Install pre-commit hooks (Gitleaks)
 if [ -f "$DOTFILES_DIR/.pre-commit-config.yaml" ]; then
