@@ -5,6 +5,13 @@ command=$(echo "$input" | jq -r '.tool_input.command // empty')
 # Debug: log pour troubleshooting
 echo "DEBUG: command='$command'" >> /tmp/claude-hook-debug.log
 
+# SUDO: Prompt user to run manually
+if [[ $command =~ ^sudo[[:space:]] ]]; then
+  echo "DEBUG: SUDO - prompt user to run manually" >> /tmp/claude-hook-debug.log
+  echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Run manually:\n\n    '"$command"'"}}'
+  exit 0
+fi
+
 # DENY: Git destructif (vérifier AVANT les allows)
 # Patterns stricts : flags doivent être des arguments séparés (pas dans noms de branches)
 # Format: (FLAG_DIRECT|.*[[:space:]]FLAG)([[:space:]]|$) = flag juste après subcommand OU après espace, suivi d'espace ou fin
