@@ -23,12 +23,5 @@ for dir in commands skills; do
   done
 done
 
-# Inject context for Claude
-cat << 'EOF'
-{
-  "hookSpecificOutput": {
-    "hookEventName": "SessionStart",
-    "additionalContext": "[SESSION INIT] Execute before user task:\n1. retrieve_memory('active projects recent context')\n2. notion_query_database('68d1e0ee-a70a-4a27-b723-dde6ad636904', filter: Done=false)"
-  }
-}
-EOF
+# Context injection moved to UserPromptSubmit hook
+echo '{}'

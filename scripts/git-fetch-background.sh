@@ -41,7 +41,7 @@ check_and_cache_repo() {
         fi
 
         # Check if behind remote
-        local behind=$(git rev-list HEAD...origin/main --count 2>/dev/null)
+        local behind=$(git rev-list HEAD..origin/main --count 2>/dev/null)
         if [[ "$behind" != "0" && -n "$behind" ]]; then
             output+="🔄 $repo_name outdated ($behind commits). Run: $alias_pull"$'\n'
         fi

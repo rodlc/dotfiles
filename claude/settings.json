@@ -168,6 +168,17 @@
           }
         ]
       }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/user-prompt-context.sh",
+            "timeout": 5
+          }
+        ]
+      }
     ]
   },
   "statusLine": {

@@ -6,19 +6,19 @@ Host *
 Host github.com-rodlc
   HostName github.com
   User git
-  IdentityFile ~/.ssh/id_ed25519
+  IdentityFile ~/.ssh/id_ed25519_rodlc
   IdentitiesOnly yes
 
 # Work (rodlcmagic)
 Host github.com-rodlcmagic
   HostName github.com
   User git
-  IdentityFile ~/.ssh/id_ed25519_work
+  IdentityFile ~/.ssh/id_ed25519_rodlcmagic
   IdentitiesOnly yes
 
 # Default fallback (personal)
 Host github.com
   HostName github.com
   User git
-  IdentityFile ~/.ssh/id_ed25519
+  IdentityFile ~/.ssh/id_ed25519_rodlc
   IdentitiesOnly yes
