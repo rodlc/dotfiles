@@ -45,5 +45,8 @@ store_memory(content="[TYPE] Subject", metadata={"tags": "reference", "type": "s
 
 ❌ Content already in git | ❌ Session temp data | ❌ Verbatim conversations
 
+## Tools
+- YouTube transcripts: `youtube_transcript_api VIDEO_ID --format text --languages fr en`
+
 ## Commands
 /notion [priority] [title] → Save to Notion Tasks
