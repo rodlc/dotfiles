@@ -205,6 +205,13 @@ symlink "$DOTFILES_DIR/claude/statusline.sh" "$HOME/.claude/statusline.sh"
 backup "$HOME/.claude/settings.json"
 symlink "$DOTFILES_DIR/claude/settings.json" "$HOME/.claude/settings.json"
 
+# Install MCP servers config
+if [ -x "$DOTFILES_DIR/claude/mcp-sync.sh" ]; then
+  "$DOTFILES_DIR/claude/mcp-sync.sh" install
+else
+  echo "Warning: mcp-sync.sh not found or not executable"
+fi
+
 # Install pre-commit hooks (Gitleaks)
 if [ -f "$DOTFILES_DIR/.pre-commit-config.yaml" ]; then
   echo "=====> Installing pre-commit hooks"

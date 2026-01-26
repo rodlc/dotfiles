@@ -23,27 +23,13 @@ Git: Team → branch/story | Personal → master direct
 Before PR: pull main → verify → check assets/migrations
 Rails TDD: test → route → controller → model → view
 
-## Memory Storage
+## Memory
+Store cross-session learnings. Tags: `critical` (365d), `reference` (180d), `standard` (90d).
+See `~/.claude/agent_docs/memory-patterns.md` for format details.
 
-Store cross-session learnings immediately. Native consolidation handles cleanup.
-
-### Types and retention
-
-| Type | Tag | Retention | Examples |
-|------|-----|-----------|----------|
-| **semantic** | reference | 180d | ☑️ Convention, API pattern, market data |
-| **episodic** | standard | 90d | ☑️ Decision with context, trade-off, bug fix |
-| **procedural** | critical | 365d | ☑️ Workflow, hook, shell command |
-
-### Format
-
-```python
-store_memory(content="[TYPE] Subject", metadata={"tags": "reference", "type": "semantic"})
-```
-
-### DO NOT store
-
-❌ Content already in git | ❌ Session temp data | ❌ Verbatim conversations
+## Config
+Source: `~/Code/rodlc/dotfiles/claude/` → `~/.claude/`
+Patterns: See `~/.claude/agent_docs/` for formatting, memory details
 
 ## Tools
 - YouTube transcripts: `youtube_transcript_api VIDEO_ID --format text --languages fr en`

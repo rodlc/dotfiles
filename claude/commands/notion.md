@@ -124,13 +124,19 @@ Bullet lists, definitions, minimal structure
 
 **Default to 🔧 if type unclear**
 
-## Local File Format
+## Content Strategy
 
-Export complete plan to `~/Downloads/{YYYYMMDD}-notion-{slug}.md`:
-- Use same formatting as plan file (markdown)
-- Keep full content (no truncation)
-- Include all sections: Contexte, Actions, Résultat, Learnings
-- Ready for manual copy-paste to Notion
+**Principe** : Le plan session (`~/.claude/plans/*.md`) EST le contenu Notion.
+
+**Options** (par ordre de préférence) :
+1. **Bloc code Notion** : Coller le plan en bloc code "Plain text" directement dans la tâche
+   - ✅ Box-drawing s'affiche bien en monospace
+   - ✅ Pas de fichier intermédiaire
+   - ✅ Single source of truth
+2. **Copie Downloads** : `cp ~/.claude/plans/{plan}.md ~/Downloads/{YYYYMMDD}-notion-{slug}.md`
+   - Fallback si Notion API indispo
+
+**Ne PAS reformater** le plan - le format box-drawing est le format final.
 
 ## Marker System
 

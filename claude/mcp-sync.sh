@@ -5,6 +5,7 @@ set -e
 
 DOTFILES_MCP="$HOME/Code/rodlc/dotfiles/claude/.mcp.json"
 CLAUDE_JSON="$HOME/.claude.json"
+MCP_JSON="$HOME/.claude/mcp.json"
 BACKUP_DIR="$HOME/.claude/backups"
 
 usage() {
@@ -12,8 +13,8 @@ usage() {
 Usage: $(basename "$0") <command>
 
 Commands:
-  install    Expand variables and merge mcpServers into ~/.claude.json
-  export     Extract mcpServers from ~/.claude.json to dotfiles (replace paths with vars)
+  install    Expand variables and write to ~/.claude/mcp.json
+  export     Extract mcpServers from ~/.claude/mcp.json to dotfiles (replace paths with vars)
   diff       Compare dotfiles template vs active config
 
 Examples:
@@ -24,15 +25,17 @@ EOF
   exit 1
 }
 
-# Backup ~/.claude.json
+# Backup ~/.claude/mcp.json
 backup() {
   mkdir -p "$BACKUP_DIR"
-  local timestamp=$(date +%Y%m%d-%H%M%S)
-  /bin/cp -f "$CLAUDE_JSON" "$BACKUP_DIR/claude.json.bak-$timestamp"
-  echo "✓ Backup: $BACKUP_DIR/claude.json.bak-$timestamp"
+  if [ -f "$MCP_JSON" ]; then
+    local timestamp=$(date +%Y%m%d-%H%M%S)
+    /bin/cp -f "$MCP_JSON" "$BACKUP_DIR/mcp.json.bak-$timestamp"
+    echo "✓ Backup: $BACKUP_DIR/mcp.json.bak-$timestamp"
+  fi
 }
 
-# Install: expand variables and merge into ~/.claude.json
+# Install: expand variables and write to ~/.claude/mcp.json
 install() {
   echo "=====> Installing MCPs from dotfiles"
 
@@ -55,14 +58,13 @@ install() {
   # Backup current config
   backup
 
-  # Replace mcpServers in ~/.claude.json
-  jq -s '(.[0] | del(.mcpServers)) * {mcpServers: .[1].mcpServers}' \
-    "$CLAUDE_JSON" \
-    <(echo "$expanded") \
-    > "$CLAUDE_JSON.tmp"
+  # Ensure ~/.claude directory exists
+  mkdir -p "$(dirname "$MCP_JSON")"
 
-  mv "$CLAUDE_JSON.tmp" "$CLAUDE_JSON"
-  echo "✓ MCPs installed from dotfiles"
+  # Write expanded config directly to ~/.claude/mcp.json
+  echo "$expanded" | jq '.' > "$MCP_JSON"
+
+  echo "✓ MCPs installed to $MCP_JSON"
   echo "⚠  Restart Claude Code to apply changes"
 }
 
@@ -70,8 +72,13 @@ install() {
 export_config() {
   echo "=====> Exporting MCPs to dotfiles"
 
-  # Extract mcpServers
-  local mcp_config=$(jq '{mcpServers: .mcpServers}' "$CLAUDE_JSON")
+  # Read from ~/.claude/mcp.json
+  if [ ! -f "$MCP_JSON" ]; then
+    echo "Error: $MCP_JSON not found"
+    exit 1
+  fi
+
+  local mcp_config=$(jq '.' "$MCP_JSON")
 
   # Replace paths with variables
   mcp_config=$(echo "$mcp_config" | sed \
@@ -100,7 +107,13 @@ diff_config() {
   fi
 
   local expanded=$(envsubst < "$DOTFILES_MCP")
-  local active=$(jq '{mcpServers: .mcpServers}' "$CLAUDE_JSON")
+
+  if [ ! -f "$MCP_JSON" ]; then
+    echo "Error: $MCP_JSON not found"
+    exit 1
+  fi
+
+  local active=$(jq '.' "$MCP_JSON")
 
   # Pretty print and diff
   diff \

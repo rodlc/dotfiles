@@ -19,7 +19,11 @@ export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
 export PATH="./bin:./node_modules/.bin:${PATH}:/usr/local/sbin"
 
 # Secrets (Bitwarden → ~/.env). Sync: bw-pull. Never commit ~/.env
-[[ -f "$HOME/.env" ]] && source "$HOME/.env"
+if [[ -f "$HOME/.env" ]]; then
+  set -a
+  source "$HOME/.env"
+  set +a
+fi
 
 # Disable Homebrew analytics
 export HOMEBREW_NO_ANALYTICS=1
