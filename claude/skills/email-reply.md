@@ -34,7 +34,7 @@ Génère un brouillon de réponse email personnalisé en respectant le style d'�
    - Si >3 jours → mentionner délai/fêtes/excuse légère
 
 4. **Analyse du style et ton appropriés**
-   - Consulter ~/.claude/email-style.md pour la structure
+   - Query mémoire: `mcp__memory-service__retrieve_memory` avec query "email style"
    - Catégories:
      - **Pro External** (rodolphe.lecoent): clients, recruteurs, consulting
      - **Pro Internal** (rodolphe.lecoent): collègues, partenariats
@@ -51,7 +51,7 @@ Génère un brouillon de réponse email personnalisé en respectant le style d'�
    - Rédiger une réponse **personnalisée** basée sur le contexte réel
    - Mentionner dates/événements/personnes spécifiques du thread
    - Respecter les règles universelles (pas de phrases vides, questions directes)
-   - Signature: *Full Name*\n+33 6 45 45 80 70
+   - Signature: Query mémoire avec tags "identity,contact" pour obtenir phone
 
 6. **Création du draft**
    - Utiliser draft_email avec threadId + to + cc
@@ -60,7 +60,7 @@ Génère un brouillon de réponse email personnalisé en respectant le style d'�
 ## Workflow
 
 ```
-User input → Read email → Analyze context → Select style category → Draft reply → Create Gmail draft
+User input → Read email → Query memory (style) → Analyze context → Select category → Draft reply → Create Gmail draft
 ```
 
 ## Exemples de détection de catégorie
@@ -78,4 +78,4 @@ User input → Read email → Analyze context → Select style category → Draf
 - **Délais de réponse:** Adapter le ton si réponse tardive
 - **Recherche large:** Si messageId manquant, chercher avec critères larges (ex: "company OR subject after:YYYY/MM/DD")
 
-Le skill consulte automatiquement ~/.claude/email-style.md pour le style, mais le contexte prime sur le template.
+Le skill query automatiquement la mémoire MCP pour le style, mais le contexte prime sur le template.
