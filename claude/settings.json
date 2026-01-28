@@ -1,5 +1,9 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
   "permissions": {
     "allow": [
       "Read(**)",
@@ -20,9 +24,12 @@
       "mcp__notion-alfec__*",
       "mcp__gmail__*",
       "mcp__gcal__*",
-      "mcp__mcp-raycast-clipboard__*"
+      "mcp__mcp-raycast-clipboard__*",
+      "mcp__playwright__*"
     ],
     "deny": [
+      "mcp__playwright__browser_evaluate",
+      "mcp__playwright__browser_run_code",
       "Bash(rm -rf:*)",
       "Bash(chmod 777:*)",
       "Bash(git reset --hard:*)",
@@ -108,30 +115,12 @@
           }
         ]
       }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Edit|Write|Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node ~/.claude/hooks/core/auto-capture-hook.js",
-            "timeout": 3
-          }
-        ]
-      }
     ]
   },
   "statusLine": {
     "type": "command",
     "command": "~/.claude/statusline.sh"
   },
-  "enabledPlugins": {
-    "document-skills@anthropic-agent-skills": true
-  },
-  "attribution": {
-    "commit": "",
-    "pr": ""
-  },
+  "enabledPlugins": {},
   "alwaysThinkingEnabled": false
 }
