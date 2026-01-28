@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.rodlecoent.mcp-memory-http</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/rodmagic/Code/rodlc/workspace/mcp-servers/mcp-memory-service/venv/bin/python</string>
+        <string>/Users/rodmagic/Code/rodlc/workspace/mcp-servers/mcp-memory-service/scripts/server/run_http_server.py</string>
+    </array>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <dict>
+        <key>SuccessfulExit</key>
+        <false/>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/Users/rodmagic/Library/Logs/mcp-memory-http.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/rodmagic/Library/Logs/mcp-memory-http.error.log</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/Users/rodmagic/.local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin</string>
+        <key>MCP_HTTP_PORT</key>
+        <string>4242</string>
+        <key>MCP_HTTP_ENABLED</key>
+        <string>true</string>
+        <key>MCP_MEMORY_STORAGE_BACKEND</key>
+        <string>sqlite_vec</string>
+        <key>MCP_OAUTH_ENABLED</key>
+        <string>false</string>
+        <key>MCP_ALLOW_ANONYMOUS</key>
+        <string>true</string>
+    </dict>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/rodmagic/Code/rodlc/workspace/mcp-servers/mcp-memory-service</string>
+
+    <key>ProcessType</key>
+    <string>Interactive</string>
+
+    <key>ThrottleInterval</key>
+    <integer>10</integer>
+</dict>
+</plist>

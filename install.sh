@@ -190,13 +190,14 @@ for cmd in "$DOTFILES_DIR/claude/commands"/*.md; do
   symlink "$cmd" "$HOME/.claude/commands/$(basename "$cmd")"
 done
 
-# Claude hooks
+# Claude hooks - basic hooks only (mcp-memory-service hooks installed separately)
 backup "$HOME/.claude/hooks/safe-bash.sh"
 symlink "$DOTFILES_DIR/claude/hooks/safe-bash.sh" "$HOME/.claude/hooks/safe-bash.sh"
 backup "$HOME/.claude/hooks/auto-approve-skills.sh"
 symlink "$DOTFILES_DIR/claude/hooks/auto-approve-skills.sh" "$HOME/.claude/hooks/auto-approve-skills.sh"
-backup "$HOME/.claude/hooks/session-init.sh"
-symlink "$DOTFILES_DIR/claude/hooks/session-init.sh" "$HOME/.claude/hooks/session-init.sh"
+
+# Note: session-init.sh and user-prompt-context.sh are replaced by mcp-memory-service hooks
+# These will be installed via install_hooks.py below
 if [ -d "$DOTFILES_DIR/claude/skills/terminal-title" ]; then
   symlink "$DOTFILES_DIR/claude/skills/terminal-title" "$HOME/.claude/skills/terminal-title"
 fi
@@ -230,6 +231,60 @@ if [ -f "$DOTFILES_DIR/.git-hooks/pre-commit" ]; then
   git config --global init.templatedir "$HOME/.git-templates"
 else
   echo "Warning: .git-hooks/pre-commit not found"
+fi
+
+# Install mcp-memory-service HTTP server (launchd)
+echo "=====> Installing mcp-memory-service HTTP server"
+MCP_MEMORY_SERVICE="$HOME/Code/rodlc/workspace/mcp-servers/mcp-memory-service"
+
+if [ -d "$MCP_MEMORY_SERVICE" ]; then
+  # Install launchd plist
+  mkdir -p "$HOME/Library/LaunchAgents"
+  backup "$HOME/Library/LaunchAgents/com.rodlecoent.mcp-memory-http.plist"
+  cp "$DOTFILES_DIR/launchd/com.rodlecoent.mcp-memory-http.plist" "$HOME/Library/LaunchAgents/com.rodlecoent.mcp-memory-http.plist"
+
+  # Make startup script executable
+  chmod +x "$DOTFILES_DIR/scripts/mcp-memory-http-start.sh"
+
+  # Load the service
+  launchctl unload "$HOME/Library/LaunchAgents/com.rodlecoent.mcp-memory-http.plist" 2>/dev/null || true
+  launchctl load "$HOME/Library/LaunchAgents/com.rodlecoent.mcp-memory-http.plist"
+
+  echo "-----> HTTP server service installed and loaded"
+  echo "-----> Waiting 5 seconds for server to start..."
+  sleep 5
+
+  # Verify server is running (port 4242)
+  if curl -s --max-time 2 http://127.0.0.1:4242/api/health > /dev/null 2>&1; then
+    echo "-----> ✓ HTTP server is running on port 4242"
+  else
+    echo "-----> ⚠️  HTTP server not responding (check logs: ~/Library/Logs/mcp-memory-http.log)"
+  fi
+
+  # Install mcp-memory-service hooks
+  echo "=====> Installing mcp-memory-service hooks"
+  if [ -f "$MCP_MEMORY_SERVICE/claude-hooks/install_hooks.py" ]; then
+    cd "$MCP_MEMORY_SERVICE/claude-hooks"
+    python3 install_hooks.py --natural-triggers
+    cd "$DOTFILES_DIR"
+    echo "-----> Hooks installed with natural triggers"
+
+    # Check if config.json needs API key
+    HOOKS_CONFIG="$HOME/.claude/hooks/config.json"
+    if [ -f "$HOOKS_CONFIG" ]; then
+      if grep -q '"apiKey": ""' "$HOOKS_CONFIG" 2>/dev/null; then
+        echo ""
+        echo "💡 Generate an API key for hooks authentication:"
+        echo "   export MCP_API_KEY=\"\$(openssl rand -base64 32)\""
+        echo "   # Then add it to $HOME/.env and hooks config.json"
+      fi
+    fi
+  else
+    echo "-----> ⚠️  install_hooks.py not found, skipping hooks installation"
+  fi
+else
+  echo "-----> ⚠️  mcp-memory-service not found at $MCP_MEMORY_SERVICE"
+  echo "-----> Run workspace-install.sh first"
 fi
 
 echo ""

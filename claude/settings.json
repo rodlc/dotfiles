@@ -1,8 +1,5 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "env": {
-    "CLAUDE_CODE_TMPDIR": "/var/folders/qw/4d71_ssj61s671zf9wqv_3f80000gn/T/claude"
-  },
   "permissions": {
     "allow": [
       "Read(**)",
@@ -84,7 +81,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/session-init.sh"
+            "command": "node \"/Users/rodmagic/.claude/hooks/core/session-start.js\"",
+            "timeout": 10
           }
         ]
       }
@@ -94,8 +92,31 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/user-prompt-context.sh",
-            "timeout": 5
+            "command": "node \"/Users/rodmagic/.claude/hooks/core/mid-conversation.js\"",
+            "timeout": 8
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/Users/rodmagic/.claude/hooks/core/session-end.js\"",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/core/auto-capture-hook.js",
+            "timeout": 3
           }
         ]
       }

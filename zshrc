@@ -1,6 +1,10 @@
 # Modular ZSH Configuration with Antidote
 # Modules: ~/.config/zsh/conf.d/
 
+# Fix Claude Code TMPDIR bug (agents use wrong temp folder)
+export TMPDIR="$HOME/.claude/tmp"
+mkdir -p "$TMPDIR" 2>/dev/null
+
 # Initialize completions with daily cache optimization
 autoload -Uz compinit
 if [[ -n ${ZDOTDIR:-~}/.zcompdump(#qN.mh+24) ]]; then
