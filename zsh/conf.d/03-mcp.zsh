@@ -7,8 +7,10 @@ export MCP_CONSOLIDATION_ENABLED=true
 # Quality scoring optimized for technical content
 # Disable AI scoring (DeBERTa/MS-MARCO have prose bias, undervalue technical content)
 export MCP_QUALITY_AI_PROVIDER=none
+export MCP_QUALITY_LOCAL_MODEL=ms-marco-MiniLM-L-6-v2  # Local model for quality scoring
 export MCP_QUALITY_SYSTEM_ENABLED=true
-export MCP_QUALITY_BOOST_ENABLED=false  # Rely on implicit signals only (access, recency, ranking)
+export MCP_QUALITY_BOOST_ENABLED=true  # Enable quality boost for retrieval ranking
+export MCP_QUALITY_BOOST_WEIGHT=0.3    # 70% semantic + 30% quality score
 
 # Association-based quality boost
 export MCP_CONSOLIDATION_QUALITY_BOOST_ENABLED=true
