@@ -33,6 +33,9 @@ unalias gm 2>/dev/null  # Override git plugin alias (custom function in .aliases
 # Starship prompt (replaces oh-my-zsh prompt)
 eval "$(starship init zsh)"
 
+# direnv hook
+eval "$(direnv hook zsh)"
+
 # Load modular configuration
 for config_file in ~/.config/zsh/conf.d/*.zsh; do
   [[ -r "$config_file" ]] && source "$config_file"

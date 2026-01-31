@@ -37,8 +37,24 @@
       }
     },
     "memory-service": {
-      "type": "http",
-      "url": "http://127.0.0.1:4242/mcp"
+      "command": "${WORKSPACE_DIR}/mcp-servers/mcp-memory-service/.venv/bin/python",
+      "args": [
+        "-m",
+        "mcp_memory_service.server_impl",
+        "--enabledTools=store_memory,retrieve_memory,search_by_tag,cleanup_duplicates,check_database_health"
+      ],
+      "env": {
+        "MCP_MEMORY_CHROMA_PATH": "${HOME}/.claude/memory-chroma",
+        "MCP_MEMORY_BACKUPS_PATH": "${HOME}/.claude/memory-backups",
+        "MCP_CONSOLIDATION_ENABLED": "true",
+        "MCP_SCHEDULE_DAILY": "03:00",
+        "MCP_SCHEDULE_WEEKLY": "SUN 04:00",
+        "MCP_SCHEDULE_MONTHLY": "01 05:00",
+        "MCP_RETENTION_CRITICAL": "365",
+        "MCP_RETENTION_REFERENCE": "180",
+        "MCP_RETENTION_STANDARD": "90",
+        "MCP_RETENTION_TEMPORARY": "30"
+      }
     },
     "gcal": {
       "command": "node",

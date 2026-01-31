@@ -9,20 +9,15 @@ Save structured summaries to Notion Tasks using plan-first workflow.
 
 1. **List Recent Plans**: Find all plans modified < 5h in `~/.claude/plans/`
 2. **Update Plan**: Finalize plan with session changes (Actions, Résultat, Learnings)
-3. **Local Export**: Save to `~/Downloads/{YYYYMMDD}-notion-{title-slug}.md`
-   - Extract title from `# Title` line in plan
-   - Slugify: lowercase, spaces→hyphens, remove special chars
-   - Example: `# /notion + /wrap Improvements` → `notion-wrap-improvements`
-   - Full formatted content ready for manual paste
-4. **Create Notion Shell**: Create task with properties only (NO content blocks)
-   - Title, Priority, Do date, Done, Area/Project
+3. **Create Notion Task**: Create task with properties
+4. **Append Code Block**: Add plan content as code block (box-drawing renders correctly)
 5. **Update Marker**: Append `<!-- notion:posted:{page_id}:mtime:{timestamp} -->` to plan
-6. **Output**: Show paths to both local file and Notion task URL
+6. **Output**: Show Notion task URL
 
 **Principles**:
-- Plan = source of truth (local file in Downloads)
-- Notion = metadata shell only (no content)
-- Manual copy-paste workflow (reliable, no API limits)
+- Plan file = source of truth
+- Notion = shell + code block content
+- No local export (plan file is the archive)
 
 ## Plan Detection
 
@@ -108,35 +103,46 @@ When generating a retroactive plan (no existing plan found):
 
 ## Content Templates
 
-**Detect type, adapt structure. Number sections with 1️⃣ 2️⃣ 3️⃣**
-
-### 🔧 Setup/Config
-Context → Decisions → Summary (result, modified files, metrics) → Sources
-
-### 🔍 Research
-Title (CAPS) → Audit/Hypotheses → Calculations → Risks → Verdict → Roadmap → Quote
-
-### 🔬 Analysis
-Market Standard → Position → Tactics → Matrix (🥇🥈🥉) → One-sentence summary
-
-### 💻 Learning
-Bullet lists, definitions, minimal structure
-
-**Default to 🔧 if type unclear**
+**Deleted** - Plans follow CLAUDE.md formatting rules directly.
+Type detection (🔧/🔍/🔬/💻) still used for title emoji only.
 
 ## Content Strategy
 
-**Principe** : Le plan session (`~/.claude/plans/*.md`) EST le contenu Notion.
+**Le plan EST le contenu final** - pas de reformatage.
 
-**Options** (par ordre de préférence) :
-1. **Bloc code Notion** : Coller le plan en bloc code "Plain text" directement dans la tâche
-   - ✅ Box-drawing s'affiche bien en monospace
-   - ✅ Pas de fichier intermédiaire
-   - ✅ Single source of truth
-2. **Copie Downloads** : `cp ~/.claude/plans/{plan}.md ~/Downloads/{YYYYMMDD}-notion-{slug}.md`
-   - Fallback si Notion API indispo
+1. Create task shell (properties only)
+2. Append plan content as code block with chunked rich_text:
+   ```json
+   {
+     "object": "block",
+     "type": "code",
+     "code": {
+       "rich_text": [
+         {"type": "text", "text": {"content": "<chunk 1 - max 2000 chars>"}},
+         {"type": "text", "text": {"content": "<chunk 2 - max 2000 chars>"}},
+         // ... up to 100 chunks (200k chars max)
+       ],
+       "language": "plain text"
+     }
+   }
+   ```
+3. Update marker in plan file
 
-**Ne PAS reformater** le plan - le format box-drawing est le format final.
+**Chunking Algorithm**:
+```python
+# Split content into 2000-char chunks
+content = plan_file_content
+chunks = []
+while content:
+    chunks.append(content[:2000])
+    content = content[2000:]
+rich_text = [{"type": "text", "text": {"content": c}} for c in chunks]
+```
+
+**Rationale**:
+- Box-drawing renders correctly in monospace code blocks
+- Notion allows 100 rich_text elements per block (2000 chars each = ~200k total)
+- Single code block with chunked array avoids multiple separate blocks
 
 ## Marker System
 
@@ -148,19 +154,19 @@ Bullet lists, definitions, minimal structure
 
 | Situation | Action | API Calls |
 |-----------|--------|-----------|
-| No marker | Export local + create shell | 1 |
-| Marker + plan modified | Export local + update shell | 1 |
+| No marker | Create task + append code block | 2 |
+| Marker + plan modified | Update task + replace code block | 2 |
 | Marker + plan unchanged | Skip (idempotent) | 0 |
 
-**No content sync** - shell properties only (title, priority, date, done)
+**Content sync via code block** - shell properties + plan content as code block
 
 ## Error Handling
 
-**Single API call** (create/update task):
-- Success → Show Notion URL + local path
-- Failure → Warn but local file always saved
+**Two API calls** (create/update task + append code block):
+- Success → Show Notion URL
+- Failure → Warn and preserve plan file
 
-**No retry needed** - no content sync = minimal API surface
+**No retry needed** - code block append is idempotent
 
 ## Style Guide
 
@@ -175,41 +181,6 @@ Bullet lists, definitions, minimal structure
 **Closing**: Research/Analysis = quote/summary | Technical = next actions
 
 **Concise**: Actionable info only, code refs as file:line
-
-## Mode Audit
-
-**Trigger** : `/notion audit` ou `/notion audit {date}`
-
-**Workflow** :
-1. Query Notion Tasks avec Do date = {date} (défaut: aujourd'hui)
-2. Lister fichiers Downloads `{YYYYMMDD}-notion-*.md`
-3. Comparer et proposer factorisation :
-   - Identifier thèmes communs (préfixe slug)
-   - Proposer regroupements (ex: 3 notes MCP → 1 tâche "MCP | Session {date}")
-   - Afficher mapping avant/après
-4. Sur confirmation :
-   - Renommer tâches Notion selon mapping
-   - Optionnel: fusionner fichiers Downloads similaires
-
-**Output** :
-```
-📊 Audit {YYYY-MM-DD}
-━━━━━━━━━━━━━━━━━━━━
-
-Notion Tasks (Do date = {date}): 4
-Downloads files ({date}): 9
-
-📦 Regroupements proposés:
-┌─────────────────────────────────┬────────────────────────────┐
-│ Thème                           │ Tâches/Notes               │
-├─────────────────────────────────┼────────────────────────────┤
-│ 🔧 Infra Claude/MCP             │ 6 notes → 1 tâche          │
-│ 🔬 Tiny House                   │ 1 note (conserver)         │
-│ 🔧 Admin                        │ 2 notes → 1 tâche          │
-└─────────────────────────────────┴────────────────────────────┘
-
-Appliquer ? (confirmer pour renommer)
-```
 
 ## Technical Notes
 
@@ -232,14 +203,12 @@ Appliquer ? (confirmer pour renommer)
 
 **Output Format**:
 ```
-✅ Notion shell created: https://notion.so/...
-📋 Local content: ~/Downloads/{YYYYMMDD}-notion-{slug}.md
-
-Copy content from local file to Notion task.
+✅ Notion task created: https://notion.so/...
+📋 Content appended as code block
 ```
 
 **On Notion failure**:
 ```
 ⚠️ Notion task creation failed
-📋 Local content saved: ~/Downloads/{YYYYMMDD}-notion-{slug}.md
+📋 Plan preserved in: ~/.claude/plans/{plan}.md
 ```

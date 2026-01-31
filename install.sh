@@ -206,6 +206,9 @@ symlink "$DOTFILES_DIR/claude/statusline.sh" "$HOME/.claude/statusline.sh"
 backup "$HOME/.claude/settings.json"
 symlink "$DOTFILES_DIR/claude/settings.json" "$HOME/.claude/settings.json"
 
+# Agent docs (reference documentation)
+symlink "$DOTFILES_DIR/claude/agent_docs" "$HOME/.claude/agent_docs"
+
 # Install MCP servers config
 if [ -x "$DOTFILES_DIR/claude/mcp-sync.sh" ]; then
   "$DOTFILES_DIR/claude/mcp-sync.sh" install

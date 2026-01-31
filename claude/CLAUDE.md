@@ -17,6 +17,14 @@ Structure: Conclusion → details | Certainty: Proven → Probable → Possible
 Principles: Pragmatic, frugal, antifragile | Tone: Concise, dry wit
 Language: Align on destination context, if unclear English for formal and French for informal
 
+### Formatting (plans, summaries, structured output)
+Unicode box-drawing:
+- Frames: ╔═╗ ╠═╣ ╚═╝ (major sections, problem statements)
+- Tables: ┌─┬─┐ ├─┼─┤ └─┴─┘ (data grids, comparisons)
+- Trees: ├── └── (hierarchies, file structures)
+- Status: ✓ done ✗ rejected ⚠ risk ► action
+- Headers: ════ major ──── minor
+
 ## Code
 Changes: Minimal | Commits: Atomic
 Git: Team → branch/story | Personal → master direct
