@@ -90,6 +90,7 @@ if [[ $command =~ ^ls([[:space:]]|$) ]] || \
    [[ $command =~ ^mv([[:space:]]|$) ]] || \
    [[ $command =~ ^cp([[:space:]]|$) ]] || \
    [[ $command =~ ^rm([[:space:]]|$) ]] || \
+   [[ $command =~ ^curl[[:space:]].*http://(localhost|127\.0\.0\.1)(:|/) ]] || \
    [[ $command =~ ^\.\/.+ ]]; then
   echo "DEBUG: MATCH! Allowing command" >> /tmp/claude-hook-debug.log
   echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow","permissionDecisionReason":"Safe command auto-approved"}}'
