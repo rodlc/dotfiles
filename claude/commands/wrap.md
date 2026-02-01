@@ -17,12 +17,15 @@ Wrap up this session by:
 5. Quick quality snapshot:
    - `analyze_quality_distribution` (top 3 / bottom 3)
    - If bottom 3 contains memories from session → warning
-6. Sync status check (non-blocking):
-   - Run `git -C ~/Code/rodlc/dotfiles status --porcelain`
-   - Run `git -C ~/Code/rodlc/workspace status --porcelain`
+6. Auto-sync repos (non-blocking):
+   - Dotfiles: Check if dirty with `git -C ~/Code/rodlc/dotfiles status --porcelain`
+     - If dirty: `git -C ~/Code/rodlc/dotfiles add -A && git -C ~/Code/rodlc/dotfiles commit -m "wrap: session sync" && git -C ~/Code/rodlc/dotfiles push`
+   - Workspace: Check if dirty with `git -C ~/Code/rodlc/workspace status --porcelain`
+     - If dirty: `git -C ~/Code/rodlc/workspace add -A && git -C ~/Code/rodlc/workspace commit -m "wrap: session sync" && git -C ~/Code/rodlc/workspace push`
    - Display results:
+     - Synced: `✅ Dotfiles: synced` / `✅ Workspace: synced`
      - Clean: `✅ Dotfiles: clean` / `✅ Workspace: clean`
-     - Dirty: `⚠️ Dotfiles: N uncommitted → df-push` / `⚠️ Workspace: N uncommitted → ws-push`
+     - Failed: `⚠️ Dotfiles: sync failed` / `⚠️ Workspace: sync failed`
 7. Confirm all saves completed
 8. Display: "✅ Wrap-up complete. Type /exit or Ctrl+D to quit."
 
