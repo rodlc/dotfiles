@@ -212,3 +212,15 @@ rich_text = [{"type": "text", "text": {"content": c}} for c in chunks]
 ⚠️ Notion task creation failed
 📋 Plan preserved in: ~/.claude/plans/{plan}.md
 ```
+
+## Required API Calls
+
+Execute in sequence, verify each completion:
+
+1. `notion_create_database_item` with:
+   - Task: title
+   - Priority: from args or "Quick"
+   - **Do date: today's date** (critical)
+   - Done: checkbox false
+2. `notion_append_block_children` with plan content as code block
+3. Update plan file with `<!-- notion:posted:{page_id}:mtime:{timestamp} -->` marker

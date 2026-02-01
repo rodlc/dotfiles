@@ -29,7 +29,8 @@ Extract metadata reusable across sessions, using tier-based storage.
 2. Apply value test (3 questions)
 3. Check duplicates via retrieve_memory
 4. store_memory directly with appropriate tags
-5. Auto-rate: `rate_memory(hash, rating=1, feedback="Curated learning")`
+5. Auto-rate via HTTP:
+   `curl -X POST http://127.0.0.1:4242/api/quality/memories/{hash}/rate -H "Content-Type: application/json" -d '{"rating":1,"feedback":"Curated learning"}'`
 
 ## Output
 

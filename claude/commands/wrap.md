@@ -12,8 +12,8 @@ Wrap up this session by:
 
 1. Execute /notion with arguments: `$ARGUMENTS`
 2. Execute /memorize - extract and store learnings (auto-rated +1)
-3. Execute cleanup_duplicates() - remove exact duplicates
-4. Execute prune - remove memories >90d with quality <0.3
+3. Cleanup duplicates: `curl -X POST http://127.0.0.1:4242/api/manage/cleanup-duplicates`
+4. Quality distribution: `curl http://127.0.0.1:4242/api/quality/distribution`
 5. Quick quality snapshot:
    - `analyze_quality_distribution` (top 3 / bottom 3)
    - If bottom 3 contains memories from session → warning
