@@ -21,7 +21,7 @@
       "Bash(find|grep|wc|stat|ls|cat|head|tail|echo|basename|dirname|date|pwd:*)",
       "mcp__memory-service__*",
       "mcp__notion-rodlecoent__*",
-      "mcp__notion-alfec__*",
+      "mcp__notion-konsigo__*",
       "mcp__gmail__*",
       "mcp__gcal__*",
       "mcp__mcp-raycast-clipboard__*",

@@ -11,7 +11,7 @@
         "NOTION_MARKDOWN_CONVERSION": "true"
       }
     },
-    "notion-alfec": {
+    "notion-konsigo": {
       "disabled": true,
       "command": "node",
       "args": [
@@ -19,7 +19,7 @@
         "--enabledTools=notion_retrieve_page,notion_query_database,notion_append_block_children,notion_update_page_properties,notion_create_database_item,notion_search,notion_retrieve_block,notion_retrieve_block_children,notion_retrieve_database"
       ],
       "env": {
-        "NOTION_API_TOKEN": "${NOTION_ALFEC_TOKEN}",
+        "NOTION_API_TOKEN": "${NOTION_KONSIGO_TOKEN}",
         "NOTION_MARKDOWN_CONVERSION": "true"
       }
     },
