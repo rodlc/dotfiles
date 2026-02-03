@@ -12,7 +12,7 @@ cd dotfiles
 ```
 
 The script will automatically:
-1. **Install tools** (Homebrew, Zed, Claude Code, pyenv, rbenv, nvm, oh-my-zsh)
+1. **Install tools** (Homebrew, Zed, Claude Code, pyenv, rbenv, fnm, oh-my-zsh)
 2. **Backup** existing config files as `*.backup`
 3. **Create symlinks** from `~/.config` to this repo
 4. **Clone & build MCP servers** (Notion, Gmail, Slack, Rails MCP to `~/Code`)
@@ -216,7 +216,7 @@ Use **LTS/stable versions exclusively** via version managers. Brewfile excludes 
 
 | Language | Manager | Install | Default |
 |----------|---------|---------|---------|
-| Node.js | nvm | `nvm install --lts` | `nvm alias default lts/*` |
+| Node.js | fnm | `fnm install --lts` | `fnm default lts-latest` |
 | Python | pyenv | `pyenv install <stable>` | `pyenv global <version>` |
 | Ruby | rbenv | `rbenv install <stable>` | `rbenv global <version>` |
 

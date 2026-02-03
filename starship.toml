@@ -9,7 +9,7 @@ $directory\
 $git_branch\
 $git_status"""
 
-right_format = """$ruby$nodejs$python$bun$golang"""
+right_format = """$ruby$nodejs$python$bun"""
 
 # Timeout for starship
 scan_timeout = 10
@@ -57,7 +57,7 @@ detect_folders = []
 format = "[\\[📦 $version\\]]($style) "
 style = "green"
 detect_extensions = []
-detect_files = ["package.json", ".nvmrc"]
+detect_files = ["package.json", ".nvmrc", ".node-version"]
 detect_folders = []
 
 [python]
@@ -74,9 +74,3 @@ detect_extensions = []
 detect_files = ["bun.lockb", "bunfig.toml"]
 detect_folders = []
 
-[golang]
-format = "[\\[🐹 $version\\]]($style) "
-style = "cyan"
-detect_extensions = []
-detect_files = ["go.mod", "go.sum"]
-detect_folders = []
