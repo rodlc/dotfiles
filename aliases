@@ -41,7 +41,7 @@ gpurge() {
   local db=$(command git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | cut -d'/' -f4)
   db="${db:-main}"
   git checkout "$db" && git pull origin "$db" && git fetch -p && \
-    command git branch --merged | grep -vE "^\*|$db" | xargs -n1 git branch -d
+    command git branch --merged | grep -vE "^\*|$db" | xargs -n1 git branch -d && \
     command git branch -vv | grep ': gone]' | awk '{sub(/^[+* ]/, ""); print $1}' | xargs -r git branch -D
 }
 
@@ -77,6 +77,7 @@ wt-clean() {
 # ============================================================================
 # Claude Code Monitoring
 # ============================================================================
+alias cc='claude'
 alias cc-global='npx ccusage@latest'
 alias cc-live='npx ccusage blocks --live'
 alias cc-daily='npx ccusage daily'

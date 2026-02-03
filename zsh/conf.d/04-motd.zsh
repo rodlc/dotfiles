@@ -109,44 +109,46 @@ show_system_info() {
     [[ -f "$cache_file" ]] && cat "$cache_file" 2>/dev/null
 }
 
-# Display greeting and system info
-echo "Hello, world!"
-show_system_info
+# Only show MOTD for login shells (not subshells)
+if [[ -o login ]]; then
+  echo "Hello, world!"
+  show_system_info
 
-# Run SSH check first
-ssh_status_code=0
-check_ssh_status
-ssh_status_code=$?
+  # Run SSH check first
+  ssh_status_code=0
+  check_ssh_status
+  ssh_status_code=$?
 
-# Only run git checks if SSH is OK
-if [[ $ssh_status_code -eq 0 ]]; then
+  # Only run git checks if SSH is OK
+  if [[ $ssh_status_code -eq 0 ]]; then
     (
-        setopt LOCAL_OPTIONS NO_MONITOR
-        "$HOME/Code/rodlc/dotfiles/scripts/git-fetch-background.sh" &
+      setopt LOCAL_OPTIONS NO_MONITOR
+      "$HOME/Code/rodlc/dotfiles/scripts/git-fetch-background.sh" &
     ) &>/dev/null
 
     check_repo_status "$HOME/Code/rodlc/dotfiles" "Dotfiles" "df-push" "df-pull"
     check_repo_status "$HOME/Code/rodlc/workspace" "Workspace" "ws-push" "ws-pull"
-fi
+  fi
 
-# Bitwarden secrets sync check
-if [[ -f "$HOME/.env" && -f "$HOME/.env.bw-synced" ]]; then
+  # Bitwarden secrets sync check
+  if [[ -f "$HOME/.env" && -f "$HOME/.env.bw-synced" ]]; then
     if [[ "$HOME/.env" -nt "$HOME/.env.bw-synced" ]]; then
-        echo "⚠️  Secrets modified locally. Run: bw-push"
+      echo "⚠️  Secrets modified locally. Run: bw-push"
     fi
-fi
+  fi
 
-# Dotfiles symlink health check
-check_dotfiles_symlinks() {
+  # Dotfiles symlink health check
+  check_dotfiles_symlinks() {
     local expected="$HOME/Code/rodlc/dotfiles"
     for link in ~/.claude/settings.json ~/.claude/CLAUDE.md ~/.claude/statusline.sh ~/.claude/hooks/*.sh; do
-        [[ ! -L "$link" ]] && continue
-        local target=$(readlink "$link")
-        # Broken or points to wrong user
-        if [[ ! -e "$link" ]] || [[ "$target" != "$expected"* ]]; then
-            echo "🌊 Drifting symlinks. Run: df-install"
-            return
-        fi
+      [[ ! -L "$link" ]] && continue
+      local target=$(readlink "$link")
+      # Broken or points to wrong user
+      if [[ ! -e "$link" ]] || [[ "$target" != "$expected"* ]]; then
+        echo "🌊 Drifting symlinks. Run: df-install"
+        return
+      fi
     done
-}
-check_dotfiles_symlinks
+  }
+  check_dotfiles_symlinks
+fi
