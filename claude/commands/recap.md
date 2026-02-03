@@ -9,66 +9,26 @@ Update the current session plan with progress made and next steps.
 
 1. **Identify session plan**:
    - Look for plan file path in system prompt
-   - If no plan exists → create retroactive summary
+   - If no plan exists → create retroactive plan
 
 2. **Analyze session**:
-   - What was accomplished (Actions réalisées)
-   - Current status (Résultat)
-   - What remains to do (Prochaines étapes)
+   - What was accomplished
+   - Current status
+   - What remains to do
 
 3. **Update plan file**:
-   - Add/update "## Résultat" section
-   - Add/update "## Prochaines étapes" section if incomplete
+   - Add/update "## Result" section with status
+   - Add "## Next steps" if task incomplete
+   - **Use native Plan Mode formatting** (CLAUDE.md: box-drawing, frames, tables)
 
-4. **Output**: Summary of changes made to plan
+4. **Output**: Brief confirmation of changes
 
-## Plan Sections
+## Formatting
 
-### Required sections after /recap:
+Write like Plan Mode naturally writes — follow CLAUDE.md formatting rules:
+- Frames: ╔═╗ ╠═╣ ╚═╝ for major sections
+- Tables: ┌─┬─┐ ├─┼─┤ └─┴─┘ for data
+- Trees: ├── └── for hierarchies
+- Status: ✓ done ✗ rejected ⚠ risk ► action
 
-```markdown
-## Résultat
-
-**Statut**: ✅ Terminé | ⚠️ Partiel | 🔄 En cours
-
-{What was accomplished}
-
-## Prochaines étapes
-<!-- Only if task incomplete -->
-
-- [ ] {Next action 1}
-- [ ] {Next action 2}
-```
-
-## Retroactive Plan
-
-If no plan exists, generate from conversation:
-
-```markdown
-# {Inferred Title}
-
-**Date**: {YYYY-MM-DD}
-**Type**: 🔧 Setup | 🔍 Research | 🔬 Analysis | 💻 Learning
-
----
-
-## Contexte
-{Why this session happened}
-
-## Actions réalisées
-- {Key actions from conversation}
-
-## Résultat
-{Outcome}
-
-## Prochaines étapes
-- [ ] {If incomplete}
-```
-
-## Output Format
-
-```
-📝 Plan updated: ~/.claude/plans/{plan}.md
-├── Résultat: {status emoji} {brief summary}
-└── Prochaines étapes: {count} items (or "None - task complete")
-```
+**No templates** — adapt to existing plan structure and context.
