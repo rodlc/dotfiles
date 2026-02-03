@@ -1,110 +1,45 @@
 ---
-description: Save session summary to Notion Tasks database
-argument-hint: "[priority] [title]"
+description: Post session plan to Notion Tasks
+argument-hint: "[--all] [priority]"
 ---
 
-Save structured summaries to Notion Tasks using plan-first workflow.
+Post the current session plan to Notion Tasks.
 
-## Workflow
+## Usage
 
-1. **List Recent Plans**: Find all plans modified < 5h in `~/.claude/plans/`
-2. **Update Plan**: Finalize plan with session changes (Actions, Résultat, Learnings)
-3. **Create Notion Task**: Create task with properties
-4. **Append Code Block**: Add plan content as code block (box-drawing renders correctly)
-5. **Update Marker**: Append `<!-- notion:posted:{page_id}:mtime:{timestamp} -->` to plan
-6. **Output**: Show Notion task URL
+- `/notion` - Post current session plan
+- `/notion --all` - Scan and post all recent plans (< 5h)
+- `/notion D2` - Post with D2 priority
 
-**Principles**:
-- Plan file = source of truth
-- Notion = shell + code block content
-- No local export (plan file is the archive)
+## Workflow (default)
 
-## Plan Detection
+1. **Get session plan**: From system prompt or most recent in ~/.claude/plans/
+2. **Create Notion task**:
+   - Title: Derived from plan `# Title`
+   - Priority: From args or "Quick"
+   - Do date: Today
+   - Done: ✅ if "Statut: ✅" in Résultat, else ❌
+3. **Append content**: Plan as code block (chunked 2000 chars)
+4. **Update marker**: `<!-- notion:posted:{page_id}:mtime:{timestamp} -->`
 
-**Time Window**: 5h (18000s) - aligned with ccline quota window
+## Workflow (--all)
 
-**Logic**:
-```bash
-# List recent plans (< 5h)
-find ~/.claude/plans -name "*.md" -mmin -300
-
-# For each plan, check marker
-grep "notion:posted" $plan || echo "unposted"
-
-# If marker exists, compare mtime
-plan_mtime=$(stat -f %m $plan)
-marker_mtime=$(grep -oP 'mtime:\K\d+' $plan)
-[ $plan_mtime -gt $marker_mtime ] && echo "modified"
-```
-
-## Plan Structure (Retroactive)
-
-When generating a retroactive plan (no existing plan found):
-
-```markdown
-# {Title}
-
-**Date** : {YYYY-MM-DD}
-**Type** : 🔧 Setup | 🔍 Research | 🔬 Analysis | 💻 Learning
-
----
-
-## Contexte
-{Why this session happened}
-
-## Actions réalisées
-- {bullet points of key actions}
-
-## Résultat
-{Outcome, files modified, metrics}
-
-## Learnings
-- {Cross-session insights}
-
-<!-- notion:posted:{page_id}:mtime:{timestamp} -->
-```
-
-**Type Detection**:
-- 🔧 Setup: Configuration, tooling, infrastructure
-- 🔍 Research: Investigation, hypothesis testing, calculations
-- 🔬 Analysis: Comparative analysis, benchmarking, positioning
-- 💻 Learning: Concepts, definitions, educational content
-- **Default to 🔧 if unclear**
-
-## Task Properties
-
-- **Task**: Short title in EN, use | or / for sub-elements (override with `$ARGUMENTS`)
-- **Priority**: Quick (~5min) | D2 (~30min) | W5 (~2h) | Scheduled | Reminder | Errand
-- **Do date**: Today
-- **Done**: Yes if complete, No otherwise
-- **Project/Area**: Link if found via search, empty otherwise
-
-**Title Examples**:
-- ✅ "🔧 Claude Code | Setup"
-- ✅ "🔍 PER * PTZ"
-- ✅ "🔬 Obat / PlayPlay / Alan"
-- ❌ "Setup optimisé Claude Code - Terminal + Workflow /notion"
+1. Find all plans: `find ~/.claude/plans -name "*.md" -mmin -300`
+2. Filter: Skip if marker exists AND plan unchanged
+3. Process each: Create/update Notion task
 
 ## Title Generation
 
-**Règle** : Le titre Notion dérive du slug du fichier staging.
+From plan `# Title`:
+- `# MCP Memory Quality` → `🔧 MCP Memory | Quality`
+- `# Tiny House Chassis Analysis` → `🔬 Tiny House | Chassis`
 
-**Process** :
-1. Générer slug depuis `# Title` du plan : lowercase, `-` pour espaces
-2. Humaniser pour titre Notion : capitaliser, séparer en 2 parties
-3. Format : `{emoji} {Thème} | {Détail}`
+## Task Properties
 
-**Exemples** :
-| Slug | Titre Notion |
-|------|--------------|
-| `mcp-memory-quality` | 🔧 MCP Memory \| Quality |
-| `tiny-house-chassis-analysis` | 🔬 Tiny House \| Chassis |
-| `vinci-email-correction` | 🔧 Vinci \| Email correction |
-
-## Content Templates
-
-**Deleted** - Plans follow CLAUDE.md formatting rules directly.
-Type detection (🔧/🔍/🔬/💻) still used for title emoji only.
+- **Task**: `{emoji} {Theme} | {Detail}`
+- **Priority**: Quick | D2 | W5 | Scheduled
+- **Do date**: Today
+- **Done**: ✅ if "Statut: ✅" in Résultat, else ❌
 
 ## Content Strategy
 
