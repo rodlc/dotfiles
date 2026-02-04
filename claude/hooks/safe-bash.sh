@@ -129,6 +129,12 @@ if [[ $command =~ ^cd([[:space:]]|$) ]] || \
    [[ $command =~ ^node([[:space:]]|$) ]] || \
    [[ $command =~ ^python3?([[:space:]]|$) ]] || \
    [[ $command =~ ^pip([[:space:]]|$) ]] || \
+   [[ $command =~ ^bundle([[:space:]]|$) ]] || \
+   [[ $command =~ ^rake([[:space:]]|$) ]] || \
+   [[ $command =~ ^rails([[:space:]]|$) ]] || \
+   [[ $command =~ ^rspec([[:space:]]|$) ]] || \
+   [[ $command =~ ^rubocop([[:space:]]|$) ]] || \
+   [[ $command =~ ^make([[:space:]]|$) ]] || \
    [[ $command =~ ^grep([[:space:]]|$) ]] || \
    [[ $command =~ ^sort([[:space:]]|$) ]] || \
    [[ $command =~ ^uniq([[:space:]]|$) ]] || \
@@ -158,7 +164,6 @@ if [[ $command =~ ^cd([[:space:]]|$) ]] || \
   exit 0
 fi
 
-# Sinon, prompt standard (JSON ask pour meilleure UX)
+# Sinon, prompt standard (exit 0 sans JSON selon doc officielle)
 echo "DEBUG: NO MATCH. Prompting user" >> /tmp/claude-hook-debug.log
-echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"Command requires user approval"}}'
 exit 0
