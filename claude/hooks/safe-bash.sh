@@ -34,10 +34,23 @@ if [[ $command =~ (eval|exec|source|\\.)[[:space:]]+(.*\$|\`|\".*\$|\'\$) ]]; th
 fi
 
 # Network exfiltration (curl/wget POST, nc, reverse shells)
-if [[ $command =~ curl[[:space:]].*(-X[[:space:]]*POST|--data|-d[[:space:]]) ]] || \
-   [[ $command =~ curl[[:space:]].*-T ]] || \
-   [[ $command =~ wget[[:space:]].*--post ]] || \
-   [[ $command =~ (nc|netcat|ncat)[[:space:]] ]] || \
+# Exception: localhost/127.0.0.1 autorisé (MCP memory-service, etc.)
+is_localhost=false
+if [[ $command =~ http://(localhost|127\.0\.0\.1) ]]; then
+  is_localhost=true
+fi
+
+if [[ $is_localhost == false ]] && \
+   { [[ $command =~ curl[[:space:]].*(-X[[:space:]]*POST|--data|-d[[:space:]]) ]] || \
+     [[ $command =~ curl[[:space:]].*-T ]] || \
+     [[ $command =~ wget[[:space:]].*--post ]] ; }; then
+  echo "DEBUG: DENY! Network exfiltration pattern detected" >> /tmp/claude-hook-debug.log
+  echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Network exfiltration pattern blocked"}}'
+  exit 0
+fi
+
+# nc/netcat et /dev/tcp toujours bloqués (pas de localhost exception)
+if [[ $command =~ (nc|netcat|ncat)[[:space:]] ]] || \
    [[ $command =~ /dev/(tcp|udp)/ ]] || \
    [[ $command =~ \|[[:space:]]*(curl|wget|nc) ]]; then
   echo "DEBUG: DENY! Network exfiltration pattern detected" >> /tmp/claude-hook-debug.log
