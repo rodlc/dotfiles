@@ -1,34 +1,74 @@
 ---
-description: Finalize session plan with progress and next steps
+description: Update plan with session progress and exit plan mode
 argument-hint: ""
 ---
 
-Update the current session plan with progress made and next steps.
+<recap-command>
 
-## Workflow
+**Purpose:** Finalize plan with session results and propose approval.
 
-1. **Identify session plan**:
-   - Look for plan file path in system prompt
-   - If no plan exists → create retroactive plan
+**Next step:** After approval (Shift+Tab), use `/wrap` to save to Notion/Memory and sync git.
 
-2. **Analyze session**:
-   - What was accomplished
-   - Current status
-   - What remains to do
+## Detect Context
+Check system-reminder for "Plan mode is active" and plan file path.
 
-3. **Update plan file**:
-   - Add/update "## Result" section with status
-   - Add "## Next steps" if task incomplete
-   - **Use native Plan Mode formatting** (CLAUDE.md: box-drawing, frames, tables)
+## If NOT in Plan Mode
+Call EnterPlanMode directly (no parameters needed).
+- If user accepts → proceed with "If IN Plan Mode" logic below
+- If user declines → output brief summary of session
 
-4. **Output**: Brief confirmation of changes
+## If IN Plan Mode
+
+### 1. Read current plan file
+Use the path from system-reminder.
+
+### 2. Analyze session
+From conversation history, extract:
+- Tasks completed (✓)
+- Current blockers (⚠)
+- Remaining work (►)
+- Key decisions made
+
+### 3. Update plan file
+Add/update sections:
+
+```
+## Résultat
+**Status: [En cours | Complété ✓ | Bloqué ⚠]**
+[Brief description]
+
+## Progression
+✓ [completed items]
+⚠ [blockers if any]
+
+## Learnings (optional)
+[Key insights, anti-patterns avoided, decisions rationale]
+
+## Next Steps
+► [actionable next steps, if work remains]
+```
+
+### 4. Exit Plan Mode
+ALWAYS call ExitPlanMode after updating plan file.
+- This triggers the confirmation prompt for user review
+- User can then approve (Shift+Tab) to transition to edit mode
+- In edit mode, user can run `/wrap` for Notion/Memory/Git sync
 
 ## Formatting
+Use CLAUDE.md conventions (box-drawing, status icons).
 
-Write like Plan Mode naturally writes — follow CLAUDE.md formatting rules:
-- Frames: ╔═╗ ╠═╣ ╚═╝ for major sections
-- Tables: ┌─┬─┐ ├─┼─┤ └─┴─┘ for data
-- Trees: ├── └── for hierarchies
-- Status: ✓ done ✗ rejected ⚠ risk ► action
+## Critical
+- ALWAYS update plan file BEFORE calling ExitPlanMode
+- ALWAYS call ExitPlanMode after updating the plan, regardless of completion status
+- DO NOT perform Notion/Memory/Git operations here (reserved for `/wrap` in edit mode)
+- Execute silently: NO intermediate commentary, just actions and final output
 
-**No templates** — adapt to existing plan structure and context.
+## Typical workflow
+
+```
+/recap          → update plan, propose approbation
+[Shift+Tab]     → approve, passe en edit mode
+/wrap           → notion + memorize + git sync
+```
+
+</recap-command>
