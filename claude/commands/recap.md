@@ -14,10 +14,10 @@ Check system-reminder for "Plan mode is active" and plan file path.
 
 ## If NOT in Plan Mode
 Call EnterPlanMode directly (no parameters needed).
-- If user accepts → proceed with "If IN Plan Mode" logic below
+- If user accepts → **IMMEDIATELY continue** with the steps below (do NOT stop after EnterPlanMode)
 - If user declines → output brief summary of session
 
-## If IN Plan Mode
+## Main Logic (execute after EnterPlanMode succeeds OR if already in Plan Mode)
 
 ### 1. Read current plan file
 Use the path from system-reminder.
@@ -58,6 +58,7 @@ ALWAYS call ExitPlanMode after updating plan file.
 Use CLAUDE.md conventions (box-drawing, status icons).
 
 ## Critical
+- After EnterPlanMode succeeds, CONTINUE IMMEDIATELY with the main logic (do NOT wait for user input)
 - ALWAYS update plan file BEFORE calling ExitPlanMode
 - ALWAYS call ExitPlanMode after updating the plan, regardless of completion status
 - DO NOT perform Notion/Memory/Git operations here (reserved for `/wrap` in edit mode)

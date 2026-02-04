@@ -5,15 +5,16 @@ argument-hint: "[priority]"
 
 Wrap up session by saving context, extracting learnings, and syncing repos.
 
-**IMPORTANT:** This command requires edit mode. If in plan mode, use `/recap` first.
-
 ## Guard: Check Mode
 
-Check system-reminder for "Plan mode is active":
-- If present → output: "⚠ Edit mode requis. Lance `/recap` d'abord pour finaliser le plan, puis Shift+Tab pour approuver et passer en edit mode."
-- If not → proceed with workflow below
+Check system-reminder for exact phrase "Plan mode is active." (with period):
+- If present → Call ExitPlanMode tool
+  - Wait for user approval
+  - If approved → Proceed with workflow below
+  - If declined → Stop execution
+- If not present → Proceed with workflow below directly
 
-## Workflow (edit mode only)
+## Workflow
 
 1. Execute `/notion $ARGUMENTS` - Post to Notion → **capture Notion URL from output**
 2. Execute `/memorize` - Extract and store learnings
@@ -34,13 +35,22 @@ Check system-reminder for "Plan mode is active":
 - `/wrap` - Full wrap with Quick priority
 - `/wrap D2` - Full wrap with D2 priority
 
+## Mode Detection
+
+**Important:** Detection must check for literal `"Plan mode is active."` at start of system-reminder.
+- `"Plan mode is active."` → Plan mode ON → needs ExitPlanMode
+- `"A plan file exists from plan mode at:"` → Plan mode OFF → proceed directly
+
 ## Typical workflow
 
 ```
-# 1. En plan mode
-/recap          → update plan, propose approbation
-[Shift+Tab]     → approve, passe en edit mode
+# Option 1: Depuis plan mode
+/wrap           → ExitPlanMode auto → user approves → workflow
 
-# 2. En edit mode
+# Option 2: Depuis edit mode
+/wrap           → workflow direct
+
+# Option 3: Workflow complet recommandé
+/recap          → update plan + ExitPlanMode
 /wrap           → notion + memorize + git sync
 ```
