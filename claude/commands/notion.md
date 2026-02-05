@@ -90,8 +90,18 @@ rich_text = [{"type": "text", "text": {"content": c}} for c in chunks]
 | Situation | Action | API Calls |
 |-----------|--------|-----------|
 | No marker | Create task + append code block | 2 |
-| Marker + plan modified | Update task + replace code block | 2 |
-| Marker + plan unchanged | Skip (idempotent) | 0 |
+| Marker exists | Delete old blocks + append new | 2-3 |
+| Marker exists but page 404 | Fallback: create new task | 2 |
+
+### Update Flow (when marker exists)
+
+1. Extract page_id: `grep -o 'posted:[^:]*' {plan} | cut -d: -f2`
+2. Get existing blocks: `notion_retrieve_block_children(page_id)`
+3. Delete code blocks only: `notion_delete_block(block_id)` for each code block
+4. Append new code block with plan content
+5. Update marker: `<!-- notion:posted:{page_id}:mtime:{new_timestamp} -->`
+
+**Error handling:** If page returns 404, remove marker and CREATE new task.
 
 **Content sync via code block** - shell properties + plan content as code block
 
@@ -139,7 +149,14 @@ rich_text = [{"type": "text", "text": {"content": c}} for c in chunks]
 **Output Format**:
 ```
 ✅ Notion task created: https://notion.so/...
-📋 Content appended as code block
+📋 Content appended
+```
+
+or
+
+```
+✅ Notion task updated: https://notion.so/...
+📋 Content synced (1 block replaced)
 ```
 
 **On Notion failure**:
