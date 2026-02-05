@@ -94,6 +94,32 @@ These bloat the memory index and slow down decay.
   /memory-clean (after converting non-stubs)
 ```
 
+### 5. Interactive Actions
+
+After displaying the diagnostic, use `AskUserQuestion` to propose fixes:
+
+**If gaps detected:**
+```
+AskUserQuestion:
+  question: "Appliquer les corrections ?"
+  header: "Actions"
+  options:
+    - label: "/memorize (create missing stubs)"
+      description: "Index {N} Notion tasks + {N} Plans without stubs"
+    - label: "/memory-clean (cleanup duplicates)"
+      description: "Remove {N} non-stub verbose memories"
+    - label: "Skip"
+      description: "No changes, diagnostic only"
+  multiSelect: true
+```
+
+**Based on selection:**
+- If "/memorize" selected → Execute `/memorize` skill
+- If "/memory-clean" selected → Execute `/memory-clean` skill
+- If "Skip" or no selection → End (diagnostic only)
+
+**If no gaps:** Skip AskUserQuestion, display "✓ All consistent"
+
 **Action mapping:**
 | Gap detected | Fix |
 |--------------|-----|
@@ -118,5 +144,6 @@ Display only:
 - **NO new searches** — analyze only the LLM context window
 - Works with any source (not just `/context`)
 - Synthesize, don't dump
+- **Prompt user before applying fixes** (unless all consistent)
 
 </consistency-command>

@@ -44,7 +44,7 @@ Note: Projects/Areas DBs not indexed (restricted access - use Tasks DB only).
 ```
 mcp__notion-rodlecoent__notion_query_database
   database_id: <DB_ID>
-  filter: {"property": "title", "title": {"contains": "$ARGUMENTS"}}
+  filter: {"property": "Task", "title": {"contains": "$ARGUMENTS"}}
   page_size: 10
   format: markdown
 ```
