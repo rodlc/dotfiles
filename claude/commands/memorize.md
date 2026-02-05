@@ -1,19 +1,37 @@
 ---
-description: Extract metadata to MCP Memory
+description: Extract metadata to MCP Memory (stubs + conventions)
 ---
 
-Extract metadata reusable across sessions, using tier-based storage.
+Create Memory entries to index sessions and capture reusable knowledge.
 
-## Storage Tiers
+## Memory Types
 
-| Tier | Tags | TTL | Criteria |
-|------|------|-----|----------|
-| T1 Core | `reference`, `identity` | ∞ | IDs, critical paths, never obsolete |
-| T2 Stable | `convention`, `preference` | 12 months | Workflows, established rules |
-| T3 Tooling | `tooling`, `project` | 6 months | Commands, active project context |
-| T4 Ephemeral | `temp`, `session` | 1 month | Disposable info, immediate context |
+### 1. Session Stubs (primary use)
+Minimal pointers to index completed work:
 
-**Store directly** with appropriate tag. Decay handles obsolescence.
+```
+[session-stub] {title}
+Date: {date}
+Plan: {plan_path}
+Notion: {notion_url}
+Topics: {topics}
+Outcome: {status}
+Tags: session-stub, {project}, {topics}
+```
+
+Use when: Plan exists, session completed, need persistent index.
+
+### 2. Conventions & References
+Reusable knowledge across sessions:
+
+| Tier | Tags | TTL | Use for |
+|------|------|-----|---------|
+| T1 Core | `reference`, `identity`, `critical` | ∞ | IDs, paths, never obsolete |
+| T2 Stable | `convention`, `preference`, `architecture` | 12 months | Workflows, patterns |
+| T3 Tooling | `tooling`, `project` | 6 months | Commands, active configs |
+| T4 Ephemeral | `temp`, `session` | 1 month | Immediate context |
+
+Tier auto-detected from tags. Decay handles obsolescence.
 
 ## Anti-patterns (DO NOT store)
 
@@ -21,17 +39,28 @@ Extract metadata reusable across sessions, using tier-based storage.
 - ❌ Standard CLI commands → discoverable via --help
 - ❌ Config file contents → already persisted on disk
 - ❌ Lists that change often → quickly obsolete
-- ❌ Project-specific decisions → use /notion
+- ❌ Full session content → use stub with pointers
 
 ## Workflow
 
-1. Scan session for metadata candidates
-2. Apply value test (3 questions)
-3. Check duplicates via retrieve_memory
-4. store_memory directly with appropriate tags
-5. Auto-rate via HTTP:
-   `curl -X POST http://127.0.0.1:4242/api/quality/memories/{hash}/rate -H "Content-Type: application/json" -d '{"rating":1,"feedback":"Curated learning"}'`
+1. Identify what to store:
+   - Session completed? → Create stub (Plan + Notion refs)
+   - Reusable pattern? → Create convention/reference
+2. Check duplicates via `retrieve_memory`
+3. `store_memory` with appropriate tags
+4. Auto-rate via HTTP:
+   ```
+   curl -X POST http://127.0.0.1:4242/api/quality/memories/{hash}/rate \
+     -H "Content-Type: application/json" \
+     -d '{"rating":1,"feedback":"Curated"}'
+   ```
 
 ## Output
 
-✓ N memories stored and rated +1 (or "No relevant metadata")
+```
+✓ {N} memories stored:
+  - [session-stub] {title} (tier:T3)
+  - [convention] {title} (tier:T2)
+```
+
+Or: "No relevant metadata to store"

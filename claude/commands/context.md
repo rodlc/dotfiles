@@ -24,7 +24,7 @@ mcp__memory-service__retrieve_memory
 **Tag search** (if subject maps to known tag):
 ```
 mcp__memory-service__search_by_tag
-  tag: $ARGUMENTS (lowercase)
+  tags: ["$ARGUMENTS"] (lowercase, array format)
   limit: 10
 ```
 
@@ -35,10 +35,10 @@ Query specific PARA databases instead of global search (avoids quotes/proverbs n
 
 **Database IDs:**
 ```
-Tasks:    68d1e0ee-a70a-4a27-b723-dde6ad636904
-Projects: 00bc1b0f-ebeb-4b20-b117-029cced93032
-Areas:    c0a5f573-ae66-4e41-9ead-2c9bacc7dd79
+Tasks: 68d1e0ee-a70a-4a27-b723-dde6ad636904
 ```
+
+Note: Projects/Areas DBs not indexed (restricted access - use Tasks DB only).
 
 **Query each DB in parallel** (use title contains filter):
 ```
@@ -121,6 +121,10 @@ If subject appears in 3+ memories OR spans 3+ months of activity:
 💡 Suggestion: Ce sujet a beaucoup de contexte dispersé.
    Consolider en memory de référence ? (tag: reference, {subject})
 ```
+
+### 6. Consistency check
+**IMPORTANT**: After completing sections 1-5, ALWAYS execute the `/consistency` skill.
+Do NOT skip this step. Call `/consistency` directly (no arguments needed) to validate Memory ↔ Plan ↔ Notion links.
 
 ## Error handling
 - No results: "Aucun contexte trouvé pour '{subject}'"
