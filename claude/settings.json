@@ -28,6 +28,7 @@
       "mcp__playwright__*"
     ],
     "deny": [
+      "mcp__gmail__send_email",
       "mcp__playwright__browser_evaluate",
       "mcp__playwright__browser_run_code",
       "Bash(rm -rf:*)",

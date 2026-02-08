@@ -27,7 +27,7 @@
       "command": "node",
       "args": [
         "${WORKSPACE_DIR}/mcp-servers/Gmail-MCP-Server/dist/index.js",
-        "--enabledTools=search_emails,read_email,draft_email,send_email,modify_email,list_email_labels,download_attachment"
+        "--enabledTools=search_emails,read_email,draft_email,modify_email,list_email_labels,download_attachment"
       ],
       "env": {
         "GMAIL_OAUTH_RODLECOENT": "${HOME}/.gmail-mcp-rodlecoent/gcp-oauth.keys.json",
