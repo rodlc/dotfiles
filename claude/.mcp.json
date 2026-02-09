@@ -58,6 +58,7 @@
       "args": ["run", "${WORKSPACE_DIR}/mcp-servers/mcp-raycast-clipboard/src/index.ts"]
     },
     "playwright": {
+      "disabled": true,
       "command": "npx",
       "args": ["@playwright/mcp@latest"]
     }
