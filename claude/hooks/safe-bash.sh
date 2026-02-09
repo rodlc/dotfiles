@@ -119,6 +119,8 @@ fi
 if [[ $command =~ ^cd([[:space:]]|$) ]] || \
    [[ $command =~ ^(magick|convert|exiftool|weasyprint)([[:space:]]|$) ]] || \
    [[ $command =~ ^(gh|code|open)([[:space:]]|$) ]] || \
+   [[ $command =~ ^yt-dlp([[:space:]]|$) ]] || \
+   [[ $command =~ ^command([[:space:]]|$) ]] || \
    [[ $command =~ ^ls([[:space:]]|$) ]] || \
    [[ $command =~ ^find([[:space:]]|$) ]] || \
    [[ $command =~ ^cat([[:space:]]|$) ]] || \

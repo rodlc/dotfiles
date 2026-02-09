@@ -19,6 +19,8 @@
       "Bash(node:*)",
       "Bash(magick|exiftool|weasyprint:*)",
       "Bash(playwright-cli:*)",
+      "Bash(yt-dlp:*)",
+      "Bash(command -v yt-dlp)",
       "Bash(find|grep|wc|stat|ls|cat|head|tail|echo|basename|dirname|date|pwd:*)",
       "mcp__memory-service__*",
       "mcp__notion-rodlecoent__*",
