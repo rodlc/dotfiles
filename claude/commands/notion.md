@@ -19,7 +19,7 @@ Post the current session plan to Notion Tasks.
    - Priority: From args or "Quick"
    - Do date: Today
    - Done: ✅ if "Statut: ✅" in Résultat, else ❌
-3. **Append content**: Plan as code block (chunked 2000 chars)
+3. **Append content**: Plan as single code block (server auto-chunks)
 4. **Update marker**: `<!-- notion:posted:{page_id}:mtime:{timestamp} -->`
 
 ## Workflow (--all)
@@ -46,38 +46,21 @@ From plan `# Title`:
 **Le plan EST le contenu final** - pas de reformatage.
 
 1. Create task shell (properties only)
-2. Append plan content as code block with chunked rich_text:
+2. Append plan content as single code block:
    ```json
    {
      "object": "block",
      "type": "code",
      "code": {
-       "rich_text": [
-         {"type": "text", "text": {"content": "<chunk 1 - max 2000 chars>"}},
-         {"type": "text", "text": {"content": "<chunk 2 - max 2000 chars>"}},
-         // ... up to 100 chunks (200k chars max)
-       ],
+       "rich_text": [{"type": "text", "text": {"content": "<full plan content>"}}],
        "language": "plain text"
      }
    }
    ```
 3. Update marker in plan file
 
-**Chunking Algorithm**:
-```python
-# Split content into 2000-char chunks
-content = plan_file_content
-chunks = []
-while content:
-    chunks.append(content[:2000])
-    content = content[2000:]
-rich_text = [{"type": "text", "text": {"content": c}} for c in chunks]
-```
-
-**Rationale**:
-- Box-drawing renders correctly in monospace code blocks
-- Notion allows 100 rich_text elements per block (2000 chars each = ~200k total)
-- Single code block with chunked array avoids multiple separate blocks
+**⚠ DO NOT chunk manually** — the MCP server auto-chunks rich_text
+(>2000 chars) server-side. Send full content in a single rich_text item.
 
 ## Marker System
 
@@ -174,5 +157,5 @@ Execute in sequence, verify each completion:
    - Priority: from args or "Quick"
    - **Do date: today's date** (critical)
    - Done: checkbox false
-2. `notion_append_block_children` with plan content as code block
+2. `notion_append_block_children` with plan content as single code block (no manual chunking)
 3. Update plan file with `<!-- notion:posted:{page_id}:mtime:{timestamp} -->` marker
