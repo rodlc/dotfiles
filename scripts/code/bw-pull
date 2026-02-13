@@ -180,4 +180,26 @@ for gmail_dir in "$HOME/.gmail-mcp-rodolphe" "$HOME/.gmail-mcp-rodlecoent"; do
 done
 
 echo ""
+
+# === GPG key sync ===
+if ! rbw get "$BW_ITEM_GPG" &>/dev/null; then
+    echo "⚠️  '$BW_ITEM_GPG' not found in Bitwarden (optional)"
+else
+    bw_gpg=$(rbw get "$BW_ITEM_GPG")
+    if [[ -z "$bw_gpg" ]]; then
+        echo "⚠️  GPG key empty in Bitwarden"
+    else
+        # Check if key already imported
+        existing_fp=$(echo "$bw_gpg" | gpg --import-options show-only --import 2>/dev/null | grep -m1 "sec" | awk '{print $2}' | cut -d'/' -f2)
+        if gpg --list-secret-keys "$existing_fp" &>/dev/null 2>&1; then
+            echo "✅ GPG key already imported ($existing_fp)"
+        else
+            echo "🔑 Importing GPG key from Bitwarden..."
+            echo "$bw_gpg" | gpg --import
+            echo "✅ GPG key imported (run 'gpg --edit-key <ID>' → trust → 5 if needed)"
+        fi
+    fi
+fi
+
+echo ""
 echo "✅ Sync complete"

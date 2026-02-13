@@ -125,6 +125,15 @@ if [ ! -f "$HOME/.env" ]; then
     echo ""
 fi
 
+# Restore zsh history from workspace if available
+WORKSPACE_HISTORY="$HOME/Code/rodlc/workspace/shell/zsh_history"
+if [[ -f "$WORKSPACE_HISTORY" && ! -f "$HOME/.zsh_history" ]]; then
+    cp "$WORKSPACE_HISTORY" "$HOME/.zsh_history"
+    echo "✅ zsh_history restored from workspace"
+elif [[ -f "$WORKSPACE_HISTORY" && -f "$HOME/.zsh_history" ]]; then
+    echo "✅ zsh_history already exists"
+fi
+
 echo "=====> Creating symlinks"
 
 # Shell config
@@ -292,6 +301,16 @@ fi
 
 echo ""
 echo "✓ Dotfiles installed"
+echo ""
+
+# macOS defaults (optional, run once on fresh install)
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    read -p "Configure macOS defaults? (Dock, Finder, keyboard...) [y/N] " macos_choice
+    if [[ "$macos_choice" =~ ^[Yy]$ ]]; then
+        bash "$DOTFILES_DIR/macos.sh"
+    fi
+fi
+
 echo ""
 echo "💡 To install workspace + MCP servers, run: ./workspace-install.sh"
 echo ""

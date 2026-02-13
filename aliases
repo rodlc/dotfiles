@@ -115,6 +115,10 @@ alias plans-sync='~/Code/rodlc/workspace/scripts/plans-sync'
 # System Maintenance
 # ============================================================================
 alias cleanup-caches='~/Code/rodlc/dotfiles/scripts/cleanup-caches.sh'
+alias cleanup-home='~/Code/rodlc/dotfiles/scripts/system/cleanup-home.sh'
 
 # Homebrew multi-user permissions fix
 alias brew-fix='~/Code/rodlc/dotfiles/scripts/brew-fix-permissions'
+
+# Zsh history sync to workspace
+alias zsh-history-sync='cp ~/.zsh_history ~/Code/rodlc/workspace/shell/zsh_history && echo "✅ zsh_history synced to workspace"'

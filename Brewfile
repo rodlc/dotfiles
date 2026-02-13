@@ -29,10 +29,24 @@ brew "jq"
 brew "libpq", link: true
 # Media player based on MPlayer and mplayer2
 brew "mpv"
-# Manage multiple Node.js versions
-brew "nvm"
-# Cryptography and SSL/TLS Toolkit
-brew "openssl@3.5"
+# Zsh plugin manager
+brew "antidote"
+# Cross-shell prompt
+brew "starship"
+# Per-directory environment variables
+brew "direnv"
+# Fast Node manager (replaces nvm)
+brew "fnm"
+# Unofficial Bitwarden CLI (Rust)
+brew "rbw"
+# Official Bitwarden CLI
+brew "bitwarden-cli"
+# Provides envsubst
+brew "gettext"
+# Go version manager
+brew "goenv"
+# Ookla speed test
+brew "speedtest-cli"
 # 7-Zip (high compression file archiver) implementation
 brew "p7zip"
 # Port of pdftk in java
@@ -70,6 +84,10 @@ cask "iterm2"
 cask "kap"
 # Password manager app
 cask "keepassxc"
+# Primary editor
+cask "zed"
+# Battery charge limiter
+cask "battery"
 # Open-source code editor
 cask "visual-studio-code"
 vscode "alexcvzz.vscode-sqlite"
