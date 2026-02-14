@@ -7,29 +7,95 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/.bw-lib.sh"
 
-marker="$HOME/.env.bw-synced"
-
-if [[ -f "$marker" ]]; then
-    echo "Last sync: $(stat -f '%Sm' -t '%Y-%m-%d %H:%M' "$marker")"
-
-    if [[ -f "$ENV_FILE" && "$ENV_FILE" -nt "$marker" ]]; then
-        echo "⚠️  ~/.env modified since last sync"
-    fi
-else
-    echo "Never synced"
-fi
-
-echo ""
 ensure_rbw
 
+echo "📊 Bitwarden Sync Status"
+echo ""
+echo "┌──────────────┬────────────────┬────────────────┬──────────┐"
+echo "│ Item         │ Bitwarden      │ Local          │ Sync     │"
+echo "├──────────────┼────────────────┼────────────────┼──────────┤"
+
+# === .env ===
+bw_env="no"
+local_env="no"
+sync_env="n/a"
+
 if rbw get "$BW_ITEM_SECRETS" &>/dev/null; then
-    echo "✅ '$BW_ITEM_SECRETS' exists in Bitwarden"
-else
-    echo "❌ '$BW_ITEM_SECRETS' not found. Run: bw-bootstrap"
+    bw_env="yes"
 fi
 
-if rbw get "$BW_ITEM_SSH" &>/dev/null; then
-    echo "✅ '$BW_ITEM_SSH' exists in Bitwarden"
-else
-    echo "❌ '$BW_ITEM_SSH' not found. Run: bw-bootstrap"
+if [[ -f "$ENV_FILE" ]]; then
+    local_env="yes"
 fi
+
+if [[ "$bw_env" == "yes" && "$local_env" == "yes" ]]; then
+    bw_content=$(rbw get "$BW_ITEM_SECRETS" 2>/dev/null)
+    local_content=$(cat "$ENV_FILE")
+    if [[ "$bw_content" == "$local_content" ]]; then
+        sync_env="ok"
+    else
+        sync_env="DIFF"
+    fi
+fi
+
+printf "│ %-12s │ %-14s │ %-14s │ %-8s │\n" ".env" "$bw_env" "$local_env" "$sync_env"
+
+# === SSH Key ===
+bw_ssh="no"
+local_ssh="no"
+sync_ssh="n/a"
+
+SSH_KEY="$HOME/.ssh/id_ed25519"
+
+if rbw get "$BW_ITEM_SSH" &>/dev/null; then
+    bw_ssh="yes"
+fi
+
+if [[ -f "$SSH_KEY" ]]; then
+    local_ssh="yes"
+fi
+
+if [[ "$bw_ssh" == "yes" && "$local_ssh" == "yes" ]]; then
+    bw_key=$(rbw get "$BW_ITEM_SSH" 2>/dev/null)
+    local_key=$(cat "$SSH_KEY")
+    if [[ "$bw_key" == "$local_key" ]]; then
+        sync_ssh="ok"
+    else
+        sync_ssh="DIFF"
+    fi
+fi
+
+printf "│ %-12s │ %-14s │ %-14s │ %-8s │\n" "SSH Key" "$bw_ssh" "$local_ssh" "$sync_ssh"
+
+# === GPG Key ===
+bw_gpg="no"
+local_gpg="no"
+sync_gpg="n/a"
+
+GPG_KEY_ID=$(gpg --list-secret-keys --keyid-format long 2>/dev/null | grep sec | head -1 | awk '{print $2}' | cut -d'/' -f2 || true)
+
+if rbw get "$BW_ITEM_GPG" &>/dev/null; then
+    bw_gpg="yes"
+fi
+
+if [[ -n "$GPG_KEY_ID" ]]; then
+    local_gpg="yes"
+fi
+
+if [[ "$bw_gpg" == "yes" && "$local_gpg" == "yes" ]]; then
+    bw_gpg_content=$(rbw get "$BW_ITEM_GPG" 2>/dev/null)
+    local_gpg_content=$(gpg --export-secret-keys --armor "$GPG_KEY_ID" 2>/dev/null)
+    if [[ "$bw_gpg_content" == "$local_gpg_content" ]]; then
+        sync_gpg="ok"
+    else
+        sync_gpg="DIFF"
+    fi
+fi
+
+printf "│ %-12s │ %-14s │ %-14s │ %-8s │\n" "GPG Key" "$bw_gpg" "$local_gpg" "$sync_gpg"
+
+echo "└──────────────┴────────────────┴────────────────┴──────────┘"
+echo ""
+echo "Legend: ok = in sync  DIFF = out of sync  n/a = cannot compare"
+echo ""
+echo "Run 'bw-push' to update Bitwarden or 'bw-pull' to update local"

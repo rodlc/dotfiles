@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# bw-push - Sync local → Bitwarden (env + SSH)
+# bw-push - Detect local changes and guide user to update Bitwarden
 #
 set -euo pipefail
 
@@ -9,62 +9,46 @@ source "$SCRIPT_DIR/.bw-lib.sh"
 
 ensure_rbw
 
-echo "📤 Syncing local → Bitwarden..."
+echo "📤 Checking local → Bitwarden sync status..."
 echo ""
 
 # === ~/.env sync ===
 if [[ ! -f "$ENV_FILE" ]]; then
-    echo "⚠️  $ENV_FILE not found. Skipping env sync."
+    echo "⏭️  $ENV_FILE not found. Skipping env sync."
 else
     if ! rbw get "$BW_ITEM_SECRETS" &>/dev/null; then
-        # Create new
-        echo "📝 Creating '$BW_ITEM_SECRETS' in Bitwarden..."
-        local_content=$(cat "$ENV_FILE")
-        if rbw_create_notes "$BW_ITEM_SECRETS" "$local_content"; then
-            echo "✅ '$BW_ITEM_SECRETS' created"
-        else
-            echo "❌ Failed to create '$BW_ITEM_SECRETS'"
-        fi
+        # Item doesn't exist in Bitwarden
+        echo "┌─────────────────────────────────────────────────────────────┐"
+        echo "│ 📝 .env : Bitwarden item not found                         │"
+        echo "└─────────────────────────────────────────────────────────────┘"
+        echo ""
+        echo "► Action required:"
+        echo "  1. Open Bitwarden app"
+        echo "  2. Create a new secure note named '$BW_ITEM_SECRETS'"
+        echo "  3. Copy and paste the content from the file below"
+        echo ""
+        ${EDITOR:-nano} "$ENV_FILE"
     else
-        # Compare and update if different
+        # Compare local vs Bitwarden
         bw_content=$(rbw get "$BW_ITEM_SECRETS" 2>/dev/null)
         local_content=$(cat "$ENV_FILE")
 
         if [[ "$bw_content" == "$local_content" ]]; then
-            echo "✅ ~/.env in sync"
+            echo "✅ .env in sync"
         else
-            echo "⚠️  ~/.env CONFLICT: local ≠ Bitwarden"
+            echo "┌─────────────────────────────────────────────────────────────┐"
+            echo "│ ⚠️  .env : local ≠ Bitwarden                                │"
+            echo "└─────────────────────────────────────────────────────────────┘"
             echo ""
-            read -p "[O]verwrite Bitwarden / [S]kip / [D]iff ? " choice
-            case "$choice" in
-                [Oo]*)
-                    if rbw_edit_notes "$BW_ITEM_SECRETS" "$local_content"; then
-                        echo "✅ Bitwarden updated"
-                    else
-                        echo "❌ Failed to update Bitwarden"
-                    fi
-                    ;;
-                [Dd]*)
-                    diff -u <(echo "$bw_content") <(echo "$local_content") || true
-                    echo ""
-                    read -p "[O]verwrite Bitwarden / [S]kip ? " choice2
-                    case "$choice2" in
-                        [Oo]*)
-                            if rbw_edit_notes "$BW_ITEM_SECRETS" "$local_content"; then
-                                echo "✅ Bitwarden updated"
-                            else
-                                echo "❌ Failed to update Bitwarden"
-                            fi
-                            ;;
-                        *)
-                            echo "⏭️  Skipped"
-                            ;;
-                    esac
-                    ;;
-                *)
-                    echo "⏭️  Skipped"
-                    ;;
-            esac
+            echo "Diff (local vs Bitwarden):"
+            diff -u <(echo "$bw_content") <(echo "$local_content") || true
+            echo ""
+            echo "► Action required:"
+            echo "  1. Review the changes in your editor"
+            echo "  2. Copy the content you want to push"
+            echo "  3. Open Bitwarden app → '$BW_ITEM_SECRETS' → paste"
+            echo ""
+            ${EDITOR:-nano} "$ENV_FILE"
         fi
     fi
 fi
@@ -73,54 +57,50 @@ echo ""
 
 # === SSH key sync ===
 SSH_KEY="$HOME/.ssh/id_ed25519"
-SSH_PUB="$HOME/.ssh/id_ed25519.pub"
 if [[ ! -f "$SSH_KEY" ]]; then
-    echo "⚠️  $SSH_KEY not found. Skipping SSH sync."
+    echo "⏭️  $SSH_KEY not found. Skipping SSH sync."
 else
     if ! rbw get "$BW_ITEM_SSH" &>/dev/null; then
-        # Create new SSH Key
-        echo "🔑 Creating '$BW_ITEM_SSH' in Bitwarden..."
-        private_key=$(cat "$SSH_KEY")
-
-        if rbw_create_notes "$BW_ITEM_SSH" "$private_key"; then
-            echo "✅ '$BW_ITEM_SSH' created"
-        else
-            echo "❌ Failed to create '$BW_ITEM_SSH'"
-        fi
+        # Item doesn't exist in Bitwarden
+        local_fp=$(ssh-keygen -lf "$SSH_KEY" 2>/dev/null | awk '{print $2}')
+        echo "┌─────────────────────────────────────────────────────────────┐"
+        echo "│ 🔑 SSH Key : Bitwarden item not found                      │"
+        echo "└─────────────────────────────────────────────────────────────┘"
+        echo ""
+        echo "Local fingerprint: $local_fp"
+        echo ""
+        echo "► Action required:"
+        echo "  1. Open Bitwarden app"
+        echo "  2. Create a new secure note named '$BW_ITEM_SSH'"
+        echo "  3. Copy your private key:"
+        echo "       cat $SSH_KEY | pbcopy"
+        echo "  4. Paste into Bitwarden"
     else
-        # Compare and update if different
+        # Compare fingerprints
         bw_key=$(rbw get "$BW_ITEM_SSH" 2>/dev/null)
         local_key=$(cat "$SSH_KEY")
 
         if [[ "$bw_key" == "$local_key" ]]; then
             echo "✅ SSH key in sync"
         else
-            echo "⚠️  SSH key CONFLICT: local ≠ Bitwarden"
             local_fp=$(ssh-keygen -lf "$SSH_KEY" 2>/dev/null | awk '{print $2}')
-
             if [[ -n "$bw_key" ]]; then
                 bw_fp=$(echo "$bw_key" | ssh-keygen -lf /dev/stdin 2>/dev/null | awk '{print $2}')
             else
                 bw_fp="(empty)"
             fi
 
-            echo "   Local:     $local_fp"
-            echo "   Bitwarden: $bw_fp"
+            echo "┌─────────────────────────────────────────────────────────────┐"
+            echo "│ ⚠️  SSH Key : local ≠ Bitwarden                             │"
+            echo "└─────────────────────────────────────────────────────────────┘"
             echo ""
-            read -p "[O]verwrite Bitwarden / [S]kip ? " choice
-            case "$choice" in
-                [Oo]*)
-                    private_key=$(cat "$SSH_KEY")
-                    if rbw_edit_notes "$BW_ITEM_SSH" "$private_key"; then
-                        echo "✅ Bitwarden updated"
-                    else
-                        echo "❌ Failed to update Bitwarden"
-                    fi
-                    ;;
-                *)
-                    echo "⏭️  Skipped"
-                    ;;
-            esac
+            echo "Local:     $local_fp"
+            echo "Bitwarden: $bw_fp"
+            echo ""
+            echo "► Action required:"
+            echo "  1. Copy your local private key:"
+            echo "       cat $SSH_KEY | pbcopy"
+            echo "  2. Open Bitwarden app → '$BW_ITEM_SSH' → paste"
         fi
     fi
 fi
@@ -128,41 +108,44 @@ fi
 echo ""
 
 # === GPG key sync ===
-GPG_KEY_ID=$(gpg --list-secret-keys --keyid-format long 2>/dev/null | grep sec | head -1 | awk '{print $2}' | cut -d'/' -f2)
+GPG_KEY_ID=$(gpg --list-secret-keys --keyid-format long 2>/dev/null | grep sec | head -1 | awk '{print $2}' | cut -d'/' -f2 || true)
 
 if [[ -z "$GPG_KEY_ID" ]]; then
-    echo "⚠️  No GPG secret key found locally. Skipping GPG sync."
+    echo "⏭️  No GPG secret key found locally. Skipping GPG sync."
 else
     echo "🔐 GPG key: $GPG_KEY_ID"
     local_gpg=$(gpg --export-secret-keys --armor "$GPG_KEY_ID" 2>/dev/null)
 
     if ! rbw get "$BW_ITEM_GPG" &>/dev/null; then
-        echo "📝 Creating '$BW_ITEM_GPG' in Bitwarden..."
-        if rbw_create_notes "$BW_ITEM_GPG" "$local_gpg"; then
-            echo "✅ '$BW_ITEM_GPG' created"
-        else
-            echo "❌ Failed to create '$BW_ITEM_GPG'"
-        fi
+        echo "┌─────────────────────────────────────────────────────────────┐"
+        echo "│ 🔑 GPG Key : Bitwarden item not found                      │"
+        echo "└─────────────────────────────────────────────────────────────┘"
+        echo ""
+        echo "► Action required:"
+        echo "  1. Export your GPG key to clipboard:"
+        echo "       gpg --export-secret-keys --armor $GPG_KEY_ID | pbcopy"
+        echo "  2. Open Bitwarden app"
+        echo "  3. Create a new secure note named '$BW_ITEM_GPG'"
+        echo "  4. Paste the key"
     else
         bw_gpg=$(rbw get "$BW_ITEM_GPG" 2>/dev/null)
         if [[ "$bw_gpg" == "$local_gpg" ]]; then
             echo "✅ GPG key in sync"
         else
-            echo "⚠️  GPG key CONFLICT: local ≠ Bitwarden"
-            read -p "[O]verwrite Bitwarden / [S]kip ? " choice
-            case "$choice" in
-                [Oo]*)
-                    if rbw_edit_notes "$BW_ITEM_GPG" "$local_gpg"; then
-                        echo "✅ Bitwarden updated"
-                    else
-                        echo "❌ Failed to update Bitwarden"
-                    fi ;;
-                *) echo "⏭️  Skipped" ;;
-            esac
+            echo "┌─────────────────────────────────────────────────────────────┐"
+            echo "│ ⚠️  GPG Key : local ≠ Bitwarden                             │"
+            echo "└─────────────────────────────────────────────────────────────┘"
+            echo ""
+            echo "► Action required:"
+            echo "  1. Export your GPG key to clipboard:"
+            echo "       gpg --export-secret-keys --armor $GPG_KEY_ID | pbcopy"
+            echo "  2. Open Bitwarden app → '$BW_ITEM_GPG' → paste"
         fi
     fi
 fi
 
-touch "$HOME/.env.bw-synced"
 echo ""
-echo "✅ Sync complete"
+echo "✅ Status check complete"
+
+# Update marker for MOTD (indicates last sync check)
+touch "$HOME/.env.bw-synced"
