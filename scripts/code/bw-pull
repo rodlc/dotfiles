@@ -54,65 +54,67 @@ fi
 
 echo ""
 
-# === SSH key sync ===
-SSH_KEY="$HOME/.ssh/id_ed25519_rodlc"
+# === SSH keys sync ===
+for i in "${!SSH_BW_NAMES[@]}"; do
+    bw_name="${SSH_BW_NAMES[$i]}"
+    ssh_key="${SSH_LOCAL_PATHS[$i]}"
 
-if ! rbw get "$BW_ITEM_SSH" &>/dev/null; then
-    echo "❌ '$BW_ITEM_SSH' not found in Bitwarden"
-else
-    bw_key=$(rbw get "$BW_ITEM_SSH")
-
-    if [[ -z "$bw_key" ]]; then
-        echo "⚠️  SSH private key empty in Bitwarden"
-    elif [[ ! -f "$SSH_KEY" ]]; then
-        # Local SSH key doesn't exist - show fingerprint and ask confirmation
-        bw_fp=$(echo "$bw_key" | ssh-keygen -lf /dev/stdin 2>/dev/null | awk '{print $2}')
-        echo "┌─────────────────────────────────────────────────────────────┐"
-        echo "│ 🔑 SSH Key : local file not found                          │"
-        echo "└─────────────────────────────────────────────────────────────┘"
-        echo ""
-        echo "Bitwarden fingerprint: $bw_fp"
-        echo ""
-        echo "► Action required:"
-        echo "  1. Verify fingerprint matches your key"
-        echo "  2. Press Enter to restore from Bitwarden, or Ctrl+C to cancel"
-        read -r
-
-        mkdir -p "$HOME/.ssh" && chmod 700 "$HOME/.ssh"
-        echo "$bw_key" > "$SSH_KEY"
-        chmod 600 "$SSH_KEY"
-        ssh-add --apple-use-keychain "$SSH_KEY" 2>/dev/null || true
-        echo "  ✅ SSH key restored to $SSH_KEY"
+    if ! rbw get "$bw_name" &>/dev/null; then
+        echo "❌ '$bw_name' not found in Bitwarden"
     else
-        # Compare keys
-        local_key=$(cat "$SSH_KEY")
-        if [[ "$bw_key" == "$local_key" ]]; then
-            echo "✅ SSH key in sync"
-        else
-            local_fp=$(ssh-keygen -lf "$SSH_KEY" 2>/dev/null | awk '{print $2}')
-            bw_fp=$(echo "$bw_key" | ssh-keygen -lf /dev/stdin 2>/dev/null | awk '{print $2}')
+        bw_key=$(rbw get "$bw_name")
 
+        if [[ -z "$bw_key" ]]; then
+            echo "⚠️  '$bw_name' empty in Bitwarden"
+        elif [[ ! -f "$ssh_key" ]]; then
+            bw_fp=$(echo "$bw_key" | ssh-keygen -lf /dev/stdin 2>/dev/null | awk '{print $2}')
             echo "┌─────────────────────────────────────────────────────────────┐"
-            echo "│ ⚠️  SSH Key : Bitwarden ≠ local                             │"
+            echo "│ 🔑 $bw_name : local file not found                         │"
             echo "└─────────────────────────────────────────────────────────────┘"
             echo ""
-            echo "Bitwarden: $bw_fp"
-            echo "Local:     $local_fp"
+            echo "Bitwarden fingerprint: $bw_fp"
             echo ""
             echo "► Action required:"
-            echo "  1. Review fingerprints above"
-            echo "  2. Backup current: cp $SSH_KEY $SSH_KEY.backup.\$(date +%Y%m%d)"
-            echo "  3. Press Enter to restore from Bitwarden, or Ctrl+C to cancel"
+            echo "  1. Verify fingerprint matches your key"
+            echo "  2. Press Enter to restore from Bitwarden, or Ctrl+C to cancel"
             read -r
 
-            cp "$SSH_KEY" "$SSH_KEY.backup.$(date +%Y%m%d)" 2>/dev/null || true
-            echo "$bw_key" > "$SSH_KEY"
-            chmod 600 "$SSH_KEY"
-            ssh-add --apple-use-keychain "$SSH_KEY" 2>/dev/null || true
-            echo "  ✅ SSH key restored from Bitwarden"
+            mkdir -p "$HOME/.ssh" && chmod 700 "$HOME/.ssh"
+            echo "$bw_key" > "$ssh_key"
+            chmod 600 "$ssh_key"
+            ssh-add --apple-use-keychain "$ssh_key" 2>/dev/null || true
+            echo "  ✅ $bw_name restored to $ssh_key"
+        else
+            local_key=$(cat "$ssh_key")
+            if [[ "$bw_key" == "$local_key" ]]; then
+                echo "✅ $bw_name in sync"
+            else
+                local_fp=$(ssh-keygen -lf "$ssh_key" 2>/dev/null | awk '{print $2}')
+                bw_fp=$(echo "$bw_key" | ssh-keygen -lf /dev/stdin 2>/dev/null | awk '{print $2}')
+
+                echo "┌─────────────────────────────────────────────────────────────┐"
+                echo "│ ⚠️  $bw_name : Bitwarden ≠ local                            │"
+                echo "└─────────────────────────────────────────────────────────────┘"
+                echo ""
+                echo "Bitwarden: $bw_fp"
+                echo "Local:     $local_fp"
+                echo ""
+                echo "► Action required:"
+                echo "  1. Review fingerprints above"
+                echo "  2. Backup current: cp $ssh_key $ssh_key.backup.\$(date +%Y%m%d)"
+                echo "  3. Press Enter to restore from Bitwarden, or Ctrl+C to cancel"
+                read -r
+
+                cp "$ssh_key" "$ssh_key.backup.$(date +%Y%m%d)" 2>/dev/null || true
+                echo "$bw_key" > "$ssh_key"
+                chmod 600 "$ssh_key"
+                ssh-add --apple-use-keychain "$ssh_key" 2>/dev/null || true
+                echo "  ✅ $bw_name restored from Bitwarden"
+            fi
         fi
     fi
-fi
+    echo ""
+done
 
 echo ""
 echo "✅ Status check complete"

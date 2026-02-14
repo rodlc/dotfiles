@@ -221,7 +221,7 @@ symlink "$DOTFILES_DIR/claude/hooks/auto-approve-skills.sh" "$HOME/.claude/hooks
 # Claude skills (all entries in dotfiles)
 for skill in "$DOTFILES_DIR/claude/skills"/*; do
   [ -e "$skill" ] || continue
-  local name="$(basename "$skill")"
+  name="$(basename "$skill")"
   backup "$HOME/.claude/skills/$name"
   symlink "$skill" "$HOME/.claude/skills/$name"
 done
