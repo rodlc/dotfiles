@@ -7,7 +7,7 @@
 
     <key>ProgramArguments</key>
     <array>
-        <string>__HOME__/Code/rodlc/dotfiles/scripts/backup-memory.sh</string>
+        <string>__HOME__/Code/rodlc/dotfiles/scripts/system/backup-memory.sh</string>
     </array>
 
     <key>StartCalendarInterval</key>
