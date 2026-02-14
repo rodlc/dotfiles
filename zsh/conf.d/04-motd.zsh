@@ -149,6 +149,14 @@ if [[ -o login ]]; then
         return
       fi
     done
+    # Skills drift check: detect non-symlink entries
+    for entry in ~/.claude/skills/*; do
+      [[ ! -e "$entry" ]] && continue
+      if [[ ! -L "$entry" ]]; then
+        echo "🌊 Skill drift: $(basename "$entry") is not a symlink. Run: df-install"
+        return
+      fi
+    done
   }
   check_dotfiles_symlinks
 fi

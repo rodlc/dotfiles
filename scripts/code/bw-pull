@@ -1,67 +1,53 @@
 #!/bin/bash
 #
-# bw-pull - Sync Bitwarden → local (env + SSH)
+# bw-pull - Detect Bitwarden changes and guide user to update local
 #
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/.bw-lib.sh"
 
-# Use rbw for env (faster), bw for SSH (needs JSON parsing)
 ensure_rbw
 
-echo "📥 Syncing Bitwarden → local..."
+echo "📥 Checking Bitwarden → local sync status..."
 echo ""
 
 # === ~/.env sync ===
 if ! rbw get "$BW_ITEM_SECRETS" &>/dev/null; then
-    echo "⚠️  '$BW_ITEM_SECRETS' not found in Bitwarden"
+    echo "❌ '$BW_ITEM_SECRETS' not found in Bitwarden"
 else
     bw_content=$(rbw get "$BW_ITEM_SECRETS")
 
     if [[ ! -f "$ENV_FILE" ]]; then
-        # Restore from Bitwarden
-        echo "📝 Restoring ~/.env from Bitwarden..."
-        echo "$bw_content" > "$ENV_FILE"
-        chmod 600 "$ENV_FILE"
-
-        # Re-add local variables (not stored in Bitwarden)
-        if ! grep -q "^export WORKSPACE_DIR=" "$ENV_FILE"; then
-            WORKSPACE_DIR="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}"
-            echo "export WORKSPACE_DIR=\"$WORKSPACE_DIR\"" >> "$ENV_FILE"
-            echo "-----> Added WORKSPACE_DIR (local variable)"
-        fi
-
-        echo "✅ ~/.env restored"
+        # Local file doesn't exist
+        echo "┌─────────────────────────────────────────────────────────────┐"
+        echo "│ 📝 .env : local file not found                             │"
+        echo "└─────────────────────────────────────────────────────────────┘"
+        echo ""
+        echo "► Action required:"
+        echo "  1. Paste the content from Bitwarden → '$BW_ITEM_SECRETS'"
+        echo "  2. Don't forget to add WORKSPACE_DIR if needed"
+        echo ""
+        touch "$ENV_FILE" && chmod 600 "$ENV_FILE"
+        ${EDITOR:-nano} "$ENV_FILE"
     else
+        # Compare Bitwarden vs local
         local_content=$(cat "$ENV_FILE")
         if [[ "$bw_content" == "$local_content" ]]; then
-            echo "✅ ~/.env in sync"
+            echo "✅ .env in sync"
         else
-            echo "⚠️  ~/.env CONFLICT: Bitwarden ≠ local"
+            echo "┌─────────────────────────────────────────────────────────────┐"
+            echo "│ ⚠️  .env : Bitwarden ≠ local                                │"
+            echo "└─────────────────────────────────────────────────────────────┘"
             echo ""
-            read -p "[O]verwrite local / [S]kip / [D]iff ? " choice
-            case "$choice" in
-                [Oo]*)
-                    cp "$ENV_FILE" "$ENV_FILE.backup.$(date +%Y%m%d)"
-                    echo "$bw_content" > "$ENV_FILE"
-
-                    # Re-add local variables (not stored in Bitwarden)
-                    if ! grep -q "^export WORKSPACE_DIR=" "$ENV_FILE"; then
-                        WORKSPACE_DIR="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}"
-                        echo "export WORKSPACE_DIR=\"$WORKSPACE_DIR\"" >> "$ENV_FILE"
-                        echo "-----> Added WORKSPACE_DIR (local variable)"
-                    fi
-
-                    echo "✅ Local updated (backup saved)"
-                    ;;
-                [Dd]*)
-                    diff -u <(echo "$local_content") <(echo "$bw_content") || true
-                    ;;
-                *)
-                    echo "⏭️  Skipped"
-                    ;;
-            esac
+            echo "Diff (local vs Bitwarden):"
+            diff -u <(echo "$local_content") <(echo "$bw_content") || true
+            echo ""
+            echo "► Action required:"
+            echo "  1. Review the changes in your editor"
+            echo "  2. Update ~/.env with content from Bitwarden"
+            echo ""
+            ${EDITOR:-nano} "$ENV_FILE"
         fi
     fi
 fi
@@ -69,115 +55,58 @@ fi
 echo ""
 
 # === SSH key sync ===
-# Use rbw for SSH key
-ensure_rbw
-
 SSH_KEY="$HOME/.ssh/id_ed25519"
-SSH_PUB="$HOME/.ssh/id_ed25519.pub"
 
 if ! rbw get "$BW_ITEM_SSH" &>/dev/null; then
-    echo "⚠️  '$BW_ITEM_SSH' not found in Bitwarden"
+    echo "❌ '$BW_ITEM_SSH' not found in Bitwarden"
 else
-    # Get private key (stored as password/note in rbw)
     bw_key=$(rbw get "$BW_ITEM_SSH")
-
-    # Try to get public key from custom field
-    bw_pub=$(rbw get "$BW_ITEM_SSH" --field "public key" 2>/dev/null || rbw get "$BW_ITEM_SSH" --field "Public Key" 2>/dev/null || echo "")
 
     if [[ -z "$bw_key" ]]; then
         echo "⚠️  SSH private key empty in Bitwarden"
     elif [[ ! -f "$SSH_KEY" ]]; then
-        # Restore from Bitwarden
-        echo "🔑 Restoring SSH key from Bitwarden..."
-        mkdir -p "$HOME/.ssh" && chmod 700 "$HOME/.ssh"
-        echo "$bw_key" > "$SSH_KEY"
-        chmod 600 "$SSH_KEY"
-
-        if [[ -n "$bw_pub" ]]; then
-            echo "$bw_pub" > "$SSH_PUB"
-        else
-            ssh-keygen -y -f "$SSH_KEY" > "$SSH_PUB"
-        fi
-
-        ssh-add --apple-use-keychain "$SSH_KEY" 2>/dev/null || true
-        echo "✅ SSH key restored"
+        # Local SSH key doesn't exist
+        bw_fp=$(echo "$bw_key" | ssh-keygen -lf /dev/stdin 2>/dev/null | awk '{print $2}')
+        echo "┌─────────────────────────────────────────────────────────────┐"
+        echo "│ 🔑 SSH Key : local key not found                           │"
+        echo "└─────────────────────────────────────────────────────────────┘"
+        echo ""
+        echo "Bitwarden fingerprint: $bw_fp"
+        echo ""
+        echo "► Action required:"
+        echo "  1. Go to Bitwarden app → '$BW_ITEM_SSH'"
+        echo "  2. Copy the private key"
+        echo "  3. Save it to $SSH_KEY"
+        echo ""
+        echo "Then run:"
+        echo "  mkdir -p ~/.ssh && chmod 700 ~/.ssh"
+        echo "  chmod 600 $SSH_KEY"
+        echo "  ssh-add --apple-use-keychain $SSH_KEY"
     else
+        # Compare keys
         local_key=$(cat "$SSH_KEY")
         if [[ "$bw_key" == "$local_key" ]]; then
             echo "✅ SSH key in sync"
         else
-            echo "⚠️  SSH key CONFLICT: Bitwarden ≠ local"
-
-            if [[ -n "$bw_key" ]]; then
-                bw_fp=$(echo "$bw_key" | ssh-keygen -lf /dev/stdin 2>/dev/null | awk '{print $2}')
-            else
-                bw_fp="(empty)"
-            fi
-
             local_fp=$(ssh-keygen -lf "$SSH_KEY" 2>/dev/null | awk '{print $2}')
-            echo "   Bitwarden: $bw_fp"
-            echo "   Local:     $local_fp"
+            bw_fp=$(echo "$bw_key" | ssh-keygen -lf /dev/stdin 2>/dev/null | awk '{print $2}')
+
+            echo "┌─────────────────────────────────────────────────────────────┐"
+            echo "│ ⚠️  SSH Key : Bitwarden ≠ local                             │"
+            echo "└─────────────────────────────────────────────────────────────┘"
             echo ""
-            read -p "[O]verwrite local / [S]kip ? " choice
-            case "$choice" in
-                [Oo]*)
-                    cp "$SSH_KEY" "$SSH_KEY.backup.$(date +%Y%m%d)"
-                    echo "$bw_key" > "$SSH_KEY"
-                    chmod 600 "$SSH_KEY"
-
-                    if [[ -n "$bw_pub" ]]; then
-                        echo "$bw_pub" > "$SSH_PUB"
-                    else
-                        ssh-keygen -y -f "$SSH_KEY" > "$SSH_PUB"
-                    fi
-
-                    ssh-add --apple-use-keychain "$SSH_KEY" 2>/dev/null || true
-                    echo "✅ Local updated (backup saved)"
-                    ;;
-                *)
-                    echo "⏭️  Skipped"
-                    ;;
-            esac
+            echo "Bitwarden: $bw_fp"
+            echo "Local:     $local_fp"
+            echo ""
+            echo "► Action required:"
+            echo "  1. Go to Bitwarden app → '$BW_ITEM_SSH'"
+            echo "  2. Copy the private key you want to use"
+            echo "  3. Replace $SSH_KEY"
+            echo ""
+            echo "Backup current key: cp $SSH_KEY $SSH_KEY.backup.\$(date +%Y%m%d)"
         fi
     fi
 fi
-
-echo ""
-
-# === OAuth credentials sync ===
-echo "🔐 Restoring OAuth credentials..."
-
-# gcal
-GCAL_DIR="$HOME/.gcal-mcp"
-if gcal_oauth=$(rbw get "MCP OAuth Credentials" --field "gcal-oauth" 2>/dev/null) && [ -n "$gcal_oauth" ]; then
-  if [ ! -f "$GCAL_DIR/oauth.keys.json" ]; then
-    mkdir -p "$GCAL_DIR"
-    echo "$gcal_oauth" > "$GCAL_DIR/oauth.keys.json"
-    chmod 600 "$GCAL_DIR/oauth.keys.json"
-    echo "✅ gcal OAuth restored (run gcal MCP once to complete OAuth flow)"
-  else
-    echo "✅ gcal OAuth exists"
-  fi
-else
-  echo "⚠️  gcal OAuth not found in Bitwarden (optional)"
-fi
-
-# gmail (same oauth.keys.json for both accounts)
-for gmail_dir in "$HOME/.gmail-mcp-rodolphe" "$HOME/.gmail-mcp-rodlecoent"; do
-  if gmail_oauth=$(rbw get "MCP OAuth Credentials" --field "gmail-oauth" 2>/dev/null) && [ -n "$gmail_oauth" ]; then
-    if [ ! -f "$gmail_dir/gcp-oauth.keys.json" ]; then
-      mkdir -p "$gmail_dir"
-      echo "$gmail_oauth" > "$gmail_dir/gcp-oauth.keys.json"
-      chmod 600 "$gmail_dir/gcp-oauth.keys.json"
-      echo "✅ $(basename $gmail_dir) OAuth restored"
-    else
-      echo "✅ $(basename $gmail_dir) OAuth exists"
-    fi
-  else
-    echo "⚠️  gmail OAuth not found in Bitwarden (optional)"
-    break  # Only show warning once
-  fi
-done
 
 echo ""
 
@@ -194,12 +123,22 @@ else
         if gpg --list-secret-keys "$existing_fp" &>/dev/null 2>&1; then
             echo "✅ GPG key already imported ($existing_fp)"
         else
-            echo "🔑 Importing GPG key from Bitwarden..."
-            echo "$bw_gpg" | gpg --import
-            echo "✅ GPG key imported (run 'gpg --edit-key <ID>' → trust → 5 if needed)"
+            echo "┌─────────────────────────────────────────────────────────────┐"
+            echo "│ 🔑 GPG Key : not in local keyring                          │"
+            echo "└─────────────────────────────────────────────────────────────┘"
+            echo ""
+            echo "► Action required:"
+            echo "  1. Get the key from Bitwarden → '$BW_ITEM_GPG'"
+            echo "  2. Import it:"
+            echo "       echo '<paste key here>' | gpg --import"
+            echo ""
+            echo "Or run: rbw get '$BW_ITEM_GPG' | gpg --import"
         fi
     fi
 fi
 
 echo ""
-echo "✅ Sync complete"
+echo "✅ Status check complete"
+
+# Update marker for MOTD (indicates last sync check)
+touch "$HOME/.env.bw-synced"

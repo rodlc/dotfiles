@@ -141,5 +141,6 @@
     "command": "~/.claude/statusline.sh"
   },
   "enabledPlugins": {},
-  "alwaysThinkingEnabled": false
+  "alwaysThinkingEnabled": false,
+  "fastMode": true
 }

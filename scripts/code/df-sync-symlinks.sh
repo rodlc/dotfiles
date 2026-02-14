@@ -32,10 +32,8 @@ symlink "$DOTFILES_DIR/claude/hooks/safe-bash.sh" "$HOME/.claude/hooks/safe-bash
 symlink "$DOTFILES_DIR/claude/hooks/auto-approve-skills.sh" "$HOME/.claude/hooks/auto-approve-skills.sh"
 
 # Claude skills
-for skill in terminal-title email-reply.md; do
-  if [ -e "$DOTFILES_DIR/claude/skills/$skill" ]; then
-    symlink "$DOTFILES_DIR/claude/skills/$skill" "$HOME/.claude/skills/$skill"
-  fi
+for skill in "$DOTFILES_DIR/claude/skills"/*; do
+  [ -e "$skill" ] && symlink "$skill" "$HOME/.claude/skills/$(basename "$skill")"
 done
 
 # Shell config

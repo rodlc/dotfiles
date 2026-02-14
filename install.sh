@@ -207,9 +207,14 @@ symlink "$DOTFILES_DIR/claude/hooks/auto-approve-skills.sh" "$HOME/.claude/hooks
 
 # Note: session-init.sh and user-prompt-context.sh are replaced by mcp-memory-service hooks
 # These will be installed via install_hooks.py below
-if [ -d "$DOTFILES_DIR/claude/skills/terminal-title" ]; then
-  symlink "$DOTFILES_DIR/claude/skills/terminal-title" "$HOME/.claude/skills/terminal-title"
-fi
+
+# Claude skills (all entries in dotfiles)
+for skill in "$DOTFILES_DIR/claude/skills"/*; do
+  [ -e "$skill" ] || continue
+  local name="$(basename "$skill")"
+  backup "$HOME/.claude/skills/$name"
+  symlink "$skill" "$HOME/.claude/skills/$name"
+done
 backup "$HOME/.claude/statusline.sh"
 symlink "$DOTFILES_DIR/claude/statusline.sh" "$HOME/.claude/statusline.sh"
 backup "$HOME/.claude/settings.json"
