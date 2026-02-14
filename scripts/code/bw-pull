@@ -67,7 +67,7 @@ for i in "${!SSH_BW_NAMES[@]}"; do
         if [[ -z "$bw_key" ]]; then
             echo "⚠️  '$bw_name' empty in Bitwarden"
         elif [[ ! -f "$ssh_key" ]]; then
-            bw_fp=$(echo "$bw_key" | ssh-keygen -lf /dev/stdin 2>/dev/null | awk '{print $2}')
+            bw_fp=$(echo "$bw_key" | ssh-keygen -lf /dev/stdin 2>/dev/null | awk '{print $2}' || true)
             echo "┌─────────────────────────────────────────────────────────────┐"
             echo "│ 🔑 $bw_name : local file not found                         │"
             echo "└─────────────────────────────────────────────────────────────┘"
@@ -89,8 +89,8 @@ for i in "${!SSH_BW_NAMES[@]}"; do
             if [[ "$bw_key" == "$local_key" ]]; then
                 echo "✅ $bw_name in sync"
             else
-                local_fp=$(ssh-keygen -lf "$ssh_key" 2>/dev/null | awk '{print $2}')
-                bw_fp=$(echo "$bw_key" | ssh-keygen -lf /dev/stdin 2>/dev/null | awk '{print $2}')
+                local_fp=$(ssh-keygen -lf "$ssh_key" 2>/dev/null | awk '{print $2}' || true)
+                bw_fp=$(echo "$bw_key" | ssh-keygen -lf /dev/stdin 2>/dev/null | awk '{print $2}' || true)
 
                 echo "┌─────────────────────────────────────────────────────────────┐"
                 echo "│ ⚠️  $bw_name : Bitwarden ≠ local                            │"
