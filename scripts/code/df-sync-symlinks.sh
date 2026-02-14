@@ -36,6 +36,12 @@ for skill in "$DOTFILES_DIR/claude/skills"/*; do
   [ -e "$skill" ] && symlink "$skill" "$HOME/.claude/skills/$(basename "$skill")"
 done
 
+# Claude scripts
+mkdir -p "$HOME/.claude/scripts"
+for script in "$DOTFILES_DIR/claude/scripts"/*.py "$DOTFILES_DIR/claude/scripts"/*.sh; do
+  [ -f "$script" ] && symlink "$script" "$HOME/.claude/scripts/$(basename "$script")"
+done
+
 # Shell config
 for name in aliases gitconfig irbrc pryrc rspec zprofile zshrc; do
   symlink "$DOTFILES_DIR/$name" "$HOME/.$name"

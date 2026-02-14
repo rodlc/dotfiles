@@ -17,7 +17,7 @@ fi
 
 # Clone workspace if not present
 if [ ! -d "$WORKSPACE_DIR" ]; then
-    if [ -f "$HOME/.ssh/id_ed25519" ]; then
+    if [ -f "$HOME/.ssh/id_ed25519_rodlc" ]; then
         echo "-----> Cloning workspace repository"
         mkdir -p "$(dirname "$WORKSPACE_DIR")"
         git clone --recurse-submodules git@github.com:rodlc/workspace.git "$WORKSPACE_DIR"

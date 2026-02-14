@@ -55,7 +55,7 @@ fi
 echo ""
 
 # === SSH key sync ===
-SSH_KEY="$HOME/.ssh/id_ed25519"
+SSH_KEY="$HOME/.ssh/id_ed25519_rodlc"
 
 if ! rbw get "$BW_ITEM_SSH" &>/dev/null; then
     echo "❌ '$BW_ITEM_SSH' not found in Bitwarden"
@@ -65,23 +65,17 @@ else
     if [[ -z "$bw_key" ]]; then
         echo "⚠️  SSH private key empty in Bitwarden"
     elif [[ ! -f "$SSH_KEY" ]]; then
-        # Local SSH key doesn't exist
+        # Local SSH key doesn't exist - auto-write from Bitwarden
         bw_fp=$(echo "$bw_key" | ssh-keygen -lf /dev/stdin 2>/dev/null | awk '{print $2}')
         echo "┌─────────────────────────────────────────────────────────────┐"
-        echo "│ 🔑 SSH Key : local key not found                           │"
+        echo "│ 🔑 SSH Key : restoring from Bitwarden                      │"
         echo "└─────────────────────────────────────────────────────────────┘"
-        echo ""
-        echo "Bitwarden fingerprint: $bw_fp"
-        echo ""
-        echo "► Action required:"
-        echo "  1. Go to Bitwarden app → '$BW_ITEM_SSH'"
-        echo "  2. Copy the private key"
-        echo "  3. Save it to $SSH_KEY"
-        echo ""
-        echo "Then run:"
-        echo "  mkdir -p ~/.ssh && chmod 700 ~/.ssh"
-        echo "  chmod 600 $SSH_KEY"
-        echo "  ssh-add --apple-use-keychain $SSH_KEY"
+        echo "Fingerprint: $bw_fp"
+        mkdir -p "$HOME/.ssh" && chmod 700 "$HOME/.ssh"
+        echo "$bw_key" > "$SSH_KEY"
+        chmod 600 "$SSH_KEY"
+        ssh-add --apple-use-keychain "$SSH_KEY" 2>/dev/null || true
+        echo "  ✅ SSH key restored to $SSH_KEY"
     else
         # Compare keys
         local_key=$(cat "$SSH_KEY")
@@ -123,16 +117,9 @@ else
         if gpg --list-secret-keys "$existing_fp" &>/dev/null 2>&1; then
             echo "✅ GPG key already imported ($existing_fp)"
         else
-            echo "┌─────────────────────────────────────────────────────────────┐"
-            echo "│ 🔑 GPG Key : not in local keyring                          │"
-            echo "└─────────────────────────────────────────────────────────────┘"
-            echo ""
-            echo "► Action required:"
-            echo "  1. Get the key from Bitwarden → '$BW_ITEM_GPG'"
-            echo "  2. Import it:"
-            echo "       echo '<paste key here>' | gpg --import"
-            echo ""
-            echo "Or run: rbw get '$BW_ITEM_GPG' | gpg --import"
+            echo "  Importing GPG key from Bitwarden..."
+            echo "$bw_gpg" | gpg --batch --import
+            echo "  ✅ GPG key imported"
         fi
     fi
 fi

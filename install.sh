@@ -43,8 +43,18 @@ fi
 
 # Install Homebrew packages
 echo "=====> Installing Homebrew packages"
-brew install --quiet pyenv rbenv nvm git pre-commit rbw bitwarden-cli 2>/dev/null || true
-brew install --cask --quiet zed battery 2>/dev/null || true
+brew bundle --file="$DOTFILES_DIR/Brewfile" --no-lock 2>/dev/null || true
+
+echo "=====> Installing language runtimes"
+# Python
+command -v pyenv &>/dev/null && [ ! -d "$HOME/.pyenv/versions/3.12.8" ] && \
+  PYTHON_CONFIGURE_OPTS="--enable-loadable-sqlite-extensions" pyenv install 3.12.8 && pyenv global 3.12.8
+# Ruby
+command -v rbenv &>/dev/null && [ ! -d "$HOME/.rbenv/versions/3.3.9" ] && \
+  rbenv install 3.3.9 && rbenv global 3.3.9
+# Node
+command -v fnm &>/dev/null && ! fnm list 2>/dev/null | grep -q "v22" && \
+  fnm install 22 && fnm default 22
 
 # Battery configuration (Apple Silicon only)
 if [[ $(uname -m) == "arm64" ]] && command -v battery &> /dev/null; then
@@ -151,7 +161,7 @@ mkdir -p "$ZSH_PLUGINS_DIR"
 # SSH
 backup "$HOME/.ssh/config"
 symlink "$DOTFILES_DIR/config" "$HOME/.ssh/config"
-ssh-add --apple-use-keychain ~/.ssh/id_ed25519 2>/dev/null || true
+ssh-add --apple-use-keychain ~/.ssh/id_ed25519_rodlc 2>/dev/null || true
 
 # Zed
 ZED_DIR="$HOME/.config/zed"
@@ -215,6 +225,15 @@ for skill in "$DOTFILES_DIR/claude/skills"/*; do
   backup "$HOME/.claude/skills/$name"
   symlink "$skill" "$HOME/.claude/skills/$name"
 done
+
+# Claude scripts (memory maintenance)
+mkdir -p "$HOME/.claude/scripts"
+for script in "$DOTFILES_DIR/claude/scripts"/*.py "$DOTFILES_DIR/claude/scripts"/*.sh; do
+  [ -f "$script" ] || continue
+  backup "$HOME/.claude/scripts/$(basename "$script")"
+  symlink "$script" "$HOME/.claude/scripts/$(basename "$script")"
+done
+
 backup "$HOME/.claude/statusline.sh"
 symlink "$DOTFILES_DIR/claude/statusline.sh" "$HOME/.claude/statusline.sh"
 backup "$HOME/.claude/settings.json"
@@ -255,17 +274,23 @@ echo "=====> Installing mcp-memory-service HTTP server"
 MCP_MEMORY_SERVICE="$HOME/Code/rodlc/workspace/mcp-servers/mcp-memory-service"
 
 if [ -d "$MCP_MEMORY_SERVICE" ]; then
-  # Install launchd plist
+  # Install launchd plists (with path substitution)
   mkdir -p "$HOME/Library/LaunchAgents"
   backup "$HOME/Library/LaunchAgents/com.rodlecoent.mcp-memory-http.plist"
   cp "$DOTFILES_DIR/launchd/com.rodlecoent.mcp-memory-http.plist" "$HOME/Library/LaunchAgents/com.rodlecoent.mcp-memory-http.plist"
 
+  # Memory backup plist
+  sed "s|__HOME__|$HOME|g" "$DOTFILES_DIR/launchd/com.rodlecoent.memory-backup.plist" \
+    > "$HOME/Library/LaunchAgents/com.rodlecoent.memory-backup.plist"
+
   # Make startup script executable
   chmod +x "$DOTFILES_DIR/scripts/mcp-memory-http-start.sh"
 
-  # Load the service
+  # Load the services
   launchctl unload "$HOME/Library/LaunchAgents/com.rodlecoent.mcp-memory-http.plist" 2>/dev/null || true
   launchctl load "$HOME/Library/LaunchAgents/com.rodlecoent.mcp-memory-http.plist"
+  launchctl unload "$HOME/Library/LaunchAgents/com.rodlecoent.memory-backup.plist" 2>/dev/null || true
+  launchctl load "$HOME/Library/LaunchAgents/com.rodlecoent.memory-backup.plist" 2>/dev/null || true
 
   echo "-----> HTTP server service installed and loaded"
   echo "-----> Waiting 5 seconds for server to start..."

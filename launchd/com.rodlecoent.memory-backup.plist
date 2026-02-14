@@ -7,7 +7,7 @@
 
     <key>ProgramArguments</key>
     <array>
-        <string>/Users/rodlecoent/Code/rodlc/dotfiles/scripts/backup-memory.sh</string>
+        <string>__HOME__/Code/rodlc/dotfiles/scripts/backup-memory.sh</string>
     </array>
 
     <key>StartCalendarInterval</key>
@@ -19,10 +19,10 @@
     </dict>
 
     <key>StandardOutPath</key>
-    <string>/Users/rodlecoent/Library/Logs/memory-backup.log</string>
+    <string>__HOME__/Library/Logs/memory-backup.log</string>
 
     <key>StandardErrorPath</key>
-    <string>/Users/rodlecoent/Library/Logs/memory-backup.error.log</string>
+    <string>__HOME__/Library/Logs/memory-backup.error.log</string>
 
     <key>RunAtLoad</key>
     <false/>
@@ -30,7 +30,7 @@
     <key>EnvironmentVariables</key>
     <dict>
         <key>PATH</key>
-        <string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
     </dict>
 </dict>
 </plist>
