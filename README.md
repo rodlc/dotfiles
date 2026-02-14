@@ -35,7 +35,9 @@ dotfiles/
 ├── aliases, zshrc, gitconfig, irbrc, pryrc, rspec, config
 ├── zed/                    # Zed editor configs
 ├── scripts/                # Utility scripts
-│   └── bw-*                # Bitwarden secrets management (pull, push, status, bootstrap)
+│   ├── code/               # Development tools (bw-*, git-*)
+│   ├── system/             # System maintenance (brew-fix, cleanup-*)
+│   └── productivity/       # Automation (mcp-memory-http-start)
 └── claude/                 # Claude Code configs + commands + MCPs
     ├── .mcp.json           # MCP servers template (GitHub, Notion, Slack, Gmail, Rails)
     ├── install-mcp-servers.sh  # Clone & build MCP repos from GitHub
@@ -66,7 +68,6 @@ brew install rbw bitwarden-cli
 rbw config set email your@email.com
 rbw config set base_url https://vault.bitwarden.eu  # if EU server
 rbw login
-bw-bootstrap  # Creates "Dotfiles Env" + "MCP Memory GPG" items
 ```
 
 **Daily usage**:

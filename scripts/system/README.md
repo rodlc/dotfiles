@@ -57,6 +57,18 @@ Remove obsolete custom hooks after mcp-memory-service migration.
 
 ---
 
+### cleanup-home.sh
+Clean unwanted files from home directory.
+
+**Usage:**
+```bash
+./cleanup-home.sh
+```
+
+**When:** Periodically to remove clutter.
+
+---
+
 ## Frequency
 
 | Script | Frequency |
@@ -65,3 +77,4 @@ Remove obsolete custom hooks after mcp-memory-service migration.
 | cleanup-caches.sh | Monthly |
 | cleanup-login-items.sh | As needed (after installs) |
 | cleanup-old-hooks.sh | One-time (migration) |
+| cleanup-home.sh | Periodically |

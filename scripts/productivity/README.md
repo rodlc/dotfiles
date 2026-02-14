@@ -17,12 +17,12 @@ Start MCP Memory HTTP server (launchd wrapper).
 - Configured for Claude Code hooks
 - Runs via launchd (background daemon)
 
-**Port:** 3100 (default)
+**Port:** 4242 (default)
 
 **Connection:**
 ```bash
 # Test connection
-curl http://localhost:3100/health
+curl http://localhost:4242/health
 
 # Used by Claude Code memory hooks
 # Connection configured in ~/.claude/config.json
