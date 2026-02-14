@@ -42,7 +42,7 @@ rbw_edit_notes() {
 
     # rbw format: line 1 = password (empty for notes), rest = notes
     printf '\n%s' "$content" > "$tmp"
-    EDITOR="cp $tmp" rbw edit "$item_name" 2>/dev/null
+    VISUAL="cp $tmp" EDITOR="cp $tmp" rbw edit "$item_name" 2>/dev/null
     local result=$?
     rm -f "$tmp"
     rbw sync >/dev/null 2>&1
@@ -58,7 +58,7 @@ rbw_create_notes() {
 
     # rbw format: line 1 = password (empty for notes), rest = notes
     printf '\n%s' "$content" > "$tmp"
-    EDITOR="cp $tmp" rbw add "$item_name" 2>/dev/null
+    VISUAL="cp $tmp" EDITOR="cp $tmp" rbw add "$item_name" 2>/dev/null
     local result=$?
     rm -f "$tmp"
     rbw sync >/dev/null 2>&1
