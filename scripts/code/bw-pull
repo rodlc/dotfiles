@@ -65,12 +65,19 @@ else
     if [[ -z "$bw_key" ]]; then
         echo "⚠️  SSH private key empty in Bitwarden"
     elif [[ ! -f "$SSH_KEY" ]]; then
-        # Local SSH key doesn't exist - auto-write from Bitwarden
+        # Local SSH key doesn't exist - show fingerprint and ask confirmation
         bw_fp=$(echo "$bw_key" | ssh-keygen -lf /dev/stdin 2>/dev/null | awk '{print $2}')
         echo "┌─────────────────────────────────────────────────────────────┐"
-        echo "│ 🔑 SSH Key : restoring from Bitwarden                      │"
+        echo "│ 🔑 SSH Key : local file not found                          │"
         echo "└─────────────────────────────────────────────────────────────┘"
-        echo "Fingerprint: $bw_fp"
+        echo ""
+        echo "Bitwarden fingerprint: $bw_fp"
+        echo ""
+        echo "► Action required:"
+        echo "  1. Verify fingerprint matches your key"
+        echo "  2. Press Enter to restore from Bitwarden, or Ctrl+C to cancel"
+        read -r
+
         mkdir -p "$HOME/.ssh" && chmod 700 "$HOME/.ssh"
         echo "$bw_key" > "$SSH_KEY"
         chmod 600 "$SSH_KEY"
@@ -93,11 +100,16 @@ else
             echo "Local:     $local_fp"
             echo ""
             echo "► Action required:"
-            echo "  1. Go to Bitwarden app → '$BW_ITEM_SSH'"
-            echo "  2. Copy the private key you want to use"
-            echo "  3. Replace $SSH_KEY"
-            echo ""
-            echo "Backup current key: cp $SSH_KEY $SSH_KEY.backup.\$(date +%Y%m%d)"
+            echo "  1. Review fingerprints above"
+            echo "  2. Backup current: cp $SSH_KEY $SSH_KEY.backup.\$(date +%Y%m%d)"
+            echo "  3. Press Enter to restore from Bitwarden, or Ctrl+C to cancel"
+            read -r
+
+            cp "$SSH_KEY" "$SSH_KEY.backup.$(date +%Y%m%d)" 2>/dev/null || true
+            echo "$bw_key" > "$SSH_KEY"
+            chmod 600 "$SSH_KEY"
+            ssh-add --apple-use-keychain "$SSH_KEY" 2>/dev/null || true
+            echo "  ✅ SSH key restored from Bitwarden"
         fi
     fi
 fi
@@ -117,7 +129,18 @@ else
         if gpg --list-secret-keys "$existing_fp" &>/dev/null 2>&1; then
             echo "✅ GPG key already imported ($existing_fp)"
         else
-            echo "  Importing GPG key from Bitwarden..."
+            # Show fingerprint and ask confirmation before import
+            echo "┌─────────────────────────────────────────────────────────────┐"
+            echo "│ 🔐 GPG Key : importing from Bitwarden                      │"
+            echo "└─────────────────────────────────────────────────────────────┘"
+            echo ""
+            echo "Fingerprint: $existing_fp"
+            echo ""
+            echo "► Action required:"
+            echo "  1. Verify fingerprint matches your key"
+            echo "  2. Press Enter to import, or Ctrl+C to cancel"
+            read -r
+
             echo "$bw_gpg" | gpg --batch --import
             echo "  ✅ GPG key imported"
         fi

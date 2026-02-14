@@ -89,7 +89,8 @@ alias cc-monthly='npx ccusage monthly'
 alias dotfiles='cd ~/Code/rodlc/dotfiles'
 alias df-status='cd ~/Code/rodlc/dotfiles && git status'
 alias df-push='cd ~/Code/rodlc/dotfiles && git fetch && git add -A && git commit -m "Update configs" && git push --force-with-lease'
-alias df-pull='cd ~/Code/rodlc/dotfiles && git pull --autostash && ~/Code/rodlc/dotfiles/scripts/df-sync-symlinks.sh && ~/Code/rodlc/dotfiles/claude/mcp-sync.sh install && echo "✅ Dotfiles synced"'
+alias df-pull='cd ~/Code/rodlc/dotfiles && git pull --autostash && ~/Code/rodlc/dotfiles/scripts/code/df-sync-symlinks.sh && ~/Code/rodlc/dotfiles/claude/mcp-sync.sh install && echo "✅ Dotfiles synced"'
+alias df-install='cd ~/Code/rodlc/dotfiles && ./install.sh'
 alias mcp-sync='~/Code/rodlc/dotfiles/claude/mcp-sync.sh'
 
 # ============================================================================
@@ -98,7 +99,6 @@ alias mcp-sync='~/Code/rodlc/dotfiles/claude/mcp-sync.sh'
 alias bw-pull='~/Code/rodlc/dotfiles/scripts/code/bw-pull'
 alias bw-push='~/Code/rodlc/dotfiles/scripts/code/bw-push'
 alias bw-status='~/Code/rodlc/dotfiles/scripts/code/bw-status'
-alias bw-bootstrap='~/Code/rodlc/dotfiles/scripts/code/bw-bootstrap'
 
 # ============================================================================
 # Workspace (Memory + Plans + AI Context)
@@ -114,11 +114,11 @@ alias plans-sync='~/Code/rodlc/workspace/scripts/plans-sync'
 # ============================================================================
 # System Maintenance
 # ============================================================================
-alias cleanup-caches='~/Code/rodlc/dotfiles/scripts/cleanup-caches.sh'
+alias cleanup-caches='~/Code/rodlc/dotfiles/scripts/system/cleanup-caches.sh'
 alias cleanup-home='~/Code/rodlc/dotfiles/scripts/system/cleanup-home.sh'
 
 # Homebrew multi-user permissions fix
-alias brew-fix='~/Code/rodlc/dotfiles/scripts/brew-fix-permissions'
+alias brew-fix='~/Code/rodlc/dotfiles/scripts/system/brew-fix-permissions'
 
 # Zsh history sync to workspace
 alias zsh-history-sync='cp ~/.zsh_history ~/Code/rodlc/workspace/shell/zsh_history && echo "✅ zsh_history synced to workspace"'

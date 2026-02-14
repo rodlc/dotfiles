@@ -37,8 +37,8 @@ else
 fi
 
 # Fix Homebrew permissions for multi-user setup
-if [[ -f "$DOTFILES_DIR/scripts/brew-fix-permissions" ]]; then
-    "$DOTFILES_DIR/scripts/brew-fix-permissions"
+if [[ -f "$DOTFILES_DIR/scripts/system/brew-fix-permissions" ]]; then
+    "$DOTFILES_DIR/scripts/system/brew-fix-permissions"
 fi
 
 # Install Homebrew packages
@@ -283,8 +283,6 @@ if [ -d "$MCP_MEMORY_SERVICE" ]; then
   sed "s|__HOME__|$HOME|g" "$DOTFILES_DIR/launchd/com.rodlecoent.memory-backup.plist" \
     > "$HOME/Library/LaunchAgents/com.rodlecoent.memory-backup.plist"
 
-  # Make startup script executable
-  chmod +x "$DOTFILES_DIR/scripts/mcp-memory-http-start.sh"
 
   # Load the services
   launchctl unload "$HOME/Library/LaunchAgents/com.rodlecoent.mcp-memory-http.plist" 2>/dev/null || true

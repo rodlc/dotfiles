@@ -123,7 +123,7 @@ if [[ -o login ]]; then
   if [[ $ssh_status_code -eq 0 ]]; then
     (
       setopt LOCAL_OPTIONS NO_MONITOR
-      "$HOME/Code/rodlc/dotfiles/scripts/git-fetch-background.sh" &
+      "$HOME/Code/rodlc/dotfiles/scripts/code/git-fetch-background.sh" &
     ) &>/dev/null
 
     check_repo_status "$HOME/Code/rodlc/dotfiles" "Dotfiles" "df-push" "df-pull"
