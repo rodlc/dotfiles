@@ -84,6 +84,8 @@ cask "iterm2"
 cask "kap"
 # Password manager app
 cask "keepassxc"
+# Keyboard/Snippets/Clipboard management
+cask "raycast"
 # Primary editor
 cask "zed"
 # Battery charge limiter

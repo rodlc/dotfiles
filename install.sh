@@ -111,7 +111,7 @@ if [ -f "$RBW_CONFIG" ]; then
 
     if rbw unlocked 2>/dev/null; then
         echo "-----> Syncing secrets from Bitwarden..."
-        "$DOTFILES_DIR/scripts/bw-pull"
+        "$DOTFILES_DIR/scripts/code/bw-pull"
     fi
 fi
 

@@ -95,10 +95,10 @@ alias mcp-sync='~/Code/rodlc/dotfiles/claude/mcp-sync.sh'
 # ============================================================================
 # Bitwarden Secrets Sync (rbw-based)
 # ============================================================================
-alias bw-pull='~/Code/rodlc/dotfiles/scripts/bw-pull'
-alias bw-push='~/Code/rodlc/dotfiles/scripts/bw-push'
-alias bw-status='~/Code/rodlc/dotfiles/scripts/bw-status'
-alias bw-bootstrap='~/Code/rodlc/dotfiles/scripts/bw-bootstrap'
+alias bw-pull='~/Code/rodlc/dotfiles/scripts/code/bw-pull'
+alias bw-push='~/Code/rodlc/dotfiles/scripts/code/bw-push'
+alias bw-status='~/Code/rodlc/dotfiles/scripts/code/bw-status'
+alias bw-bootstrap='~/Code/rodlc/dotfiles/scripts/code/bw-bootstrap'
 
 # ============================================================================
 # Workspace (Memory + Plans + AI Context)
