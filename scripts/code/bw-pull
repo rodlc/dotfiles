@@ -115,39 +115,6 @@ else
 fi
 
 echo ""
-
-# === GPG key sync ===
-if ! rbw get "$BW_ITEM_GPG" &>/dev/null; then
-    echo "⚠️  '$BW_ITEM_GPG' not found in Bitwarden (optional)"
-else
-    bw_gpg=$(rbw get "$BW_ITEM_GPG")
-    if [[ -z "$bw_gpg" ]]; then
-        echo "⚠️  GPG key empty in Bitwarden"
-    else
-        # Check if key already imported
-        existing_fp=$(echo "$bw_gpg" | gpg --import-options show-only --import 2>/dev/null | grep -m1 "sec" | awk '{print $2}' | cut -d'/' -f2)
-        if gpg --list-secret-keys "$existing_fp" &>/dev/null 2>&1; then
-            echo "✅ GPG key already imported ($existing_fp)"
-        else
-            # Show fingerprint and ask confirmation before import
-            echo "┌─────────────────────────────────────────────────────────────┐"
-            echo "│ 🔐 GPG Key : importing from Bitwarden                      │"
-            echo "└─────────────────────────────────────────────────────────────┘"
-            echo ""
-            echo "Fingerprint: $existing_fp"
-            echo ""
-            echo "► Action required:"
-            echo "  1. Verify fingerprint matches your key"
-            echo "  2. Press Enter to import, or Ctrl+C to cancel"
-            read -r
-
-            echo "$bw_gpg" | gpg --batch --import
-            echo "  ✅ GPG key imported"
-        fi
-    fi
-fi
-
-echo ""
 echo "✅ Status check complete"
 
 # Update marker for MOTD (indicates last sync check)
