@@ -91,13 +91,26 @@ show_system_info() {
             [[ $d -eq 0 && $h -eq 0 ]] && uptime_compact="${m}m"
             output+="⏱️  ${uptime_compact}"
 
-            local load=$(sysctl -n vm.loadavg 2>/dev/null | awk '{print $2}')
-            local cores=$(sysctl -n hw.ncpu 2>/dev/null)
-            local cpu_pct=$(awk -v l="$load" -v c="$cores" 'BEGIN {printf "%.0f", (l/c)*100}')
+            # CPU: instantaneous utilization (user% + sys%)
+            local cpu_pct=$(top -l 2 -s 0 -FR -n 0 2>/dev/null \
+                | awk '/CPU usage/ {gsub(/%/,""); printf "%.0f", $3+$5}' | tail -1)
+            [[ -z "$cpu_pct" ]] && cpu_pct="0"
             output+=" | ⚡${cpu_pct}%"
 
-            local total_ram=$(sysctl -n hw.memsize 2>/dev/null | awk '{printf "%.0f", $1/1024/1024/1024}')
-            output+=" | 🧠 $(top -l 1 | grep PhysMem | awk -v total="$total_ram" '{used=$2; gsub(/G/, "", used); printf "%.0f%%", (used/total)*100}')"
+            # RAM: Activity Monitor-style (app + wired + compressor)
+            local ram_pct=$(vm_stat 2>/dev/null | awk \
+                -v total_bytes="$(sysctl -n hw.memsize)" '
+                NR==1 { ps=0; split($0, a, " "); for(i in a) if(a[i]+0>0) ps=a[i]+0 }
+                /Anonymous pages:/           { gsub(/\./,"",$NF); internal=$NF }
+                /Pages purgeable:/           { gsub(/\./,"",$NF); purgeable=$NF }
+                /Pages wired down:/          { gsub(/\./,"",$NF); wired=$NF }
+                /occupied by compressor:/    { gsub(/\./,"",$NF); compressor=$NF }
+                END {
+                    used = (internal - purgeable + wired + compressor) * ps
+                    printf "%.0f", (used * 100) / total_bytes
+                }')
+            [[ -z "$ram_pct" ]] && ram_pct="0"
+            output+=" | 🧠 ${ram_pct}%"
 
             output+=" | 💾 $(df -h ~ | tail -1 | awk '{print $5}')"
 

@@ -51,3 +51,6 @@ cd ~/Code
 [[ -f "$HOME/.local/bin/env" ]] && . "$HOME/.local/bin/env"
 
 export PATH="$HOME/.local/bin:$PATH"
+
+# bun completions
+[ -s "/Users/rodlecoent/.bun/_bun" ] && source "/Users/rodlecoent/.bun/_bun"
