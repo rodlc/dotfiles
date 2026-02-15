@@ -28,3 +28,13 @@ Rails TDD: test → route → controller → model → view
 
 ## Config
 Source: `~/Code/rodlc/dotfiles/claude/` — query memory (tags: dotfiles, mcp) before edits
+
+## Dotfiles
+Source: `~/Code/rodlc/dotfiles/` | Workspace: `~/Code/rodlc/workspace/`
+Paths: NEVER hardcode username. Use $HOME (shell), Path.home() (python),
+       __HOME__ (plists), ~/ (claude settings), ${HOME} (mcp.json templates)
+Plists: always use __HOME__ placeholder, sed at install time
+MCP config: .mcp.json is a template, expanded by mcp-sync.sh (envsubst)
+Install: install.sh (system+dotfiles) then workspace-install.sh (MCP servers)
+Version manager: mise (single tool for bun/node/python/ruby/go)
+Runtime: bun preferred for JS/TS MCP servers, python for memory-service

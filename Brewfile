@@ -35,16 +35,14 @@ brew "antidote"
 brew "starship"
 # Per-directory environment variables
 brew "direnv"
-# Fast Node manager (replaces nvm)
-brew "fnm"
+# Polyglot version manager
+brew "mise"
 # Unofficial Bitwarden CLI (Rust)
 brew "rbw"
 # Official Bitwarden CLI
 brew "bitwarden-cli"
 # Provides envsubst
 brew "gettext"
-# Go version manager
-brew "goenv"
 # Ookla speed test
 brew "speedtest-cli"
 # 7-Zip (high compression file archiver) implementation
@@ -57,12 +55,8 @@ brew "poppler"
 brew "postgresql@15", restart_service: :changed
 # Framework for managing multi-language pre-commit hooks
 brew "pre-commit"
-# Python version management
-brew "pyenv"
 # Generic syntax highlighter
 brew "pygments"
-# Ruby version manager
-brew "rbenv"
 # Display directories as trees (with optional color/HTML output)
 brew "tree"
 # Convert HTML to PDF

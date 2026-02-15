@@ -1,8 +1,9 @@
 {
   "mcpServers": {
     "notion-rodlecoent": {
-      "command": "node",
+      "command": "bun",
       "args": [
+        "run",
         "${WORKSPACE_DIR}/mcp-servers/mcp-notion-server/build/index.js",
         "--enabledTools=notion_retrieve_page,notion_query_database,notion_retrieve_block_children,notion_append_block_children,notion_create_database_item,notion_delete_block,notion_search"
       ],
@@ -13,8 +14,9 @@
     },
     "notion-konsigo": {
       "disabled": true,
-      "command": "node",
+      "command": "bun",
       "args": [
+        "run",
         "${WORKSPACE_DIR}/mcp-servers/mcp-notion-server/build/index.js",
         "--enabledTools=notion_retrieve_page,notion_query_database,notion_retrieve_block_children,notion_append_block_children,notion_create_database_item,notion_delete_block,notion_search"
       ],
@@ -24,8 +26,9 @@
       }
     },
     "gmail": {
-      "command": "node",
+      "command": "bun",
       "args": [
+        "run",
         "${WORKSPACE_DIR}/mcp-servers/Gmail-MCP-Server/dist/index.js",
         "--enabledTools=search_emails,read_email,draft_email,modify_email,list_email_labels,download_attachment"
       ],
@@ -41,8 +44,9 @@
       "url": "http://127.0.0.1:4242/mcp"
     },
     "gcal": {
-      "command": "node",
+      "command": "bun",
       "args": [
+        "run",
         "${WORKSPACE_DIR}/mcp-servers/google-calendar-mcp/build/index.js",
         "--enable-tools",
         "list-events,create-event,update-event,get-current-time"
@@ -59,7 +63,7 @@
     },
     "playwright": {
       "disabled": true,
-      "command": "npx",
+      "command": "bunx",
       "args": ["@playwright/mcp@latest"]
     }
   }

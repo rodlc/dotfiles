@@ -59,7 +59,7 @@
 
 [init]
 	defaultBranch = main
-	templatedir = /Users/rodlecoent/.git-templates
+	templatedir = ~/.git-templates
 [user]
 	email = 63702959+rodlc@users.noreply.github.com
 	name = Rod Lc

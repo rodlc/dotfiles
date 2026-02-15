@@ -15,12 +15,10 @@ echo ""
 # Check prerequisites upfront
 check_prereqs() {
   local missing=()
-  command -v node >/dev/null || missing+=("node (brew install node)")
-  command -v npm >/dev/null || missing+=("npm")
+  command -v bun >/dev/null || missing+=("bun (mise install)")
   command -v go >/dev/null || missing+=("go (brew install go)")
-  command -v bun >/dev/null || missing+=("bun (curl -fsSL https://bun.sh/install | bash)")
   command -v bundle >/dev/null || missing+=("bundle (gem install bundler)")
-  [ -f "$HOME/.pyenv/versions/3.12.8/bin/python" ] || missing+=("pyenv python 3.12.8")
+  command -v python3 >/dev/null || missing+=("python (mise install)")
 
   if [ ${#missing[@]} -gt 0 ]; then
     echo "⚠️  Missing prerequisites (some MCPs will be skipped):"
@@ -94,21 +92,21 @@ build_mcp() {
   fi
 }
 
-# Build Node.js MCPs
+# Build Node.js MCPs (using bun)
 build_mcp "mcp-notion-server" \
-  "npm install --silent && npm run build" \
+  "bun install && bun run build" \
   "build/index.js" \
-  "node"
+  "bun"
 
 build_mcp "Gmail-MCP-Server" \
-  "npm install --silent && npm run build" \
+  "bun install && bun run build" \
   "dist/index.js" \
-  "node"
+  "bun"
 
 build_mcp "google-calendar-mcp" \
-  "npm install --silent && npm run build" \
+  "bun install && bun run build" \
   "build/index.js" \
-  "node"
+  "bun"
 
 # Build Go MCP
 build_mcp "slack-mcp-server" \
@@ -128,28 +126,24 @@ build_mcp "mcp-raycast-clipboard" \
   "node_modules" \
   "bun"
 
-# Ensure pyenv Python 3.12.8 has SQLite extension support
-install_python_with_sqlite() {
-  local version="3.12.8"
-  local pyenv_python="$HOME/.pyenv/versions/$version/bin/python"
-
-  # Skip if already correctly compiled
-  if [ -f "$pyenv_python" ] && $pyenv_python -c "import sqlite3; sqlite3.connect(':memory:').enable_load_extension(True)" 2>/dev/null; then
-    return 0
+# Verify Python has SQLite extension support (mise-managed)
+check_python_sqlite() {
+  if ! command -v python3 >/dev/null; then
+    return 1
   fi
 
-  echo "-----> Installing Python $version with SQLite extension support..."
-
-  # Remove existing broken install if present
-  [ -d "$HOME/.pyenv/versions/$version" ] && pyenv uninstall -f "$version"
-
-  # Install with SQLite extensions enabled
-  PYTHON_CONFIGURE_OPTS="--enable-loadable-sqlite-extensions" pyenv install "$version"
+  if ! python3 -c "import sqlite3; sqlite3.connect(':memory:').enable_load_extension(True)" 2>/dev/null; then
+    echo "⚠️  Warning: Python lacks SQLite extension support"
+    echo "   mcp-memory-service requires SQLite extensions"
+    echo "   Install with: mise install python (should include SQLite extensions)"
+    return 1
+  fi
+  return 0
 }
 
-command -v pyenv >/dev/null && install_python_with_sqlite
+check_python_sqlite
 
-# Memory MCP (Python virtualenv via pyenv)
+# Memory MCP (Python virtualenv via mise)
 MEMORY_DIR="$MCP_DIR/mcp-memory-service"
 if [ -d "$MEMORY_DIR" ]; then
   VENV_DIR="$MEMORY_DIR/.venv"
@@ -158,17 +152,17 @@ if [ -d "$MEMORY_DIR" ]; then
     echo "-----> Setting up mcp-memory-service virtualenv..."
     cd "$MEMORY_DIR"
 
-    # Use pyenv Python 3.12 (must have SQLite extensions compiled)
-    PYENV_PYTHON="$HOME/.pyenv/versions/3.12.8/bin/python"
-    if [ ! -f "$PYENV_PYTHON" ]; then
-      BUILD_RESULTS["mcp-memory-service"]="skipped (missing python 3.12.8)"
-      echo "⚠️  mcp-memory-service: skipping (pyenv Python 3.12.8 not found)"
+    # Use mise-managed Python (must have SQLite extensions)
+    PYENV_PYTHON="$(command -v python3)"
+    if [ -z "$PYENV_PYTHON" ]; then
+      BUILD_RESULTS["mcp-memory-service"]="skipped (missing python3)"
+      echo "⚠️  mcp-memory-service: skipping (python3 not found)"
     else
       # Verify SQLite extension support
       if ! $PYENV_PYTHON -c "import sqlite3; sqlite3.connect(':memory:').enable_load_extension(True)" 2>/dev/null; then
         BUILD_RESULTS["mcp-memory-service"]="✗ failed (SQLite extensions)"
-        echo "❌ mcp-memory-service: Python 3.12.8 missing SQLite extension support"
-        echo "   Reinstall with: PYTHON_CONFIGURE_OPTS=\"--enable-loadable-sqlite-extensions\" pyenv install 3.12.8"
+        echo "❌ mcp-memory-service: Python missing SQLite extension support"
+        echo "   Install with: mise install python"
       else
         if $PYENV_PYTHON -m venv .venv && .venv/bin/pip install --quiet --upgrade pip && .venv/bin/pip install --quiet -e .; then
           BUILD_RESULTS["mcp-memory-service"]="✓ built"

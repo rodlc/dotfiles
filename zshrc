@@ -53,4 +53,4 @@ cd ~/Code
 export PATH="$HOME/.local/bin:$PATH"
 
 # bun completions
-[ -s "/Users/rodlecoent/.bun/_bun" ] && source "/Users/rodlecoent/.bun/_bun"
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"

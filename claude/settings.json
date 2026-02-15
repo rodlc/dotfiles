@@ -107,7 +107,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"/Users/rodmagic/.claude/hooks/core/session-start.js\"",
+            "command": "node ~/.claude/hooks/core/session-start.js",
             "timeout": 10
           }
         ]
@@ -118,7 +118,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"/Users/rodmagic/.claude/hooks/core/mid-conversation.js\"",
+            "command": "node ~/.claude/hooks/core/mid-conversation.js",
             "timeout": 8
           }
         ]
@@ -129,7 +129,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"/Users/rodmagic/.claude/hooks/core/session-end.js\"",
+            "command": "node ~/.claude/hooks/core/session-end.js",
             "timeout": 15
           }
         ]

@@ -4,7 +4,7 @@
 
 set -e
 
-PROJECT_DIR="/Users/rodmagic/Code/rodlc/workspace/mcp-servers/mcp-memory-service"
+PROJECT_DIR="$HOME/Code/rodlc/workspace/mcp-servers/mcp-memory-service"
 HTTP_MANAGER="$PROJECT_DIR/scripts/service/http_server_manager.sh"
 
 # Ensure the HTTP manager script exists

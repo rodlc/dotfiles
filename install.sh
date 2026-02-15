@@ -46,15 +46,10 @@ echo "=====> Installing Homebrew packages"
 brew bundle --file="$DOTFILES_DIR/Brewfile" --no-lock 2>/dev/null || true
 
 echo "=====> Installing language runtimes"
-# Python
-command -v pyenv &>/dev/null && [ ! -d "$HOME/.pyenv/versions/3.12.8" ] && \
-  PYTHON_CONFIGURE_OPTS="--enable-loadable-sqlite-extensions" pyenv install 3.12.8 && pyenv global 3.12.8
-# Ruby
-command -v rbenv &>/dev/null && [ ! -d "$HOME/.rbenv/versions/3.3.9" ] && \
-  rbenv install 3.3.9 && rbenv global 3.3.9
-# Node
-command -v fnm &>/dev/null && ! fnm list 2>/dev/null | grep -q "v22" && \
-  fnm install 22 && fnm default 22
+if command -v mise &>/dev/null; then
+  echo "-----> Installing runtimes via mise"
+  mise install
+fi
 
 # Battery configuration (Apple Silicon only)
 if [[ $(uname -m) == "arm64" ]] && command -v battery &> /dev/null; then
@@ -277,7 +272,8 @@ if [ -d "$MCP_MEMORY_SERVICE" ]; then
   # Install launchd plists (with path substitution)
   mkdir -p "$HOME/Library/LaunchAgents"
   backup "$HOME/Library/LaunchAgents/com.rodlecoent.mcp-memory-http.plist"
-  cp "$DOTFILES_DIR/launchd/com.rodlecoent.mcp-memory-http.plist" "$HOME/Library/LaunchAgents/com.rodlecoent.mcp-memory-http.plist"
+  sed "s|__HOME__|$HOME|g" "$DOTFILES_DIR/launchd/com.rodlecoent.mcp-memory-http.plist" \
+    > "$HOME/Library/LaunchAgents/com.rodlecoent.mcp-memory-http.plist"
 
   # Memory backup plist
   sed "s|__HOME__|$HOME|g" "$DOTFILES_DIR/launchd/com.rodlecoent.memory-backup.plist" \

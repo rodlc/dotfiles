@@ -86,7 +86,7 @@ export_config() {
   # Replace paths with variables
   mcp_config=$(echo "$mcp_config" | sed \
     -e "s|$HOME|"'${HOME}|g' \
-    -e "s|/Users/rodmagic/Code/rodlc/workspace|"'${WORKSPACE_DIR}|g')
+    -e "s|$HOME/Code/rodlc/workspace|"'${WORKSPACE_DIR}|g')
 
   # Backup existing dotfiles template
   [ -f "$DOTFILES_MCP" ] && /bin/cp -f "$DOTFILES_MCP" "${DOTFILES_MCP}.bak"

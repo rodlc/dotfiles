@@ -6,13 +6,10 @@ WORKSPACE_DIR="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}"
 
 echo "=====> Installing workspace + MCP servers"
 
-# Install Bun if not present (needed for some MCPs)
+# Verify runtimes (managed by mise)
 if ! command -v bun &> /dev/null; then
-  echo "-----> Installing Bun"
-  curl -fsSL https://bun.sh/install | bash
-  export PATH="$HOME/.bun/bin:$PATH"
-else
-  echo "-----> Bun already installed"
+  echo "❌ bun not found. Run: mise install"
+  exit 1
 fi
 
 # Clone workspace if not present

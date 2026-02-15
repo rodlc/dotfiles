@@ -50,8 +50,8 @@ mkdir -p "$WRAPPER_DIR"
 cat > "$WRAPPER_SCRIPT" << 'WRAPPER'
 #!/bin/bash
 # MCP Memory HTTP Server wrapper
-exec /Users/rodmagic/Code/rodlc/workspace/mcp-servers/mcp-memory-service/venv/bin/python \
-    /Users/rodmagic/Code/rodlc/workspace/mcp-servers/mcp-memory-service/scripts/server/run_http_server.py "$@"
+exec "$HOME/Code/rodlc/workspace/mcp-servers/mcp-memory-service/venv/bin/python" \
+    "$HOME/Code/rodlc/workspace/mcp-servers/mcp-memory-service/scripts/server/run_http_server.py" "$@"
 WRAPPER
 chmod +x "$WRAPPER_SCRIPT"
 echo "  ✓ Wrapper créé: $WRAPPER_SCRIPT"

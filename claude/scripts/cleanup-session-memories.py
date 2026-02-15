@@ -17,7 +17,9 @@ from typing import Dict, List, Optional, Tuple
 # ═══════════════════════════════════════════════════════════════════════════
 
 PLANS_DIR = Path.home() / ".claude" / "plans"
-MEMORY_RESULT_FILE = Path.home() / ".claude/projects/-Users-rodmagic-Code/1a488232-13e7-46a2-b821-1b8dd706734f/tool-results/mcp-memory-service-search_by_tag-1770225139594.txt"
+# MEMORY_RESULT_FILE: Session-specific path - should be passed as argument or configured per run
+# Old hardcoded path (obsolete): .claude/projects/-Users-rodmagic-Code/1a488232-13e7-46a2-b821-1b8dd706734f/tool-results/...
+MEMORY_RESULT_FILE = None  # TODO: Make this configurable via CLI argument
 
 TIMESTAMP_THRESHOLD = 7200  # ±2h en secondes
 KEYWORD_THRESHOLD = 172800  # ±48h en secondes
