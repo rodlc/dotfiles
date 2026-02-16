@@ -48,7 +48,7 @@ for i in "${!SSH_BW_NAMES[@]}"; do
     local_ssh="no"
     sync_ssh="n/a"
 
-    if rbw get "$bw_name" &>/dev/null; then
+    if get_ssh_key "$bw_name" &>/dev/null; then
         bw_ssh="yes"
     fi
 
@@ -57,7 +57,7 @@ for i in "${!SSH_BW_NAMES[@]}"; do
     fi
 
     if [[ "$bw_ssh" == "yes" && "$local_ssh" == "yes" ]]; then
-        bw_key=$(rbw get "$bw_name" 2>/dev/null)
+        bw_key=$(get_ssh_key "$bw_name")
         local_key=$(cat "$ssh_key")
         if [[ "$bw_key" == "$local_key" ]]; then
             sync_ssh="ok"

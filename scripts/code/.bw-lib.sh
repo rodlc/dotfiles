@@ -16,3 +16,18 @@ ensure_rbw() {
         rbw unlock
     fi
 }
+
+# Fetch SSH private key from BW (SSH Key items → fallback Secure Notes)
+# Returns: 0 on success, 1 if not found, 2 if multiple entries exist
+get_ssh_key() {
+    local err
+    rbw get --field=private_key "$1" 2>/dev/null && return 0
+    err=$(rbw get "$1" 2>&1) && { echo "$err"; return 0; }
+    [[ "$err" == *"multiple entries"* ]] && return 2
+    return 1
+}
+
+# Fetch SSH public key from BW SSH Key item
+get_ssh_pub() {
+    rbw get --field=public_key "$1" 2>/dev/null
+}

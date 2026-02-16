@@ -62,45 +62,63 @@ for i in "${!SSH_BW_NAMES[@]}"; do
 
     if [[ ! -f "$ssh_key" ]]; then
         echo "⏭️  $ssh_key not found. Skipping $bw_name sync."
-    elif ! rbw get "$bw_name" &>/dev/null; then
-        local_fp=$(ssh-keygen -lf "$ssh_key" 2>/dev/null | awk '{print $2}' || true)
-        echo "┌─────────────────────────────────────────────────────────────┐"
-        echo "│ 🔑 $bw_name : Bitwarden item not found                     │"
-        echo "└─────────────────────────────────────────────────────────────┘"
-        echo ""
-        echo "Local fingerprint: $local_fp"
-        echo ""
-        echo "► Action required:"
-        echo "  1. Open Bitwarden app"
-        echo "  2. Create a new secure note named '$bw_name'"
-        echo "  3. Copy your private key:"
-        echo "       cat $ssh_key | pbcopy"
-        echo "  4. Paste into Bitwarden"
     else
-        bw_key=$(rbw get "$bw_name" 2>/dev/null)
-        local_key=$(cat "$ssh_key")
+        get_ssh_key_rc=0
+        get_ssh_key "$bw_name" &>/dev/null || get_ssh_key_rc=$?
 
-        if [[ "$bw_key" == "$local_key" ]]; then
-            echo "✅ $bw_name in sync"
-        else
-            local_fp=$(ssh-keygen -lf "$ssh_key" 2>/dev/null | awk '{print $2}' || true)
-            if [[ -n "$bw_key" ]]; then
-                bw_fp=$(echo "$bw_key" | ssh-keygen -lf /dev/stdin 2>/dev/null | awk '{print $2}' || true)
-            else
-                bw_fp="(empty)"
-            fi
-
+        if [[ $get_ssh_key_rc -eq 2 ]]; then
+            # Multiple entries with same name
             echo "┌─────────────────────────────────────────────────────────────┐"
-            echo "│ ⚠️  $bw_name : local ≠ Bitwarden                            │"
+            echo "│ ⚠️  $bw_name : multiple Bitwarden entries found             │"
             echo "└─────────────────────────────────────────────────────────────┘"
             echo ""
-            echo "Local:     $local_fp"
-            echo "Bitwarden: $bw_fp"
-            echo ""
             echo "► Action required:"
-            echo "  1. Copy your local private key:"
-            echo "       cat $ssh_key | pbcopy"
-            echo "  2. Open Bitwarden app → '$bw_name' → paste"
+            echo "  1. Open Bitwarden Desktop → search '$bw_name'"
+            echo "  2. Delete the duplicate entry"
+            echo "  3. Re-run bw-push"
+        elif [[ $get_ssh_key_rc -ne 0 ]]; then
+            # Item absent
+            local_fp=$(ssh-keygen -lf "$ssh_key" 2>/dev/null | awk '{print $2}' || true)
+            echo "┌─────────────────────────────────────────────────────────────┐"
+            echo "│ 🔑 $bw_name : Bitwarden item not found                     │"
+            echo "└─────────────────────────────────────────────────────────────┘"
+            echo ""
+            echo "Local fingerprint: $local_fp"
+            echo ""
+            cat "$ssh_key" | pbcopy
+            echo "► Action required (private key copied to clipboard):"
+            echo "  1. Open Bitwarden Desktop"
+            echo "  2. + New Item → Type: SSH Key → Name: '$bw_name'"
+            echo "  3. Paste private key (already in clipboard)"
+            echo "  4. Save"
+        else
+            # Item found — compare
+            bw_key=$(get_ssh_key "$bw_name")
+            local_key=$(cat "$ssh_key")
+
+            if [[ "$bw_key" == "$local_key" ]]; then
+                echo "✅ $bw_name in sync"
+            else
+                local_fp=$(ssh-keygen -lf "$ssh_key" 2>/dev/null | awk '{print $2}' || true)
+                if [[ -n "$bw_key" ]]; then
+                    bw_fp=$(echo "$bw_key" | ssh-keygen -lf /dev/stdin 2>/dev/null | awk '{print $2}' || true)
+                else
+                    bw_fp="(empty)"
+                fi
+
+                echo "┌─────────────────────────────────────────────────────────────┐"
+                echo "│ ⚠️  $bw_name : local ≠ Bitwarden                            │"
+                echo "└─────────────────────────────────────────────────────────────┘"
+                echo ""
+                echo "Local:     $local_fp"
+                echo "Bitwarden: $bw_fp"
+                echo ""
+                cat "$ssh_key" | pbcopy
+                echo "► Action required (private key copied to clipboard):"
+                echo "  1. Open Bitwarden Desktop → '$bw_name'"
+                echo "  2. Paste updated private key (already in clipboard)"
+                echo "  3. Save"
+            fi
         fi
     fi
     echo ""

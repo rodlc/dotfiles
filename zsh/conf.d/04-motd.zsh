@@ -14,7 +14,7 @@ format_cache_age() {
 
 # Check SSH agent status
 check_ssh_status() {
-    local ssh_key="$HOME/.ssh/id_ed25519"
+    local ssh_key="$HOME/.ssh/id_ed25519_rodlc"
 
     # Check if SSH agent has keys loaded
     if ssh-add -l &>/dev/null; then

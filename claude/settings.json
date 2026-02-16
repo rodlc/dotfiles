@@ -78,7 +78,7 @@
     ],
     "defaultMode": "plan"
   },
-  "model": "opusplan",
+  "model": "opus",
   "hooks": {
     "PreToolUse": [
       {
@@ -140,7 +140,5 @@
     "type": "command",
     "command": "~/.claude/statusline.sh"
   },
-  "enabledPlugins": {},
-  "alwaysThinkingEnabled": false,
-  "fastMode": true
+  "enabledPlugins": {}
 }
