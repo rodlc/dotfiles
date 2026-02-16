@@ -35,19 +35,6 @@ brew "direnv"
 brew "mise"
 
 # ════════════════════════════════════════════════════════════════════════════
-# Language Managers
-# ════════════════════════════════════════════════════════════════════════════
-
-# Python version management
-brew "pyenv"
-# Ruby version manager
-brew "rbenv"
-# Go version manager (REMOVED go — use goenv when needed)
-brew "goenv"
-# Fast Node manager (replaces nvm)
-brew "fnm"
-
-# ════════════════════════════════════════════════════════════════════════════
 # Security Tools
 # ════════════════════════════════════════════════════════════════════════════
 

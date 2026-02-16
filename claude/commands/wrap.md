@@ -25,9 +25,12 @@ Check system-reminder for exact phrase "Plan mode is active." (with period):
    - Use: `mcp__memory-service__store_memory` with type: `session-stub`
 4. Cleanup: `curl -X POST http://127.0.0.1:4242/api/manage/cleanup-duplicates`
 5. Quality check: `curl http://127.0.0.1:4242/api/quality/distribution`
-6. Auto-sync repos:
-   - Dotfiles: commit & push if dirty
-   - Workspace: commit & push if dirty
+6. Auto-sync repos (for each: dotfiles, workspace):
+   - Skip if working tree is clean
+   - `git add` + `git commit` (stage and commit changes)
+   - `git pull` (merge — safer than rebase, surfaces conflicts instead of silent drops)
+   - If merge conflict → warn user, do NOT push
+   - `git push`
 7. Display: "✅ Wrap-up complete. Type /exit or Ctrl+D to quit."
 
 ## Usage
