@@ -7,3 +7,16 @@ secrets
 # OS
 .DS_Store
 **/temp_extract/
+
+# Temporary/backup files
+*.tmp
+*.bak
+*.swp
+*.swo
+*.log
+*.orig
+*.backup*
+
+# Python
+**/__pycache__/
+*.pyc
