@@ -7,8 +7,8 @@ BW_ITEM_SECRETS="Dotfiles Env"
 # SSH keys: parallel arrays (BW item name → local file path)
 SSH_BW_NAMES=("SSH rodlc")
 SSH_LOCAL_PATHS=("$HOME/.ssh/id_ed25519_rodlc")
-# SSH_BW_NAMES+=("SSH rodmagic")
-# SSH_LOCAL_PATHS+=("$HOME/.ssh/id_ed25519_rodmagic")
+SSH_BW_NAMES+=("SSH rodlcmagic")
+SSH_LOCAL_PATHS+=("$HOME/.ssh/id_ed25519_rodlcmagic")
 
 ensure_rbw() {
     if ! rbw unlocked &>/dev/null; then

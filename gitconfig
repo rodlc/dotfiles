@@ -64,5 +64,5 @@
 	email = 63702959+rodlc@users.noreply.github.com
 	name = Rod Lc
 
-[includeIf "gitdir:~/Code/submagic-remotion/"]
+[includeIf "gitdir:~/Code/rodlcmagic/"]
     path = ~/.gitconfig-rodlcmagic
