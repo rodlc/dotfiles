@@ -40,8 +40,6 @@ brew "mise"
 
 # Unofficial Bitwarden CLI (Rust)
 brew "rbw"
-# Official Bitwarden CLI
-brew "bitwarden-cli"
 # YubiKey manager
 brew "ykman"
 # GPG pin entry for macOS
@@ -75,12 +73,10 @@ brew "pygments"
 # Utilities
 # ════════════════════════════════════════════════════════════════════════════
 
-# Select default apps for documents and URL schemes on macOS
-brew "duti"
-# Ookla speed test
-brew "speedtest-cli"
 # 7-Zip (high compression file archiver) implementation
 brew "p7zip"
+# Lightweight BitTorrent client (CLI)
+brew "transmission-cli"
 # Framework for managing multi-language pre-commit hooks
 brew "pre-commit"
 
@@ -90,8 +86,6 @@ brew "pre-commit"
 
 # Open source IDE for exploring and testing APIs
 cask "bruno"
-# Monero desktop wallet
-cask "feather"
 cask "font-jetbrains-mono"
 # Free and open-source media player
 cask "iina"
@@ -101,8 +95,6 @@ cask "raycast"
 cask "zed"
 # Browser routing
 cask "finicky"
-# Browsers
-cask "google-chrome"
 # Encryption tools
 cask "veracrypt"
 cask "macfuse"

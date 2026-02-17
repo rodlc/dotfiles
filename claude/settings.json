@@ -6,7 +6,7 @@
   },
   "permissions": {
     "allow": [
-      "Read(**)",
+      "Read",
       "Edit",
       "Write",
       "WebSearch",
@@ -18,6 +18,10 @@
       "Bash(python*:*)",
       "Bash(node:*)",
       "Bash(magick|exiftool|weasyprint:*)",
+      "Bash(bun|bunx:*)",
+      "Bash(mise:*)",
+      "Bash(ruby|rails|rake|bundle|gem:*)",
+      "Bash(jq:*)",
       "Bash(playwright-cli:*)",
       "Bash(yt-dlp:*)",
       "Bash(command -v yt-dlp)",
