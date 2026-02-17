@@ -13,12 +13,13 @@ Language: English (code/docs/commits) | French (conversational)
 Style: Working > elegant | Minimal > complete | Robust > optimal | No fluff
 
 ### Formatting (plans, summaries, structured output)
-Unicode box-drawing:
-- Frames: ╔═╗ ╠═╣ ╚═╝ (major sections, problem statements)
-- Tables: ┌─┬─┐ ├─┼─┤ └─┴─┘ (data grids, comparisons)
-- Trees: ├── └── (hierarchies, file structures)
+Telegraphic — fragments > sentences, 1 idea = 1 line, no filler.
+Context ≤ 3 lines. Every section earns its space.
+Plan = living doc: carry full session context, condense as it grows.
+Use structure to replace prose:
+- Data → tables ┌─┬─┐  Flow → arrows (→)  Lists → trees ├── └──
+- Frames: ╔═╗ ╠═╣ ╚═╝  Headers: ════ major ──── minor
 - Status: ✓ done ✗ rejected ⚠ risk ► action
-- Headers: ════ major ──── minor
 
 ## Code
 Changes: Minimal | Commits: Atomic
