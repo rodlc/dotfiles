@@ -59,7 +59,6 @@ Cross-cutting knowledge for PostHog at Submagic. Consult when encountering edge 
 
 ### Gotchas
 - `$feature/variant` breakdown only works if property exists on target event
-- `sum(if())` not `sumIf()` — HogQL syntax differs from ClickHouse
 - UUID null: `!= '00000000-0000-0000-0000-000000000000'` (not `!= ''`)
 
 ════════════════════════════════════════
@@ -155,6 +154,9 @@ AND timestamp >= '2026-XX-XXTXX:XX:XX'  -- exact launch time
 | `"identified_only"` | ~$0.00005 | Pre-signup pageviews not attributed |
 
 **Recommendation**: `identified_only` (current Submagic config)
+
+### Cost Optimization
+- `capture_pageleave: false` → ~55% event savings (PostHog JS SDK option)
 
 ### PostHog Pricing (2026)
 ```

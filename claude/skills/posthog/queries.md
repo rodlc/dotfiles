@@ -61,27 +61,31 @@ Template insight: **V6FhR2DE**
 ### flat+arrayJoin Pattern (avoids CTE timeout)
 ```sql
 -- CTE = macro in HogQL → N× evaluation → timeout
--- Instead: flatten once with arrayJoin
+-- Instead: flatten per-person, then arrayJoin + filter
 
+-- Step 1: Aggregate events per person per variant
 SELECT
   variant,
-  arrayJoin(events_array) AS event_name,
-  count() AS cnt
+  event_name,
+  count(DISTINCT person_id) AS unique_persons
 FROM (
   SELECT
     variant,
-    groupArray(event) AS events_array
+    person_id,
+    arrayJoin(events_array) AS event_name
   FROM (
     SELECT
       properties.`$feature/flag-name` AS variant,
-      event,
-      person_id
+      person_id,
+      groupArray(event) AS events_array
     FROM events
-    WHERE ...
+    WHERE event IN ('signup', 'videoUploadInitiated', 'planPurchased')
+      AND timestamp >= '2026-XX-XX'
+    GROUP BY variant, person_id  -- ← per-person aggregation
   )
-  GROUP BY variant
 )
 GROUP BY variant, event_name
+ORDER BY variant, event_name
 ```
 
 ### argMax Stripe Dedup (multi-subscription users)
@@ -155,14 +159,14 @@ WITH
   control AS (
     SELECT
       count() AS n,
-      countIf(converted = 1) AS x
+      count(if(converted = 1, 1, NULL)) AS x
     FROM experiment_data
     WHERE variant = 'control'
   ),
   treatment AS (
     SELECT
       count() AS n,
-      countIf(converted = 1) AS x
+      count(if(converted = 1, 1, NULL)) AS x
     FROM experiment_data
     WHERE variant = 'test'
   )

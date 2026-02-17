@@ -50,17 +50,20 @@ Consult PostHog AI (Max) BEFORE any non-trivial action:
 ### `/posthog experiment [phase|details]`
 A/B test lifecycle — setup, launch, validate, analyze, monitor.
 
-**MANDATORY READ: Read the file `experiment.md` in this skill directory completely. NEVER set range limits.**
+**MANDATORY - READ ENTIRE FILE**: Read [`experiment.md`](experiment.md) (~165 lines) completely from start to finish. **NEVER set any range limits when reading this file.**
 
 ### `/posthog insight [type|details]`
 Create and configure PostHog insights — funnels, trends, retention, HogQL.
 
-**MANDATORY READ: Read the file `insights.md` in this skill directory completely. NEVER set range limits.**
+**MANDATORY - READ ENTIRE FILE**: Read [`insights.md`](insights.md) (~115 lines) completely from start to finish. **NEVER set any range limits when reading this file.**
 
 ### `/posthog query [pattern|details]`
 HogQL templates — validated queries ready to adapt.
 
-**MANDATORY READ: Read the file `queries.md` in this skill directory completely. NEVER set range limits.**
+**MANDATORY - READ ENTIRE FILE**: Read [`queries.md`](queries.md) (~305 lines) completely from start to finish. **NEVER set any range limits when reading this file.**
+
+### `/posthog ask [question]`
+Consult PostHog AI (Max) — see "PostHog AI" section above. No sub-file needed.
 
 ### `/posthog` (no argument)
 Display this routing table. Ask user which domain they need.
@@ -71,7 +74,7 @@ Display this routing table. Ask user which domain they need.
 
 Cross-cutting pitfalls, conventions, and patterns shared across all domains.
 
-**MANDATORY READ: Read the file `reference.md` in this skill directory when encountering pitfalls, edge cases, or unfamiliar PostHog behavior. Read completely. NEVER set range limits.**
+**MANDATORY - READ ENTIRE FILE**: Read [`reference.md`](reference.md) (~180 lines) when encountering pitfalls, edge cases, or unfamiliar PostHog behavior. **NEVER set any range limits when reading this file.**
 
 ────────────────────────────────────────
 

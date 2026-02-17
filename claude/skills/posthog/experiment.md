@@ -136,7 +136,7 @@ Post-launch monitoring for longer experiments (e.g. hard-reverse-trial).
 - [ ] Define **maturation window** (e.g. 3-day rolling, applied to BOTH control AND treatment)
 - [ ] Build **power analysis** table: MDE by day
 
-### Power Analysis Table
+### Power Analysis Table (example values — replace with actuals)
 ```
 | Day | n_control | n_treatment | MDE    | Min detectable |
 |-----|-----------|-------------|--------|----------------|
@@ -144,6 +144,7 @@ Post-launch monitoring for longer experiments (e.g. hard-reverse-trial).
 | 7   | 1200      | 1200        | 5.3%   | Medium effects  |
 | 14  | 2500      | 2500        | 3.7%   | Target MDE      |
 ```
+MDE typical: ~5% for signup conversion experiments.
 
 ### Decision Framework
 ```
