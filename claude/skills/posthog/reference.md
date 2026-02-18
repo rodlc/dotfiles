@@ -116,7 +116,7 @@ $device_id (www) → signup/$identify event → email → Stripe customer
 ### Implementation
 1. Collect `$device_id` from www exposure events
 2. Join to signup/$identify events (same device_id) to get email
-3. Join email to `s3_submagic_prod.stripe_subscription.customer_email`
+3. Join email to `stripe.customer.email` → `stripe.subscription`
 4. Template insight: **V6FhR2DE**
 
 ════════════════════════════════════════
@@ -130,7 +130,7 @@ $device_id (www) → signup/$identify event → email → Stripe customer
 | `email` | Stripe JOINs | -17% vs person_id |
 | Native (Bayesian) | Quick check | Internal dedup |
 
-### Filters (always apply)
+### Filters (recommended)
 ```sql
 AND person_id != '00000000-0000-0000-0000-000000000000'
 AND NOT match(toString(properties.$host), '^(localhost|127\\.0\\.0\\.1)($|:)')

@@ -60,7 +60,7 @@ Create and configure PostHog insights — funnels, trends, retention, HogQL.
 ### `/posthog query [pattern|details]`
 HogQL templates — validated queries ready to adapt.
 
-**MANDATORY - READ ENTIRE FILE**: Read [`queries.md`](queries.md) (~305 lines) completely from start to finish. **NEVER set any range limits when reading this file.**
+**MANDATORY - READ ENTIRE FILE**: Read [`queries.md`](queries.md) (~280 lines) completely from start to finish. **NEVER set any range limits when reading this file.**
 
 ### `/posthog ask [question]`
 Consult PostHog AI (Max) — see "PostHog AI" section above. No sub-file needed.

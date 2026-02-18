@@ -51,7 +51,7 @@ SELECT
   count(DISTINCT s.id) AS subs
 FROM exposures e
 JOIN device_emails de ON de.device_id = e.device_id
-JOIN s3_submagic_prod.stripe_subscription s ON s.customer_email = de.email
+JOIN stripe.subscription s ON s.customer_email = de.email
 GROUP BY e.variant, s.status
 ```
 Template insight: **V6FhR2DE**
@@ -93,7 +93,7 @@ SELECT
   customer_email,
   argMax(status, created_at) AS current_status,
   argMax(plan_amount, created_at) AS current_amount
-FROM s3_submagic_prod.stripe_subscription
+FROM stripe.subscription
 GROUP BY customer_email
 ```
 
@@ -132,7 +132,7 @@ SELECT
   min(total) AS total,
   min(currency) AS currency,
   min(billing_reason) AS billing_reason
-FROM s3_submagic_prod.stripe_invoice
+FROM stripe.invoice
 GROUP BY id
 ```
 
@@ -198,6 +198,11 @@ Replace `signup` with `videoUploadInitiated` in conversion query + z-test.
 ### planPurchased + P-value — q4f9IE2P
 Replace `signup` with `planPurchased` in conversion query + z-test.
 
+### Stripe (cross-domain z-test) — 5HvdLc5q
+Cross-domain bridge: `$device_id` → email → `stripe.customer` → `stripe.subscription`.
+Z-test on clean_active subscription rate (excludes `cancel_at_period_end`).
+Replaces deleted sgUqt2iZ.
+
 ### Daily Trend by Variant
 ```sql
 SELECT
@@ -256,7 +261,7 @@ SELECT
   sum(total) / 100 AS new_mrr
 FROM (
   SELECT id, min(total) AS total, min(created_at) AS created_at
-  FROM s3_submagic_prod.stripe_invoice
+  FROM stripe.invoice
   WHERE billing_reason = 'subscription_create'
   GROUP BY id
 )
