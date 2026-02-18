@@ -23,7 +23,8 @@ fi
 # Override port with environment variable (4242 for this service)
 export MCP_HTTP_PORT="${MCP_HTTP_PORT:-4242}"
 export MCP_HTTP_ENABLED=true
-export MCP_MEMORY_STORAGE_BACKEND="${MCP_MEMORY_STORAGE_BACKEND:-hybrid}"
+export MCP_OAUTH_ENABLED=false
+export MCP_MEMORY_STORAGE_BACKEND="${MCP_MEMORY_STORAGE_BACKEND:-sqlite_vec}"
 
 # SQLite path for hybrid backend
 export MCP_MEMORY_SQLITE_PATH="${MCP_MEMORY_SQLITE_PATH:-$HOME/Library/Application Support/mcp-memory/sqlite_vec.db}"
