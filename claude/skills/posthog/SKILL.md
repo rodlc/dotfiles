@@ -90,11 +90,11 @@ Cross-cutting pitfalls, conventions, and patterns shared across all domains.
 ### homepage-redesign
 | Metric | Short ID |
 |--------|----------|
-| Conversion by variant | sgUqt2iZ |
 | Signup + P-value | qSgJRy34 |
 | videoUploadInitiated + P-value | ouRagmLs |
 | planPurchased + P-value | q4f9IE2P |
-| Cross-domain Stripe | V6FhR2DE |
+| Stripe (cross-domain z-test) | 5HvdLc5q |
+| Cross-domain Stripe (legacy) | V6FhR2DE |
 
 ### hard-reverse-trial
 | Metric | Short ID |

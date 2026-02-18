@@ -9,30 +9,28 @@ Validated queries for Submagic PostHog (project 48392). Copy and adapt.
 ### Exposure Dedup (ROW_NUMBER)
 ```sql
 -- First exposure per person for a given flag
+-- ⚠ Use toString(properties['$feature/...']) — backtick syntax silently returns NULL via MCP
 SELECT variant, person_id FROM (
   SELECT
-    properties.`$feature/flag-name` AS variant,
+    toString(properties['$feature/flag-name']) AS variant,
     person_id,
     ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY timestamp ASC) AS rn
   FROM events
   WHERE event = '$feature_flag_called'
-    AND properties.`$feature_flag` = 'flag-name'
-    AND properties.`$feature/flag-name` IN ('control', 'variant')
+    AND toString(properties['$feature_flag']) = 'flag-name'
+    AND toString(properties['$feature/flag-name']) IN ('control', 'variant')
     AND timestamp >= '2026-02-XX'  -- exact launch time
-    AND person_id != '00000000-0000-0000-0000-000000000000'
-    AND NOT match(toString(properties.$host), '^(localhost|127\\.0\\.0\\.1)($|:)')
 ) WHERE rn = 1
 ```
 
-### Localhost Exclusion Filter
+### Optional Filters (apply when needed)
 ```sql
+-- Localhost exclusion (works in saved insights, may fail via MCP tool)
 AND NOT match(toString(properties.$host), '^(localhost|127\\.0\\.0\\.1)($|:)')
-```
-
-### UUID Null Check
-```sql
+-- UUID null check
 AND person_id != '00000000-0000-0000-0000-000000000000'
 ```
+⚠ These filters are optional — existing insights (2zr7IsOF, 1ZDLWDdG) work without them.
 
 ### Cross-domain Bridge ($device_id → email → Stripe)
 ```sql
@@ -75,7 +73,7 @@ FROM (
     arrayJoin(events_array) AS event_name
   FROM (
     SELECT
-      properties.`$feature/flag-name` AS variant,
+      toString(properties['$feature/flag-name']) AS variant,
       person_id,
       groupArray(event) AS events_array
     FROM events
@@ -190,40 +188,6 @@ FROM control c, treatment t
 ════════════════════════════════════════
 
 ## homepage-redesign Queries (dashboard 519019)
-
-### Conversion by Variant (person_id) — sgUqt2iZ
-```sql
-WITH exposures AS (
-  SELECT variant, person_id FROM (
-    SELECT
-      properties.`$feature/homepage-redesign` AS variant,
-      person_id,
-      ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY timestamp ASC) AS rn
-    FROM events
-    WHERE event = '$feature_flag_called'
-      AND properties.`$feature_flag` = 'homepage-redesign'
-      AND properties.`$feature/homepage-redesign` IN ('control', 'test')
-      AND timestamp >= '2026-02-10T14:00:00'
-      AND person_id != '00000000-0000-0000-0000-000000000000'
-      AND NOT match(toString(properties.$host), '^(localhost|127\\.0\\.0\\.1)($|:)')
-  ) WHERE rn = 1
-),
-signups AS (
-  SELECT DISTINCT person_id
-  FROM events
-  WHERE event = 'signup'
-    AND timestamp >= '2026-02-10T14:00:00'
-)
-SELECT
-  e.variant,
-  count(DISTINCT e.person_id) AS exposed,
-  count(DISTINCT s.person_id) AS converted,
-  round(count(DISTINCT s.person_id) / count(DISTINCT e.person_id) * 100, 2) AS rate
-FROM exposures e
-LEFT JOIN signups s ON s.person_id = e.person_id
-GROUP BY e.variant
-ORDER BY e.variant
-```
 
 ### Signup + P-value — qSgJRy34
 Same as above with z-test significance appended (see z-test template).

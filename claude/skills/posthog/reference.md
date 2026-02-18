@@ -60,6 +60,7 @@ Cross-cutting knowledge for PostHog at Submagic. Consult when encountering edge 
 ### Gotchas
 - `$feature/variant` breakdown only works if property exists on target event
 - UUID null: `!= '00000000-0000-0000-0000-000000000000'` (not `!= ''`)
+- **Backtick vs bracket**: `properties.\`$feature/flag\`` works in saved insights but silently returns NULL when sent via MCP tool (JSON escaping issue). Always use `toString(properties['$feature/flag'])` for programmatic queries.
 
 ════════════════════════════════════════
 
