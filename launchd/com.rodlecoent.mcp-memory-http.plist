@@ -7,8 +7,7 @@
 
     <key>ProgramArguments</key>
     <array>
-        <string>__HOME__/Code/rodlc/workspace/mcp-servers/mcp-memory-service/.venv/bin/python</string>
-        <string>__HOME__/Code/rodlc/workspace/mcp-servers/mcp-memory-service/scripts/server/run_http_server.py</string>
+        <string>__HOME__/Code/rodlc/workspace/mcp-servers/mcp-memory-service/scripts/server/mcp-memory-http</string>
     </array>
 
     <key>RunAtLoad</key>
