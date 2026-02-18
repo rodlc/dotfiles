@@ -150,8 +150,8 @@ AND timestamp >= '2026-XX-XXTXX:XX:XX'  -- exact launch time
 ### person_profiles Impact
 | Mode | Cost/event | Trade-off |
 |------|-----------|-----------|
-| `"always"` | ~$0.000198 | 4× more expensive |
-| `"identified_only"` | ~$0.00005 | Pre-signup pageviews not attributed |
+| `"always"` | ~USD 0.000198 | 4× more expensive |
+| `"identified_only"` | ~USD 0.00005 | Pre-signup pageviews not attributed |
 
 **Recommendation**: `identified_only` (current Submagic config)
 
@@ -160,12 +160,12 @@ AND timestamp >= '2026-XX-XXTXX:XX:XX'  -- exact launch time
 
 ### PostHog Pricing (2026)
 ```
-Product Analytics : 1M free → $0.00005/event
-Feature Flags     : 1M free → $0.0001/request
-Session Replay    : 5K free → $0.005/recording
-Data Warehouse    : 1M rows free → $0.000015/row
+Product Analytics : 1M free → USD 0.00005/event
+Feature Flags     : 1M free → USD 0.0001/request
+Session Replay    : 5K free → USD 0.005/recording
+Data Warehouse    : 1M rows free → USD 0.000015/row
 Experiments       : billed with feature flags
-Surveys           : 1.5K free → $0.10/response
+Surveys           : 1.5K free → USD 0.10/response
 ```
 
 ════════════════════════════════════════

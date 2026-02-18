@@ -20,7 +20,7 @@ A/B Test Board   : dashboard 519019
 Stripeboard      : dashboard 518344
 MCP tools        : mcp__posthog__* (when connected)
 Stack            : React/Next.js, Remotion, PostHog JS SDK
-Billing mode     : identified_only (~$0.00005/event)
+Billing mode     : identified_only (~USD 0.00005/event)
 ```
 
 ### Submagic Quick Ref
