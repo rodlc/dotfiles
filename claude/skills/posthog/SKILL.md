@@ -18,6 +18,7 @@ Project ID       : 48392 (EU instance)
 Growthboard      : dashboard 477928
 A/B Test Board   : dashboard 519019
 Stripeboard      : dashboard 518344
+Trigger Board    : dashboard 528615
 MCP tools        : mcp__posthog__* (when connected)
 Stack            : React/Next.js, Remotion, PostHog JS SDK
 Billing mode     : identified_only (~USD 0.00005/event)
@@ -113,3 +114,24 @@ Cross-cutting pitfalls, conventions, and patterns shared across all domains.
 | New MRR | Ia4W3q8s |
 | Expansion cohort | TYBWNoFQ |
 | New Subs cohort | ICTMvQHx |
+
+## Payment Trigger Dashboard (528615) — v2.3
+
+14 tiles, all dimensions covered. `remove_watermark` = $32K/mo, 73% new sub revenue.
+
+| ID | Name | Category |
+|----|------|----------|
+| `rVG48Jgd` | Feature Leaderboard (3d attribution) | Attribution |
+| `mpHlFuHx` | Adopt Triggers by Plan | Attribution |
+| `6kcaoCWr` | Adore Triggers by Plan | Attribution |
+| `V4Hl37wQ` | Modal Fatigue Check | Attribution |
+| `6DapjpUr` | Time-to-Activate (30d) | Timing |
+| `cAFV1Nv8` | Time-to-Adopt (30d) | Timing |
+| `6WAq18gA` | Time-to-Adore (180d) | Timing |
+| `9h9hvvBo` | Last Event Before Adopt (by plan) | Last Event |
+| `cKUichM8` | Last Event Before Adore (by plan) | Last Event |
+| `TE8RCYBN` | Adopt Context — Plan × Page × Feature (3d) | Context |
+| `dRR5RA7E` | Adore Context — Plan × Page × Feature (3d) | Context |
+| `dBtSgn7L` | Activate & Adopt Rate by BCG Quadrant | BCG |
+| `VL8QTSJ0` | BCG Country Matrix | BCG |
+| `a25LC5Ly` | BCG Quadrant Summary | BCG |
