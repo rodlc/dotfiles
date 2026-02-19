@@ -50,7 +50,7 @@ if [[ $is_localhost == false ]] && \
 fi
 
 # nc/netcat et /dev/tcp toujours bloqués (pas de localhost exception)
-if [[ $command =~ (nc|netcat|ncat)[[:space:]] ]] || \
+if [[ $command =~ (^|[[:space:]]|[/\|;\&\(])(nc|netcat|ncat)[[:space:]] ]] || \
    [[ $command =~ /dev/(tcp|udp)/ ]] || \
    [[ $command =~ \|[[:space:]]*(curl|wget|nc) ]]; then
   echo "DEBUG: DENY! Network exfiltration pattern detected" >> /tmp/claude-hook-debug.log
