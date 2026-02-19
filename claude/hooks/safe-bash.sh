@@ -173,7 +173,8 @@ if [[ $command =~ ^cd([[:space:]]|$) ]] || \
    [[ $command =~ ^cp([[:space:]]|$) ]] || \
    [[ $command =~ ^rm([[:space:]]|$) ]] || \
    [[ $command =~ ^curl[[:space:]].*http://(localhost|127\.0\.0\.1)(:|/) ]] || \
-   [[ $command =~ ^\.\/.+ ]]; then
+   [[ $command =~ ^\.\/.+ ]] || \
+   [[ $command =~ ^~/Code/rodlc/(workspace/scripts|dotfiles)/.+ ]]; then
   echo "DEBUG: MATCH! Allowing command" >> /tmp/claude-hook-debug.log
   echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow","permissionDecisionReason":"Safe command auto-approved"}}'
   exit 0
