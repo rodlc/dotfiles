@@ -39,6 +39,10 @@
         <string>false</string>
         <key>MCP_ALLOW_ANONYMOUS</key>
         <string>true</string>
+        <key>MCP_MEMORY_USE_ONNX</key>
+        <string>true</string>
+        <key>MCP_QUALITY_AI_PROVIDER</key>
+        <string>none</string>
     </dict>
 
     <key>WorkingDirectory</key>
