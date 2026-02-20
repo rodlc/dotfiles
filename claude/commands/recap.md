@@ -30,15 +30,23 @@ From conversation history, extract:
 - Key decisions made
 
 ### 3. Update plan file
-Add/update sections:
+Read existing plan content first. PRESERVE all prior context.
+Add/update the following sections (do NOT replace existing content):
 
 ```
+If sections already exist → UPDATE in place (do NOT duplicate).
+On successive recaps:
+- Merge new ✓ items into existing Progression
+- Condense resolved ✓ clusters → single summary line (e.g. "✓ Auth flow — 3 endpoints + tests")
+- Update Status field, don't append a new one
+- Append new ► items to Next Steps, remove completed ones
+
 ## Résultat
 **Status: [En cours | Complété ✓ | Bloqué ⚠]**
-[Brief description]
+[Brief description — ≤ 3 lines]
 
 ## Progression
-✓ [completed items]
+✓ [completed items — condense when > 5 related items]
 ⚠ [blockers if any]
 
 ## Learnings (optional)
@@ -55,7 +63,12 @@ ALWAYS call ExitPlanMode after updating plan file.
 - In edit mode, user can run `/wrap` for Notion/Memory/Git sync
 
 ## Formatting
-Use CLAUDE.md conventions (box-drawing, status icons).
+Use CLAUDE.md conventions: telegraphic, box-drawing, status icons.
+- Fragments > sentences, 1 idea = 1 line, no filler
+- Context ≤ 3 lines per section intro
+- Plan = living doc → preserve existing plan content, enrich with session results
+- Condense completed sections (✓ items → summary line) as plan grows
+- Structure replaces prose: tables, frames ╔═╗, trees ├──, arrows →
 
 ## Critical
 - After EnterPlanMode succeeds, CONTINUE IMMEDIATELY with the main logic (do NOT wait for user input)
