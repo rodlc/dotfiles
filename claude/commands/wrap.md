@@ -17,15 +17,10 @@ Check system-reminder for exact phrase "Plan mode is active." (with period):
 ## Workflow
 
 1. Execute `/notion $ARGUMENTS` - Post to Notion → **capture Notion URL from output**
-2. Execute `/memorize` - Extract and store learnings
-3. **Store session stub** with minimal metadata and pointers:
-   - Plan path: from system-reminder or read latest plan in ~/.claude/plans/
-   - Notion URL: from step 1 output
-   - Template: `[session-stub] {plan_title}\nDate: {date}\nPlan: {plan_path}\nNotion: {notion_url}\nTopics: {topics}\nOutcome: {status}\nTags: session-stub, {project}, {topics}`
-   - Use: `mcp__memory-service__store_memory` with type: `session-stub`
-4. Cleanup: `curl -X POST http://127.0.0.1:4242/api/manage/cleanup-duplicates`
-5. Quality check: `curl http://127.0.0.1:4242/api/quality/distribution`
-6. Auto-sync repos via dedicated scripts:
+2. Execute `/memorize` - Extract and store learnings (including session stub with Notion URL)
+3. Cleanup: `curl -X POST http://127.0.0.1:4242/api/manage/cleanup-duplicates`
+4. Quality check: `curl http://127.0.0.1:4242/api/quality/distribution`
+5. Auto-sync repos via dedicated scripts:
    - **dotfiles**: run `df-push` alias inline:
      `cd ~/Code/rodlc/dotfiles && git fetch && git add -A && git commit -m "wrap: session sync" && git push --force-with-lease`
      Skip if `git status --porcelain` is clean
@@ -33,7 +28,7 @@ Check system-reminder for exact phrase "Plan mode is active." (with period):
      `~/Code/rodlc/workspace/scripts/context-sync push`
      (exports encrypted plans + memories, syncs submodules, commits + pushes)
    - On failure → warn user, continue (non-blocking)
-7. Display: "✅ Wrap-up complete. Type /exit or Ctrl+D to quit."
+6. Display: "✅ Wrap-up complete. Type /exit or Ctrl+D to quit."
 
 ## Usage
 

@@ -16,10 +16,13 @@ Plan: {plan_path}
 Notion: {notion_url}
 Topics: {topics}
 Outcome: {status}
+Decision: {key decision made} | OR Key finding: {reusable insight}
 Tags: session-stub, {project}, {topics}
 ```
 
 Use when: Plan exists, session completed, need persistent index.
+**Required**: at least one of `Decision:` or `Key finding:` must be non-empty.
+If neither applies → do not store a stub (session had no extractable knowledge).
 
 ### 2. Conventions & References
 Reusable knowledge across sessions:
@@ -41,6 +44,7 @@ Tier auto-detected from tags. Decay handles obsolescence.
 - ❌ Lists that change often → quickly obsolete
 - ❌ Full session content → use stub with pointers
 - ❌ Generic session summaries → use curated stubs only
+- ❌ "Completed" stubs with no Decision/Key finding → pure log noise
 - ❌ Skill/plan scaffolding text → noise, not knowledge
 
 ## Workflow
