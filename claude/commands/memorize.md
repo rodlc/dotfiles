@@ -40,13 +40,15 @@ Tier auto-detected from tags. Decay handles obsolescence.
 - ❌ Config file contents → already persisted on disk
 - ❌ Lists that change often → quickly obsolete
 - ❌ Full session content → use stub with pointers
+- ❌ Generic session summaries → use curated stubs only
+- ❌ Skill/plan scaffolding text → noise, not knowledge
 
 ## Workflow
 
 1. Identify what to store:
    - Session completed? → Create stub (Plan + Notion refs)
    - Reusable pattern? → Create convention/reference
-2. Check duplicates via `retrieve_memory`
+2. Check duplicates via `retrieve_memory` — skip if similarity >0.85 with existing
 3. `store_memory` with appropriate tags
 4. Auto-rate via HTTP:
    ```
