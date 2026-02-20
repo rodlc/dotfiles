@@ -39,3 +39,7 @@ export MCP_CONSOLIDATION_RETENTION_CRITICAL=365    # T1 equivalent
 export MCP_CONSOLIDATION_RETENTION_REFERENCE=180   # T2 equivalent
 export MCP_CONSOLIDATION_RETENTION_STANDARD=90     # T3 equivalent
 export MCP_CONSOLIDATION_RETENTION_TEMPORARY=30    # T4 equivalent
+
+# Claude Code — always defer MCP tool definitions (use on-demand tool search)
+# `auto` / `auto:N` has known bugs (#18397, #19890) — use `true` explicitly
+export ENABLE_TOOL_SEARCH="true"
