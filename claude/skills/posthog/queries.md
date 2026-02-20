@@ -181,7 +181,13 @@ SELECT
     abs(t.x / t.n - c.x / c.n) /
     sqrt((c.x / c.n * (1 - c.x / c.n) / c.n) + (t.x / t.n * (1 - t.x / t.n) / t.n))
     / sqrt(2)
-  ) AS p_value
+  ) AS p_value,
+  -- significance label — guard: np≥5 required in BOTH groups (normal approximation validity)
+  if(
+    least(c.x, t.x) < 5,
+    '⚠ np<5',
+    multiIf(p_value < 0.01, '✓✓✓ p<0.01', p_value < 0.05, '✓✓ p<0.05', p_value < 0.10, '✓ p<0.10', '')
+  ) AS sig
 FROM control c, treatment t
 ```
 

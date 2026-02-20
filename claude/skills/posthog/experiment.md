@@ -78,6 +78,7 @@ Before any experiment setup:
 - [ ] Start date = exact launch time (not midnight UTC)
 - [ ] Cross-check custom HogQL vs native PostHog (±1% tolerance)
 - [ ] Minimum **7 days** before conclusions (novelty effect)
+- [ ] **Z-test validity**: np ≥ 5 in both groups (if not met → sig = `⚠ np<5`, wait for data)
 
 ### SRM Quick Test
 ```
@@ -135,6 +136,15 @@ Post-launch monitoring for longer experiments (e.g. hard-reverse-trial).
 ### Checklist
 - [ ] Define **maturation window** (e.g. 3-day rolling, applied to BOTH control AND treatment)
 - [ ] Build **power analysis** table: MDE by day
+
+### Z-test Guard Pattern
+```sql
+-- sig column in z-test SELECT:
+if(least(c.x, t.x) < 5, '⚠ np<5',
+  multiIf(p < 0.01, '✓✓✓ p<0.01', p < 0.05, '✓✓ p<0.05', p < 0.10, '✓ p<0.10', ''))
+-- np<5 → blank/invalid — do NOT report as significant
+-- Wait: for p_baseline ~1%, need n≥500 per group before validity
+```
 
 ### Power Analysis Table (example values — replace with actuals)
 ```
