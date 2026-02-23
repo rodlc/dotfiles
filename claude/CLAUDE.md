@@ -31,10 +31,11 @@ Rails TDD: test → route → controller → model → view
 Source: `~/Code/rodlc/dotfiles/claude/` — query memory (tags: dotfiles, mcp) before edits
 
 ## Ollama Delegation
-Local Ollama (qwen2.5:14b) via MCP for token-heavy grunt work.
+Local Ollama (qwen3:14b, fallback qwen3:8b) via MCP for token-heavy grunt work.
 Delegate: file reviews, code explanations, summaries, test boilerplate, extractions.
 Keep on Claude: complex reasoning, multi-file architecture, debugging, tool-calling chains.
-Tools: ollama_review_file, ollama_explain_file, ollama_analyze_files, ollama_general_task.
+File-aware (token savings): ollama_review_file, ollama_explain_file, ollama_analyze_files.
+ollama_general_task: param `task` (not `prompt`), `context` optional.
 
 ## Dotfiles
 Source: `~/Code/rodlc/dotfiles/` | Workspace: `~/Code/rodlc/workspace/`
