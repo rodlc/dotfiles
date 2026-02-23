@@ -45,6 +45,23 @@ fi
 echo "=====> Installing Homebrew packages"
 brew bundle --file="$DOTFILES_DIR/Brewfile" --no-lock 2>/dev/null || true
 
+# Start Ollama service + pull default model
+if command -v ollama &>/dev/null; then
+  echo "=====> Configuring Ollama"
+  brew services start ollama 2>/dev/null || true
+  if ! ollama list 2>/dev/null | grep -q "qwen2.5:14b"; then
+    read -p "Pull qwen2.5:14b model (~9 GB)? [y/N] " ollama_choice
+    if [[ "$ollama_choice" =~ ^[Yy]$ ]]; then
+      echo "-----> Pulling qwen2.5:14b (this will take a few minutes)..."
+      ollama pull qwen2.5:14b
+    else
+      echo "-----> Skipped. Run manually: ollama pull qwen2.5:14b"
+    fi
+  else
+    echo "-----> qwen2.5:14b already present"
+  fi
+fi
+
 echo "=====> Installing language runtimes"
 if command -v mise &>/dev/null; then
   echo "-----> Installing runtimes via mise"

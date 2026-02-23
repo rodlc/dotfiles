@@ -30,6 +30,12 @@ Rails TDD: test → route → controller → model → view
 ## Config
 Source: `~/Code/rodlc/dotfiles/claude/` — query memory (tags: dotfiles, mcp) before edits
 
+## Ollama Delegation
+Local Ollama (qwen2.5:14b) via MCP for token-heavy grunt work.
+Delegate: file reviews, code explanations, summaries, test boilerplate, extractions.
+Keep on Claude: complex reasoning, multi-file architecture, debugging, tool-calling chains.
+Tools: ollama_review_file, ollama_explain_file, ollama_analyze_files, ollama_general_task.
+
 ## Dotfiles
 Source: `~/Code/rodlc/dotfiles/` | Workspace: `~/Code/rodlc/workspace/`
 Paths: NEVER hardcode username. Use $HOME (shell), Path.home() (python),
