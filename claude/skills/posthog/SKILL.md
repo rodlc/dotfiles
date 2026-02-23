@@ -100,12 +100,15 @@ Cross-cutting pitfalls, conventions, and patterns shared across all domains.
 ### hard-reverse-trial
 | Metric | Short ID |
 |--------|----------|
-| Sub/churn z-tests | 2zr7IsOF |
+| Experiment Summary (DW) | 2zr7IsOF |
+| Experiment Summary (Invoices) | Jt8oqClh |
 | Signup→Upload→Export | 1ZDLWDdG |
 | Subs by variant × status | Mxwhs3PE |
-| MRR by variant (Stripe) | mONyHF9v |
-| Subs by variant × tier | 1K6JNQiu |
-| MRR by variant × tier | Lzm9Yz5d |
+| MRR by variant (DW) | Q6mikbMF |
+| MRR by variant (Invoices) | kYnJZyiE |
+| Subs & MRR by tier (DW) | uL9ZuWUl |
+| Subs & MRR by tier (Invoices) | DCjQkRzh |
+| Cancel Reasons by variant | JPKoqtWe |
 | Z-test significance | TCz9t5UZ |
 
 ### Stripe MRR
