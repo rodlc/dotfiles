@@ -32,10 +32,24 @@ Source: `~/Code/rodlc/dotfiles/claude/` — query memory (tags: dotfiles, mcp) b
 
 ## Ollama Delegation
 Local Ollama (qwen3:14b, fallback qwen3:8b) via MCP for token-heavy grunt work.
-Delegate: file reviews, code explanations, summaries, test boilerplate, extractions.
 Keep on Claude: complex reasoning, multi-file architecture, debugging, tool-calling chains.
-File-aware (token savings): ollama_review_file, ollama_explain_file, ollama_analyze_files.
-ollama_general_task: param `task` (not `prompt`), `context` optional.
+
+**MUST delegate** (proactively, not on request):
+- Single-file review/explain → `ollama_review_file`, `ollama_explain_file`
+- Multi-file scan → `ollama_analyze_files`
+- Summarize long text/logs → `ollama_general_task`
+- Generate test boilerplate → `ollama_general_task`
+- Extract/transform data from files → `ollama_general_task`
+
+Trigger: if task is read-only analysis of 1+ files AND doesn't need tool-calling → delegate.
+`ollama_general_task`: param `task` (not `prompt`), `context` optional.
+
+## Raycast MCP
+When user shares/references a screenshot, capture, or clipboard content:
+- Clipboard → `mcp__mcp-raycast-clipboard__clipboard_read`
+- Recent screenshots → `mcp__mcp-raycast-clipboard__raycast_recent_images`
+- Preview (token-efficient) → `get_thumbnail` then Read if needed
+- Metadata only → `get_image_metadata`
 
 ## Dotfiles
 Source: `~/Code/rodlc/dotfiles/` | Workspace: `~/Code/rodlc/workspace/`
