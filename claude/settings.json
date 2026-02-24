@@ -31,6 +31,7 @@
       "Bash(curl *127.0.0.1:4242/api*)",
       "mcp__memory-service__*",
       "mcp__notion-rodlecoent__*",
+      "mcp__notion-submagic__*",
       "mcp__notion-konsigo__*",
       "mcp__gmail__*",
       "mcp__gcal__*",
