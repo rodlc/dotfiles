@@ -31,18 +31,11 @@ Rails TDD: test → route → controller → model → view
 Source: `~/Code/rodlc/dotfiles/claude/` — query memory (tags: dotfiles, mcp) before edits
 
 ## Ollama Delegation
-Local Ollama (qwen3:14b, fallback qwen3:8b) via MCP for token-heavy grunt work.
+Local Ollama (qwen3:14b) via MCP. Tools are deferred — call `ToolSearch("+ollama")` to load them.
+BEFORE any read-only file analysis (review, explain, summarize, test generation):
+→ Call ToolSearch("+ollama") → then use the matching mcp__ollama__* tool directly.
 Keep on Claude: complex reasoning, multi-file architecture, debugging, tool-calling chains.
-
-**MUST delegate** (proactively, not on request):
-- Single-file review/explain → `ollama_review_file`, `ollama_explain_file`
-- Multi-file scan → `ollama_analyze_files`
-- Summarize long text/logs → `ollama_general_task`
-- Generate test boilerplate → `ollama_general_task`
-- Extract/transform data from files → `ollama_general_task`
-
-Trigger: if task is read-only analysis of 1+ files AND doesn't need tool-calling → delegate.
-`ollama_general_task`: param `task` (not `prompt`), `context` optional.
+Ollama max concurrent: 2. When delegating 3+ reviews, batch in groups of 2.
 
 ## Raycast MCP
 When user shares/references a screenshot, capture, or clipboard content:
