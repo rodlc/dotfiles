@@ -78,7 +78,7 @@ Before any experiment setup:
 - [ ] Start date = exact launch time (not midnight UTC)
 - [ ] Cross-check custom HogQL vs native PostHog (±1% tolerance)
 - [ ] Minimum **7 days** before conclusions (novelty effect)
-- [ ] **Z-test validity**: np ≥ 5 in both groups (if not met → sig = `⚠ np<5`, wait for data)
+- [ ] **Z-test validity**: np ≥ 5 in both groups (if not met → sig = `n.p`, wait for data)
 
 ### SRM Quick Test
 ```
@@ -108,10 +108,20 @@ native     : Bayesian, uses internal dedup
 - [ ] Revenue: Baremetrics = MRR source of truth, PostHog = behavioral
 
 ### Metric Selection
+
+| Stage    | Emoji | KPI     | Event / Metric        |
+|----------|-------|---------|-----------------------|
+| Acquire  | 👉    | Signup  | signup                |
+| Activate | 🙌    | Export  | projectExported       |
+| Adopt    | 🤝    | Pay     | planPurchased         |
+| Renew    | ✋    | Renew   | subscription_cycle (Stripe) |
+| Adore    | 🫶    | Upgrade | plan_upgrade (Stripe) |
+| Refer    | 👏    | Refer?  | TBD                   |
+
 ```
-Primary   : signup conversion (or target action)
-Secondary : videoUploadInitiated, planPurchased
-Avoid     : $pageview (inflated), $autocapture (unreliable for CTAs)
+Primary   : pick the stage matching experiment Goal tag
+Secondary : adjacent stages (e.g. Adopt goal → also track Activate + Adore)
+Avoid     : $pageview (inflated), $autocapture (unreliable)
 ```
 
 ### Cross-domain Bridge
@@ -140,9 +150,9 @@ Post-launch monitoring for longer experiments (e.g. hard-reverse-trial).
 ### Z-test Guard Pattern
 ```sql
 -- sig column in z-test SELECT:
-if(least(c.x, t.x) < 5, '⚠ np<5',
-  multiIf(p < 0.01, '✓✓✓ p<0.01', p < 0.05, '✓✓ p<0.05', p < 0.10, '✓ p<0.10', ''))
--- np<5 → blank/invalid — do NOT report as significant
+if(least(c.x, t.x) < 5, 'n.p',
+  multiIf(p < 0.01, '***', p < 0.05, '**', p < 0.10, '*', 'n.s'))
+-- n.p → insufficient data — do NOT report as significant
 -- Wait: for p_baseline ~1%, need n≥500 per group before validity
 ```
 

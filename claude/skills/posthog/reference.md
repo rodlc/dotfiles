@@ -144,7 +144,7 @@ AND timestamp >= '2026-XX-XXTXX:XX:XX'  -- exact launch time
 - Cross-check custom HogQL vs native (±1% tolerance)
 - MDE typical: 5% for signup conversions
 - **Z-test validity**: np ≥ 5 AND n(1-p) ≥ 5 in BOTH groups (normal approximation)
-  - If np < 5 → sig = `⚠ np<5` → result invalid, do not report
+  - If np < 5 → sig = `n.p` → result invalid, do not report
   - Fallback: Fisher's exact test (valid for any n, but not implemented in HogQL)
   - Wilson CI for small n: `[0.09%, 2.8%]` at n=1 → too wide to conclude
 

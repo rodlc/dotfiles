@@ -21,11 +21,15 @@ Signup → Upload : 51.5% conversion
 Quick wins identified: upgrade modal + OAuth
 ```
 
-### Common Funnel Patterns
+### AARRR Funnel Patterns
 ```
-Signup funnel     : signup → videoUploadInitiated → projectSaved → planPurchased
-Activation funnel : signup → videoUploadInitiated (within 24h)
-Revenue funnel    : signup → planPurchased (within 7d)
+👉 Acquire  : signup
+🙌 Activate : signup → projectExported (within 24h)
+🤝 Adopt    : signup → planPurchased (within 7d)
+✋ Renew    : subscription_cycle (Stripe)
+🫶 Adore    : planPurchased → plan_upgrade (Stripe)
+👏 Refer    : TBD
+─── Full    : signup → videoUploadInitiated → projectSaved → planPurchased
 ```
 
 ════════════════════════════════════════

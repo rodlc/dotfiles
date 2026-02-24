@@ -172,11 +172,7 @@ SELECT
   c.x / c.n AS p_control,
   t.x / t.n AS p_treatment,
   t.x / t.n - c.x / c.n AS lift,
-  -- z-score
-  (t.x / t.n - c.x / c.n) /
-    sqrt((c.x / c.n * (1 - c.x / c.n) / c.n) + (t.x / t.n * (1 - t.x / t.n) / t.n))
-    AS z_score,
-  -- p-value via erf()
+  -- p-value via erf() (z-score kept internal, not in output)
   1 - erf(
     abs(t.x / t.n - c.x / c.n) /
     sqrt((c.x / c.n * (1 - c.x / c.n) / c.n) + (t.x / t.n * (1 - t.x / t.n) / t.n))
@@ -185,8 +181,8 @@ SELECT
   -- significance label — guard: np≥5 required in BOTH groups (normal approximation validity)
   if(
     least(c.x, t.x) < 5,
-    '⚠ np<5',
-    multiIf(p_value < 0.01, '✓✓✓ p<0.01', p_value < 0.05, '✓✓ p<0.05', p_value < 0.10, '✓ p<0.10', '')
+    'n.p',
+    multiIf(p_value < 0.01, '***', p_value < 0.05, '**', p_value < 0.10, '*', 'n.s')
   ) AS sig
 FROM control c, treatment t
 ```
