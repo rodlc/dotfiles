@@ -19,6 +19,7 @@ Growthboard      : dashboard 477928
 A/B Test Board   : dashboard 519019
 Stripeboard      : dashboard 518344
 Trigger Board    : dashboard 528615
+Adopt Actions    : dashboard 539127
 MCP tools        : mcp__posthog__* (when connected)
 Stack            : React/Next.js, Remotion, PostHog JS SDK
 Billing mode     : identified_only (~USD 0.00005/event)
