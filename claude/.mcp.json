@@ -66,9 +66,5 @@
       "command": "bunx",
       "args": ["@playwright/mcp@latest"]
     },
-    "ollama": {
-      "command": "bun",
-      "args": ["run", "${WORKSPACE_DIR}/mcp-servers/OllamaClaude/index.js"]
-    }
   }
 }
