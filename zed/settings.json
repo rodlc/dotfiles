@@ -1,5 +1,20 @@
 {
-  "theme": "Nord Dark",
+  "edit_predictions": {
+    "provider": "copilot"
+  },
+  "session": {
+    "trust_all_worktrees": true
+  },
+  "icon_theme": {
+    "mode": "dark",
+    "light": "Zed (Default)",
+    "dark": "Zed (Default)"
+  },
+  "theme": {
+    "mode": "dark",
+    "light": "Nord Dark",
+    "dark": "Nord Dark"
+  },
   "ui_font_size": 16,
   "buffer_font_size": 15,
   "buffer_font_family": "JetBrains Mono",
