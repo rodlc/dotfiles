@@ -139,3 +139,29 @@ Cross-cutting pitfalls, conventions, and patterns shared across all domains.
 | `dBtSgn7L` | Activate & Adopt Rate by BCG Quadrant | BCG |
 | `VL8QTSJ0` | BCG Country Matrix | BCG |
 | `a25LC5Ly` | BCG Quadrant Summary | BCG |
+
+## Insight Description Conventions
+
+Format: [What it measures]. [Key constraint]. [Scope].
+
+Rules:
+- No internal codes (B1–B8) — use plain English
+- Constraints: explain filtering logic in plain English (temporal, cohort, exclusions)
+- Keep under 120 chars when possible
+
+────────────────────────────────────────
+
+## Adopt Actions Dashboard (539127)
+
+8 tiles: feature→conversion analysis. First-time buyers, impact_mrr in $.
+
+| # | ID | Name |
+|---|-----|------|
+| 1 | `ViFLZSR9` | AI Usage × Plan (Correlation) |
+| 2 | `QWHVmMAl` | AI Usage × Plan (Causation) |
+| 3 | `EZ2rnKQy` | Features × Plan (Correlation) |
+| 4 | `t2nlQt2k` | Features × Plan (Causation) |
+| 5 | `aOPM5WOI` | Engagement Tier × Plan (Correlation) |
+| 6 | `3oPTVkfU` | Engagement Tier × Plan (Causation) |
+| 7 | `IyFDqojj` | Clusters × Plan (Correlation) |
+| 8 | `fXYeTt5O` | Clusters × Plan (Causation) |
