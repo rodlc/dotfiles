@@ -12,10 +12,10 @@ cd dotfiles
 ```
 
 The script will automatically:
-1. **Install tools** (Homebrew, Zed, Claude Code, pyenv, rbenv, fnm, oh-my-zsh)
+1. **Install tools** (Homebrew, Zed, Claude Code, pyenv, fnm, oh-my-zsh)
 2. **Backup** existing config files as `*.backup`
 3. **Create symlinks** from `~/.config` to this repo
-4. **Clone & build MCP servers** (Notion, Gmail, Slack, Rails MCP to `~/Code`)
+4. **Clone & build MCP servers** (Notion, Gmail, Memory, Raycast to `~/Code`)
 5. **Configure MCPs** (merge template into `~/.claude.json`)
 6. **Setup environment** (create `~/.env` from template if not exists)
 7. **Install plugins** (zsh-autosuggestions, zsh-syntax-highlighting)
@@ -85,12 +85,9 @@ Private workspace for AI context (plans, memory, notes) and MCP server source co
 ```
 ~/Code/rodlc/workspace/
 ├── mcp-servers/             # MCP server source code (git submodules)
-│   ├── mcp-notion-server/   # Fork of makenotion/notion-mcp-server
-│   ├── Gmail-MCP-Server/    # Fork (rodlecoent + rodolphe accounts)
-│   ├── slack-mcp-server/    # Fork of tuananh/slack-mcp
-│   ├── rails-mcp-server/    # Custom Rails MCP
-│   ├── google-calendar-mcp/ # Fork of nspady/google-calendar-mcp
-│   ├── mcp-memory-service/  # Fork of dosuken123/mcp-memory-service
+│   ├── mcp-notion-server/     # Fork of makenotion/notion-mcp-server
+│   ├── Gmail-MCP-Server/      # Fork (rodlecoent + rodolphe accounts)
+│   ├── mcp-memory-service/    # Fork of dosuken123/mcp-memory-service
 │   └── mcp-raycast-clipboard/ # Custom Raycast clipboard MCP
 ├── claude/                  # Claude Code context
 │   ├── memory/             # Encrypted MCP Memory backups
@@ -124,14 +121,10 @@ ws-pull        # Pull remote → local
 
 Claude Code MCP (Model Context Protocol) servers are managed as git submodules in the private workspace repository. All MCPs use personal forks for control over upstream updates.
 
-**Active servers** (9):
-- **GitHub** (HTTP): Issues, PRs, repos, code search
+**Active servers** (4):
 - **Notion** (stdio): Pages, databases, blocks (fork of makenotion/notion-mcp-server)
-- **Slack** (stdio): Messages, channels, threads (fork of tuananh/slack-mcp)
 - **Gmail×2** (stdio): Email for rodlecoent + rodolphe.lecoent (fork)
-- **Rails MCP** (stdio): Rails project analysis (custom)
-- **Google Calendar×2** (stdio): Calendar management for both accounts (fork of nspady/google-calendar-mcp)
-- **Memory Service** (stdio): Persistent memory with consolidation (fork of dosuken123/mcp-memory-service)
+- **Memory Service** (HTTP): Persistent memory with consolidation (fork of dosuken123/mcp-memory-service)
 - **Raycast Clipboard** (stdio): Clipboard and recent images access (custom)
 
 **Architecture**:
@@ -179,7 +172,7 @@ Test: @notion, @gmail-pro, @filesystem
 
 **Philosophy**:
 - **Raycast** = Productivity (email, files, quick queries)
-- **Claude Code** = Dev workflow (GitHub, Rails MCP)
+- **Claude Code** = Dev workflow (Notion, Gmail, Memory)
 
 ## Daily Workflow
 

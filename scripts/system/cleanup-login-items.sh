@@ -11,32 +11,8 @@ echo "║  CLEANUP LOGIN ITEMS & BACKGROUND TASKS                        ║"
 echo "╚════════════════════════════════════════════════════════════════╝"
 echo ""
 
-# ── 1. SUPPRIMER OLLAMA ────────────────────────────────────────────────────────
-echo "► [1/4] Suppression Ollama..."
-
-# Arrêter Ollama si en cours
-pkill -f ollama 2>/dev/null || true
-
-# Supprimer l'application
-if [ -d "/Applications/Ollama.app" ]; then
-    rm -rf "/Applications/Ollama.app"
-    echo "  ✓ /Applications/Ollama.app supprimé"
-else
-    echo "  - Ollama.app déjà absent"
-fi
-
-# Supprimer les données
-if [ -d "$HOME/.ollama" ]; then
-    rm -rf "$HOME/.ollama"
-    echo "  ✓ ~/.ollama supprimé"
-else
-    echo "  - ~/.ollama déjà absent"
-fi
-
-echo ""
-
-# ── 2. RENOMMER PYTHON → MCP MEMORY ────────────────────────────────────────────
-echo "► [2/4] Renommage LaunchAgent python → MCP Memory..."
+# ── 1. RENOMMER PYTHON → MCP MEMORY ────────────────────────────────────────────
+echo "► [1/3] Renommage LaunchAgent python → MCP Memory..."
 
 # Le nom affiché dans System Settings vient du ProcessType et de l'exécutable
 # Pour avoir "MCP Memory" au lieu de "python", on peut créer un wrapper
@@ -77,8 +53,8 @@ fi
 
 echo ""
 
-# ── 3. DÉSACTIVER FIGMA AGENT ──────────────────────────────────────────────────
-echo "► [3/4] Désactivation FigmaAgent (usage non régulier)..."
+# ── 2. DÉSACTIVER FIGMA AGENT ──────────────────────────────────────────────────
+echo "► [2/3] Désactivation FigmaAgent (usage non régulier)..."
 
 # FigmaAgent est un login item, pas un LaunchAgent
 # On peut le désactiver via la commande osascript
@@ -96,8 +72,8 @@ fi
 
 echo ""
 
-# ── 4. VÉRIFICATION BATTERY ────────────────────────────────────────────────────
-echo "► [4/4] Vérification Battery..."
+# ── 3. VÉRIFICATION BATTERY ────────────────────────────────────────────────────
+echo "► [3/3] Vérification Battery..."
 
 if pgrep -f "battery maintain" > /dev/null; then
     echo "  ✓ Battery daemon actif"
@@ -124,8 +100,6 @@ echo ""
 echo "2. Pour vérifier le nouveau nom 'MCP Memory':"
 echo "   → Redémarrer ou se déconnecter/reconnecter"
 echo "   → System Settings → General → Login Items → Allow in Background"
-echo ""
-echo "3. BTM cleanup automatique au prochain reboot pour Ollama"
 echo ""
 echo "════════════════════════════════════════════════════════════════"
 echo "✓ Script terminé"

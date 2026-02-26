@@ -7,7 +7,6 @@ echo "🧹 Cleaning up home directory cruft..."
 CRUFT=(
     "$HOME/bin"                     # Vide
     "$HOME/go"                      # Cache Go pkg (goenv gère son GOPATH)
-    "$HOME/.ollama"                 # Vide (désinstallé)
     "$HOME/.gmail-mcp"              # Ancien dir (remplacé par gmail-mcp-rodlecoent)
     "$HOME/.profile"                # Non utilisé (zsh)
     "$HOME/.mcp.json"               # Doublon racine (le vrai est dans ~/.claude/)

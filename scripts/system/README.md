@@ -34,7 +34,7 @@ Clean macOS browser caches safely.
 ---
 
 ### cleanup-login-items.sh
-Remove unwanted login items (Ollama, background tasks).
+Remove unwanted login items (FigmaAgent, background tasks).
 
 **Usage:**
 ```bash

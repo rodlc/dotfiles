@@ -4,9 +4,6 @@ alias localip="ifconfig | grep 'inet ' | grep -v 127.0.0.1 | awk '{print \$2}'" 
 alias gateway="netstat -rn | grep default"  # Network gateway
 alias fastcom="npx fast-cli --upload --verbose"  # Netflix CDN (download/upload/latency/server)
 
-# Development server
-alias serve='ruby -run -e httpd . -p 8000'
-
 # Open current directory in Zed
 alias z="zed ."
 
