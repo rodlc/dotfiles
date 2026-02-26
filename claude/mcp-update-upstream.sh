@@ -34,7 +34,7 @@ EXAMPLES:
   $(basename "$0") mcp-notion-server
 
 MCP NAMES:
-  mcp-notion-server, slack-mcp-server, google-calendar-mcp, mcp-memory-service
+  mcp-notion-server, mcp-memory-service
 EOF
 }
 

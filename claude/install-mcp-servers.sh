@@ -101,23 +101,6 @@ build_mcp "Gmail-MCP-Server" \
   "dist/index.js" \
   "bun"
 
-build_mcp "google-calendar-mcp" \
-  "bun install && bun run build" \
-  "build/index.js" \
-  "bun"
-
-# Build Go MCP
-build_mcp "slack-mcp-server" \
-  "go build -o ./slack-mcp-server ./cmd/slack-mcp-server" \
-  "slack-mcp-server" \
-  "go"
-
-# Build Ruby MCP
-build_mcp "rails-mcp-server" \
-  "bundle install --quiet" \
-  "exe/rails-mcp-server" \
-  "bundle"
-
 # Build Bun MCP
 build_mcp "mcp-raycast-clipboard" \
   "bun install" \
@@ -184,8 +167,6 @@ fi
 echo ""
 echo "-----> Configuring upstream remotes..."
 configure_upstream "mcp-notion-server" "git@github.com:makenotion/notion-mcp-server.git"
-configure_upstream "slack-mcp-server" "git@github.com:tuananh/slack-mcp.git"
-configure_upstream "google-calendar-mcp" "git@github.com:nspady/google-calendar-mcp.git"
 configure_upstream "mcp-memory-service" "git@github.com:dosuken123/mcp-memory-service.git"
 
 # Summary at the end
