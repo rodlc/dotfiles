@@ -127,7 +127,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node ~/.claude/hooks/core/mid-conversation.js",
+            "command": "~/.claude/hooks/core/mid-conversation-wrapper.sh",
             "timeout": 8
           }
         ]

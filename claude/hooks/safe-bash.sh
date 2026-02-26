@@ -2,16 +2,12 @@
 input=$(cat)
 command=$(echo "$input" | jq -r '.tool_input.command // empty')
 
-# Debug: log pour troubleshooting
-echo "DEBUG: command='$command'" >> /tmp/claude-hook-debug.log
-
 # ════════════════════════════════════════════════════════════════════
 # PROMPT INJECTION & EXFILTRATION PROTECTIONS
 # ════════════════════════════════════════════════════════════════════
 
 # Limite taille commande (prévient payload injection)
 if [[ ${#command} -gt 4096 ]]; then
-  echo "DEBUG: DENY! Command too long (${#command} chars)" >> /tmp/claude-hook-debug.log
   echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Command exceeds 4096 char limit"}}'
   exit 0
 fi
@@ -21,14 +17,12 @@ if [[ $command =~ base64[[:space:]]+-d ]] || \
    [[ $command =~ \|[[:space:]]*base64 ]] || \
    [[ $command =~ xxd[[:space:]]+-r ]] || \
    [[ $command =~ printf[[:space:]].*\\\\x ]]; then
-  echo "DEBUG: DENY! Encoding/obfuscation detected" >> /tmp/claude-hook-debug.log
   echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Encoding/obfuscation pattern blocked"}}'
   exit 0
 fi
 
 # Exécution dynamique (eval, exec, source avec variables)
 if [[ $command =~ (eval|exec|source|\\.)[[:space:]]+(.*\$|\`|\".*\$|\'\$) ]]; then
-  echo "DEBUG: DENY! Dynamic execution detected" >> /tmp/claude-hook-debug.log
   echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Dynamic eval/exec/source blocked"}}'
   exit 0
 fi
@@ -44,7 +38,6 @@ if [[ $is_localhost == false ]] && \
    { [[ $command =~ curl[[:space:]].*(-X[[:space:]]*POST|--data|-d[[:space:]]) ]] || \
      [[ $command =~ curl[[:space:]].*-T ]] || \
      [[ $command =~ wget[[:space:]].*--post ]] ; }; then
-  echo "DEBUG: DENY! Network exfiltration pattern detected" >> /tmp/claude-hook-debug.log
   echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Network exfiltration pattern blocked"}}'
   exit 0
 fi
@@ -53,7 +46,6 @@ fi
 if [[ $command =~ (^|[[:space:]]|[/\|;\&\(])(nc|netcat|ncat)[[:space:]] ]] || \
    [[ $command =~ /dev/(tcp|udp)/ ]] || \
    [[ $command =~ \|[[:space:]]*(curl|wget|nc) ]]; then
-  echo "DEBUG: DENY! Network exfiltration pattern detected" >> /tmp/claude-hook-debug.log
   echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Network exfiltration pattern blocked"}}'
   exit 0
 fi
@@ -62,14 +54,12 @@ fi
 if [[ $command =~ (bash|sh|zsh)[[:space:]]+-c[[:space:]]+ ]] || \
    [[ $command =~ python[[:space:]]+-c[[:space:]]+ ]] || \
    [[ $command =~ node[[:space:]]+-e[[:space:]]+ ]]; then
-  echo "DEBUG: DENY! Inline script execution detected" >> /tmp/claude-hook-debug.log
   echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Inline script execution blocked - use a file instead"}}'
   exit 0
 fi
 
 # SUDO: Prompt user to run manually
 if [[ $command =~ ^sudo[[:space:]] ]]; then
-  echo "DEBUG: SUDO - prompt user to run manually" >> /tmp/claude-hook-debug.log
   echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Run manually:\n\n    '"$command"'"}}'
   exit 0
 fi
@@ -82,7 +72,6 @@ if [[ $command =~ git[[:space:]]+reset[[:space:]]+(--hard|.*[[:space:]]--hard)([
    [[ $command =~ git[[:space:]]+checkout[[:space:]]+--[[:space:]] ]] || \
    [[ $command =~ git[[:space:]]+clean[[:space:]]+(-[fFdDxX]|.*[[:space:]]-[fFdDxX])([[:space:]]|$) ]] || \
    [[ $command =~ git[[:space:]]+branch[[:space:]]+(-D|.*[[:space:]]-D)([[:space:]]|$) ]]; then
-  echo "DEBUG: DENY! Destructive git command" >> /tmp/claude-hook-debug.log
   echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Destructive git command blocked for safety"}}'
   exit 0
 fi
@@ -92,7 +81,6 @@ fi
 if [[ $command =~ ^rm[[:space:]] ]] && [[ $command =~ -[rRfF]*[rR][rRfF]* ]]; then
   # Bloque si chemin absolu (/) ou home (~) détecté
   if [[ $command =~ [[:space:]]/[^.] ]] || [[ $command =~ [[:space:]]~ ]]; then
-    echo "DEBUG: DENY! rm recursive with absolute or home path" >> /tmp/claude-hook-debug.log
     echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"rm recursive with absolute or home path blocked"}}'
     exit 0
   fi
@@ -101,7 +89,6 @@ fi
 # DENY: Lecture fichiers sensibles
 if [[ $command =~ (cat|head|tail|less|more|bat|strings)[[:space:]]+(.*/)?(\.env|\.env\.[^[:space:]]*|id_rsa|id_ed25519|.*\.pem|.*\.key|credentials\.yml\.enc|master\.key)([[:space:]]|$) ]] || \
    [[ $command =~ (cat|head|tail|less|more|bat|strings)[[:space:]]+.*/(\.(ssh|gnupg|aws|kube))/ ]]; then
-  echo "DEBUG: DENY! Sensitive file read blocked" >> /tmp/claude-hook-debug.log
   echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Sensitive file access blocked for security"}}'
   exit 0
 fi
@@ -110,7 +97,6 @@ fi
 if [[ $command =~ ^(dd|mkfs|fdisk|parted)[[:space:]] ]] || \
    [[ $command =~ ^chmod[[:space:]]+-R[[:space:]]+777 ]] || \
    [[ $command =~ ^chown[[:space:]]+-R ]]; then
-  echo "DEBUG: DENY! Destructive system command" >> /tmp/claude-hook-debug.log
   echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Destructive system command blocked"}}'
   exit 0
 fi
@@ -175,11 +161,9 @@ if [[ $command =~ ^cd([[:space:]]|$) ]] || \
    [[ $command =~ ^curl[[:space:]].*http://(localhost|127\.0\.0\.1)(:|/) ]] || \
    [[ $command =~ ^\.\/.+ ]] || \
    [[ $command =~ ^~/Code/rodlc/(workspace/scripts|dotfiles)/.+ ]]; then
-  echo "DEBUG: MATCH! Allowing command" >> /tmp/claude-hook-debug.log
   echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow","permissionDecisionReason":"Safe command auto-approved"}}'
   exit 0
 fi
 
 # Sinon, prompt standard (exit 0 sans JSON selon doc officielle)
-echo "DEBUG: NO MATCH. Prompting user" >> /tmp/claude-hook-debug.log
 exit 0

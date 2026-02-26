@@ -39,6 +39,10 @@
   },
   "agent_servers": {
     "claude": {
+      "default_config_options": {
+        "model": "default",
+        "mode": "plan"
+      },
       "settings": {
         "model": "opusplan",
         "edit_mode": "accept"

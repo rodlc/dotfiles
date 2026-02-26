@@ -1,119 +1,93 @@
 #!/bin/bash
-COST_LIMIT=35.00  # Max 5x estimé
+COST_LIMIT=35.00
 
 input=$(cat)
-dir=$(echo "$input" | jq -r '.workspace.current_dir' | xargs basename)
-branch=$(git -C "$(echo "$input" | jq -r '.workspace.current_dir')" branch --show-current 2>/dev/null || echo "-")
 
-# Modèle : extraire display_name (ou fallback sur id simplifié)
-model=$(echo "$input" | jq -r '
-  if .model | type == "object" then
+# ── 1. Parse all input in one jq call ──────────────────────────────
+{
+  read -r dir_full
+  read -r dir
+  read -r model
+  read -r ctx
+  read -r session_cost
+  read -r session_id
+} < <(echo "$input" | jq -r '
+  (.workspace.current_dir // "/tmp"),
+  (.workspace.current_dir // "/tmp" | split("/") | last),
+  (if .model | type == "object" then
     (.model.display_name // (.model.id | sub("claude-(?<m>[a-z]+).*"; "\(.m | ascii_upcase[0:1] + .[1:])")))
   else
     (.model | sub("claude-(?<m>[a-z]+).*"; "\(.m | ascii_upcase[0:1] + .[1:])"))
-  end // "?"
-')
+  end // "?"),
+  (((.context_window.current_usage.input_tokens // 0) +
+    (.context_window.current_usage.cache_read_input_tokens // 0)) * 100 /
+    (.context_window.context_window_size // 200000) | floor | tostring),
+  (.cost.total_cost_usd // 0 | tostring),
+  (.session_id // "")')
 
-# Contexte %
-ctx=$(echo "$input" | jq -r '
-  ((.context_window.current_usage.input_tokens // 0) +
-   (.context_window.current_usage.cache_read_input_tokens // 0)) * 100 /
-  (.context_window.context_window_size // 200000) | floor')
+# ── 2. Git branch ──────────────────────────────────────────────────
+branch=$(git -C "$dir_full" branch --show-current 2>/dev/null || echo "-")
 
-# Quota persisté multi-sessions avec baseline
-quota_file="$HOME/.claude/quota-window.json"
-session_cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
-session_id=$(echo "$input" | jq -r '.session_id // ""')
-
-# Timestamp actuel
+# ── 3. Timestamp ───────────────────────────────────────────────────
 now=$(date +%s)
 
-# Lire état précédent
-if [ -f "$quota_file" ] && [ -s "$quota_file" ]; then
-  prev_state=$(cat "$quota_file")
-  sessions_json=$(echo "$prev_state" | jq -c '.sessions // {}')
-  last_reset=$(echo "$prev_state" | jq -r '.last_reset // 0')
-else
-  sessions_json='{}'
-  last_reset=0
-fi
+# ── 4. Quota: read + reset + update + compute in one jq call ───────
+quota_file="$HOME/.claude/quota-window.json"
+[ -f "$quota_file" ] && [ -s "$quota_file" ] && prev_json=$(< "$quota_file") || prev_json='{"sessions":{},"last_reset":0}'
 
-# Vérifier si on doit reset (5h = 18000s)
-if [ $((now - last_reset)) -ge 18000 ]; then
-  # Reset : cost_at_reset = cost pour toutes les sessions
-  sessions_json=$(echo "$sessions_json" | jq -c '
-    to_entries
-    | map(.value = (
-        if .value | type == "object" then
-          .value | .cost_at_reset = .cost
-        else
-          {cost: .value, first_seen: '"$now"', cost_at_reset: .value}
-        end
-      ))
+{
+  read -r new_state
+  read -r total_cost
+  read -r last_reset
+  read -r quota
+  read -r next_reset_ts
+  read -r time_left
+} < <(printf '%s' "$prev_json" | jq -r \
+  --argjson now "$now" \
+  --arg sid "$session_id" \
+  --argjson cost "$session_cost" \
+  --argjson limit "$COST_LIMIT" '
+  (.last_reset // 0) as $lr
+  | (if ($now - $lr) >= 18000 then
+      (.sessions // {} | to_entries | map(
+        .value = (if .value | type == "object"
+          then .value | .cost_at_reset = .cost
+          else {cost: .value, first_seen: $now, cost_at_reset: .value} end)
+      ) | from_entries) as $rs
+      | {sessions: $rs, last_reset: $now}
+    else {sessions: (.sessions // {}), last_reset: $lr}
+    end) as $s
+  | ($s.sessions
+    | to_entries
+    | map(.value = (if .value | type == "object"
+        then .value | .cost_at_reset = (.cost_at_reset // 0)
+        else {cost: .value, first_seen: $now, cost_at_reset: 0} end))
+    | map(select(.key == $sid or (($now - .value.first_seen) <= 18000)))
     | from_entries
-  ')
-  last_reset=$now
-fi
+    | if .[$sid] != null then .[$sid].cost = $cost
+      else .[$sid] = {cost: $cost, first_seen: $now, cost_at_reset: $cost} end
+  ) as $sessions
+  | {sessions: $sessions, last_reset: $s.last_reset} as $final
+  | ($final.sessions | [.[] | if type == "object" then (.cost - .cost_at_reset) else . end] | add // 0) as $total
+  | $final.last_reset as $reset
+  | ($now - $reset) as $elapsed
+  | (if ($elapsed > 300) and ($total > 0.01) then
+      ($total * 3600 / $elapsed) as $burn
+      | (($limit - $total) / $burn) as $hrs
+      | "\($hrs | floor)h\(($hrs - ($hrs | floor)) * 60 | floor)m"
+    else "--" end) as $tl
+  | ($final | tojson),
+    ($total | tostring),
+    ($reset | tostring),
+    ($total * 100 / $limit | floor | tostring),
+    (($reset + 18000) | tostring),
+    $tl')
 
-# Mettre à jour session courante avec baseline
-sessions_json=$(echo "$sessions_json" | jq -c --arg sid "$session_id" --argjson cost "$session_cost" --argjson now "$now" '
-  # Normaliser sessions existantes (ajouter cost_at_reset si absent)
-  to_entries
-  | map(.value = (
-      if .value | type == "object" then
-        .value | .cost_at_reset = (.cost_at_reset // 0)
-      else
-        {cost: .value, first_seen: $now, cost_at_reset: 0}
-      end
-    ))
-  | from_entries
-  # Mettre à jour session courante
-  | if .[$sid] then
-      # Session existante - update cost seulement
-      .[$sid].cost = $cost
-    else
-      # Nouvelle session - baseline le coût hérité
-      .[$sid] = {cost: $cost, first_seen: $now, cost_at_reset: $cost}
-    end
-  # Filtrer autres sessions expirées (garder courante)
-  | to_entries
-  | map(select(.key == $sid or (($now - .value.first_seen) <= 18000)))
-  | from_entries
-')
+[ -n "$new_state" ] && echo "$new_state" > "$quota_file"
 
-# Total = somme des coûts fenêtre (cost - cost_at_reset)
-total_cost=$(echo "$sessions_json" | jq '[.[] | if type == "object" then (.cost - .cost_at_reset) else . end] | add // 0' 2>/dev/null || echo 0)
-
-# Sauvegarder
-echo "$sessions_json" | jq --argjson reset "$last_reset" '{sessions: ., last_reset: $reset}' > "$quota_file" 2>/dev/null
-
-# Calculer %
-quota=$(echo "scale=0; $total_cost * 100 / $COST_LIMIT" | bc 2>/dev/null || echo 0)
-
-# Temps écoulé dans la fenêtre (secondes)
-elapsed=$((now - last_reset))
-
-# Burn rate ($/h) et temps restant
-if [ "$elapsed" -gt 300 ] && [ "$(echo "$total_cost > 0.01" | bc)" -eq 1 ]; then
-  burn_rate=$(echo "scale=4; $total_cost * 3600 / $elapsed" | bc)
-  remaining=$(echo "scale=2; $COST_LIMIT - $total_cost" | bc)
-  hours_left=$(echo "scale=2; $remaining / $burn_rate" | bc 2>/dev/null || echo "0")
-  # Formater en XhYYm avec awk (gère .85 et 9.85)
-  time_left=$(echo "$hours_left" | awk '{
-    h = int($1)
-    m = int(($1 - h) * 60)
-    printf "%dh%dm", h, m
-  }')
-else
-  time_left="--"
-fi
-
-# Formater le coût en dollars
+# ── 5. Reset time + display ─────────────────────────────────────────
+reset_time=$(date -r "$next_reset_ts" +%H:%M 2>/dev/null || echo "??:??")
 cost_display=$(printf "%.2f" "$total_cost")
-
-# Calculer prochaine reset (last_reset + 5h)
-next_reset=$((last_reset + 18000))
-reset_time=$(date -r "$next_reset" +%H:%M 2>/dev/null || echo "??:??")
 
 printf "📁 %s 🌿 %s 🤖 %s 🧠 %d%% 💰 \$%s (%d%%) 🔥 %s 🔄 %s" \
   "$dir" "$branch" "$model" "$ctx" \
