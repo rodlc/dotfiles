@@ -87,14 +87,6 @@ if [[ $(uname -m) == "arm64" ]] && command -v battery &> /dev/null; then
   echo ""
 fi
 
-# Install oh-my-zsh if not present
-if [ ! -d "$HOME/.oh-my-zsh" ]; then
-  echo "=====> Installing oh-my-zsh"
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
-else
-  echo "=====> oh-my-zsh already installed"
-fi
-
 # Install Claude Code if not present
 if ! command -v claude &> /dev/null; then
   echo "=====> Installing Claude Code"
@@ -163,12 +155,6 @@ for name in aliases gitconfig irbrc pryrc rspec zprofile zshrc; do
   backup "$HOME/.$name"
   symlink "$DOTFILES_DIR/$name" "$HOME/.$name"
 done
-
-# Zsh plugins
-ZSH_PLUGINS_DIR="$HOME/.oh-my-zsh/custom/plugins"
-mkdir -p "$ZSH_PLUGINS_DIR"
-[ ! -d "$ZSH_PLUGINS_DIR/zsh-autosuggestions" ] && git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_PLUGINS_DIR/zsh-autosuggestions"
-[ ! -d "$ZSH_PLUGINS_DIR/zsh-syntax-highlighting" ] && git clone https://github.com/zsh-users/zsh-syntax-highlighting "$ZSH_PLUGINS_DIR/zsh-syntax-highlighting"
 
 # SSH
 backup "$HOME/.ssh/config"

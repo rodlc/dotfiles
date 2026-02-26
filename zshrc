@@ -1,9 +1,9 @@
 # Modular ZSH Configuration with Antidote
 # Modules: ~/.config/zsh/conf.d/
 
-# Fix Claude Code TMPDIR bug (agents use wrong temp folder)
-export TMPDIR="$HOME/.claude/tmp"
-mkdir -p "$TMPDIR" 2>/dev/null
+# Claude Code temp directory (scoped, does not affect system TMPDIR)
+export CLAUDE_CODE_TMPDIR="$HOME/.claude/tmp"
+mkdir -p "$CLAUDE_CODE_TMPDIR" 2>/dev/null
 
 # Initialize completions with daily cache optimization
 autoload -Uz compinit
@@ -19,10 +19,6 @@ source /opt/homebrew/opt/antidote/share/antidote/antidote.zsh
 # Load plugins statically (faster than dynamic)
 antidote load ${ZDOTDIR:-~}/.config/zsh/.zsh_plugins.txt
 
-# Oh-My-Zsh theme
-ZSH_THEME="robbyrussell"
-
-# Oh-My-Zsh settings
 setopt NO_NOTIFY
 
 # Remove conflicting aliases
