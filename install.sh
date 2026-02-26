@@ -164,7 +164,8 @@ for name in irbrc rspec zprofile zshrc; do
 done
 
 # XDG config (~/.config/<app>/)
-mkdir -p "$HOME/.config/git" "$HOME/.config/pry"
+mkdir -p "$HOME/.config/git" "$HOME/.config/mise" "$HOME/.config/pry"
+symlink "$DOTFILES_DIR/mise/config.toml" "$HOME/.config/mise/config.toml"
 symlink "$DOTFILES_DIR/git/config" "$HOME/.config/git/config"
 symlink "$DOTFILES_DIR/git/config-rodlcmagic" "$HOME/.config/git/config-rodlcmagic"
 symlink "$DOTFILES_DIR/pry/pryrc" "$HOME/.config/pry/pryrc"
