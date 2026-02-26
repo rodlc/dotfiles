@@ -34,14 +34,12 @@
       "mcp__notion-submagic__*",
       "mcp__notion-konsigo__*",
       "mcp__gmail__*",
-      "mcp__gcal__*",
       "mcp__mcp-raycast-clipboard__*",
       "mcp__playwright__*",
       "mcp__webflow__data_comments_tool",
       "mcp__webflow__ask_webflow_ai",
       "mcp__webflow__webflow_guide_tool",
-      "mcp__posthog__*",
-      "mcp__ollama__*"
+      "mcp__posthog__*"
     ],
     "deny": [
       "mcp__webflow__*",

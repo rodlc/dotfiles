@@ -43,19 +43,6 @@
       "type": "http",
       "url": "http://127.0.0.1:4242/mcp"
     },
-    "gcal": {
-      "command": "bun",
-      "args": [
-        "run",
-        "${WORKSPACE_DIR}/mcp-servers/google-calendar-mcp/build/index.js",
-        "--enable-tools",
-        "list-events,create-event,update-event,get-current-time"
-      ],
-      "env": {
-        "GOOGLE_OAUTH_CREDENTIALS": "${HOME}/.gcal-mcp/oauth.keys.json",
-        "GOOGLE_CALENDAR_MCP_TOKEN_PATH": "${HOME}/.gcal-mcp/tokens.json"
-      }
-    },
     "mcp-raycast-clipboard": {
       "disabled": true,
       "command": "bun",

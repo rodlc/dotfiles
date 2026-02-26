@@ -16,8 +16,6 @@ echo ""
 check_prereqs() {
   local missing=()
   command -v bun >/dev/null || missing+=("bun (mise install)")
-  command -v go >/dev/null || missing+=("go (brew install go)")
-  command -v bundle >/dev/null || missing+=("bundle (gem install bundler)")
   command -v python3 >/dev/null || missing+=("python (mise install)")
 
   if [ ${#missing[@]} -gt 0 ]; then
