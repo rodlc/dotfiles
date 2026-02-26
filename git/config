@@ -65,4 +65,4 @@
 	name = Rod Lc
 
 [includeIf "gitdir:~/Code/rodlcmagic/"]
-    path = ~/.gitconfig-rodlcmagic
+    path = ~/.config/git/config-rodlcmagic

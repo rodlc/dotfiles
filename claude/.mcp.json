@@ -33,10 +33,10 @@
         "--enabledTools=search_emails,read_email,draft_email,modify_email,list_email_labels,download_attachment"
       ],
       "env": {
-        "GMAIL_OAUTH_RODLECOENT": "${HOME}/.gmail-mcp-rodlecoent/gcp-oauth.keys.json",
-        "GMAIL_CREDENTIALS_RODLECOENT": "${HOME}/.gmail-mcp-rodlecoent/credentials.json",
-        "GMAIL_OAUTH_RODOLPHE": "${HOME}/.gmail-mcp-rodolphe/gcp-oauth.keys.json",
-        "GMAIL_CREDENTIALS_RODOLPHE": "${HOME}/.gmail-mcp-rodolphe/credentials.json"
+        "GMAIL_OAUTH_RODLECOENT": "${HOME}/.config/gmail-mcp-rodlecoent/gcp-oauth.keys.json",
+        "GMAIL_CREDENTIALS_RODLECOENT": "${HOME}/.config/gmail-mcp-rodlecoent/credentials.json",
+        "GMAIL_OAUTH_RODOLPHE": "${HOME}/.config/gmail-mcp-rodolphe/gcp-oauth.keys.json",
+        "GMAIL_CREDENTIALS_RODOLPHE": "${HOME}/.config/gmail-mcp-rodolphe/credentials.json"
       }
     },
     "memory-service": {
@@ -52,6 +52,6 @@
       "disabled": true,
       "command": "bunx",
       "args": ["@playwright/mcp@latest"]
-    },
+    }
   }
 }

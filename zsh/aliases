@@ -117,4 +117,4 @@ alias cleanup-home='~/Code/rodlc/dotfiles/scripts/system/cleanup-home.sh'
 alias brew-fix='~/Code/rodlc/dotfiles/scripts/system/brew-fix-permissions'
 
 # Zsh history sync to workspace
-alias zsh-history-sync='cp ~/.zsh_history ~/Code/rodlc/workspace/shell/zsh_history && echo "✅ zsh_history synced to workspace"'
+alias zsh-history-sync='cp "$HISTFILE" ~/Code/rodlc/workspace/shell/zsh_history && echo "✅ zsh_history synced to workspace"'

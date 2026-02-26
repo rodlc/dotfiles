@@ -141,20 +141,34 @@ fi
 
 # Restore zsh history from workspace if available
 WORKSPACE_HISTORY="$HOME/Code/rodlc/workspace/shell/zsh_history"
-if [[ -f "$WORKSPACE_HISTORY" && ! -f "$HOME/.zsh_history" ]]; then
-    cp "$WORKSPACE_HISTORY" "$HOME/.zsh_history"
+ZSH_HISTORY="$HOME/.local/state/zsh/history"
+mkdir -p "$HOME/.local/state/zsh"
+# Migrate legacy location if needed
+if [[ -f "$HOME/.zsh_history" && ! -f "$ZSH_HISTORY" ]]; then
+    mv "$HOME/.zsh_history" "$ZSH_HISTORY"
+    echo "-----> Migrated .zsh_history to $ZSH_HISTORY"
+fi
+if [[ -f "$WORKSPACE_HISTORY" && ! -f "$ZSH_HISTORY" ]]; then
+    cp "$WORKSPACE_HISTORY" "$ZSH_HISTORY"
     echo "✅ zsh_history restored from workspace"
-elif [[ -f "$WORKSPACE_HISTORY" && -f "$HOME/.zsh_history" ]]; then
+elif [[ -f "$ZSH_HISTORY" ]]; then
     echo "✅ zsh_history already exists"
 fi
 
 echo "=====> Creating symlinks"
 
-# Shell config
-for name in aliases gitconfig irbrc pryrc rspec zprofile zshrc; do
+# Shell config (home directory — tools that require ~/.<name>)
+for name in irbrc rspec zprofile zshrc; do
   backup "$HOME/.$name"
   symlink "$DOTFILES_DIR/$name" "$HOME/.$name"
 done
+
+# XDG config (~/.config/<app>/)
+mkdir -p "$HOME/.config/git" "$HOME/.config/pry"
+symlink "$DOTFILES_DIR/git/config" "$HOME/.config/git/config"
+symlink "$DOTFILES_DIR/git/config-rodlcmagic" "$HOME/.config/git/config-rodlcmagic"
+symlink "$DOTFILES_DIR/pry/pryrc" "$HOME/.config/pry/pryrc"
+symlink "$DOTFILES_DIR/zsh/aliases" "$HOME/.config/zsh/aliases"
 
 # SSH
 backup "$HOME/.ssh/config"
