@@ -70,12 +70,8 @@ ALWAYS call ExitPlanMode after updating plan file.
 - In edit mode, user can run `/wrap` for Notion/Memory/Git sync
 
 ## Formatting
-Use CLAUDE.md conventions: telegraphic, box-drawing, status icons.
-- Fragments > sentences, 1 idea = 1 line, no filler
-- Context ≤ 3 lines per section intro
-- Plan = living doc → preserve existing plan content, enrich with session results
-- Condense completed sections (✓ items → summary line) as plan grows
-- Structure replaces prose: tables, frames ╔═╗, trees ├──, arrows →
+Follow CLAUDE.md § Formatting conventions. Recap-specific:
+- Condense completed ✓ clusters → summary line as plan grows
 - Preserve `# Titre` as H1 markdown (plan mode system-reminder compatibility)
 
 Example output:
