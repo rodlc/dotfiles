@@ -41,19 +41,26 @@ On successive recaps:
 - Update Status field, don't append a new one
 - Append new ► items to Next Steps, remove completed ones
 
-## Résultat
-**Status: [En cours | Complété ✓ | Bloqué ⚠]**
-[Brief description — ≤ 3 lines]
+═══════════════════════
+Résultat
+═══════════════════════
+Status: [En cours | Complété ✓ | Bloqué ⚠]
+[≤ 3 lignes]
 
-## Progression
-✓ [completed items — condense when > 5 related items]
-⚠ [blockers if any]
+═══════════════════════
+Progression
+═══════════════════════
+✓ [completed — condense clusters > 5]
+⚠ [blockers]
 
-## Learnings (optional)
-[Key insights, anti-patterns avoided, decisions rationale]
+──── Learnings (optional) ────
+├── [insight 1]
+└── [insight 2]
 
-## Next Steps
-► [actionable next steps, if work remains]
+═══════════════════════
+Next Steps
+═══════════════════════
+► [actions restantes]
 ```
 
 ### 4. Exit Plan Mode
@@ -69,6 +76,31 @@ Use CLAUDE.md conventions: telegraphic, box-drawing, status icons.
 - Plan = living doc → preserve existing plan content, enrich with session results
 - Condense completed sections (✓ items → summary line) as plan grows
 - Structure replaces prose: tables, frames ╔═╗, trees ├──, arrows →
+- Preserve `# Titre` as H1 markdown (plan mode system-reminder compatibility)
+
+Example output:
+```
+═══════════════════════
+Résultat
+═══════════════════════
+Status: Complété ✓
+Auth flow implémenté, 3 endpoints + tests.
+
+═══════════════════════
+Progression
+═══════════════════════
+✓ Auth flow — 3 endpoints + tests
+✓ DB migration — users table
+
+──── Learnings ────
+├── OAuth token refresh nécessite scope offline
+└── Zod validation avant MCP call
+
+═══════════════════════
+Next Steps
+═══════════════════════
+► Deploy staging
+```
 
 ## Critical
 - After EnterPlanMode succeeds, CONTINUE IMMEDIATELY with the main logic (do NOT wait for user input)
