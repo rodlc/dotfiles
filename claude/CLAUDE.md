@@ -16,3 +16,9 @@ Use structure to replace prose:
 - Data → tables ┌─┬─┐  Flow → arrows (→)  Lists → trees ├── └──
 - Frames: ╔═╗ ╠═╣ ╚═╝  Headers: ════ major ──── minor
 - Status: ✓ done ✗ rejected ⚠ risk ► action
+
+### Illustrated patterns (plans, analyses)
+Diagrams  → box-drawing + status icons
+Timelines → vertical (D0/D1/..) or horizontal (→)
+Compare   → side-by-side columns ┃ left ┃ right ┃
+Scorecard → actions groupées par owner, checkboxes ☐/☑

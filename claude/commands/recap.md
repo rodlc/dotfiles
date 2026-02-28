@@ -57,6 +57,13 @@ Progression
 ├── [insight 1]
 └── [insight 2]
 
+──── Scorecard (si actions multi-parties) ────
+@Alice
+  ☐ action 1
+  ☑ action 2
+@Bob
+  ☐ action 3
+
 ═══════════════════════
 Next Steps
 ═══════════════════════
