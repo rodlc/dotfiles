@@ -4,10 +4,14 @@
 ENV_FILE="$HOME/.env"
 BW_ITEM_SECRETS="Dotfiles Env"
 
+# Source env for overridable config
+source "$HOME/.env" 2>/dev/null || true
+
 # SSH keys: parallel arrays (BW item name → local file path)
-SSH_BW_NAMES=("SSH rodlc")
+# Override names via ~/.env: SSH_BW_NAME_RODLC, SSH_BW_NAME_RODLCMAGIC
+SSH_BW_NAMES=("${SSH_BW_NAME_RODLC:-SSH rodlc}")
 SSH_LOCAL_PATHS=("$HOME/.ssh/id_ed25519_rodlc")
-SSH_BW_NAMES+=("SSH rodlcmagic")
+SSH_BW_NAMES+=("${SSH_BW_NAME_RODLCMAGIC:-SSH rodlcmagic}")
 SSH_LOCAL_PATHS+=("$HOME/.ssh/id_ed25519_rodlcmagic")
 
 ensure_rbw() {

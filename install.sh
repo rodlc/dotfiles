@@ -162,7 +162,7 @@ EOF
 
   # macOS defaults (optional)
   if [[ "$OSTYPE" == "darwin"* ]]; then
-    read -p "Configure macOS defaults? (Dock, Finder, keyboard...) [y/N] " macos_choice
+    read "macos_choice?Configure macOS defaults? (Dock, Finder, keyboard...) [y/N] "
     if [[ "$macos_choice" =~ ^[Yy]$ ]]; then
       bash "$DOTFILES_DIR/macos.sh"
     fi
@@ -189,7 +189,7 @@ install_claude() {
     echo ""
     echo "Bitwarden setup required for secrets (SSH key, API tokens)."
     echo ""
-    read -p "Enter your Bitwarden email (or press Enter to skip): " bw_email
+    read "bw_email?Enter your Bitwarden email (or press Enter to skip): "
     if [[ -n "$bw_email" ]]; then
       rbw config set email "$bw_email"
       rbw config set base_url https://api.bitwarden.eu/
@@ -276,6 +276,8 @@ EOF
   # Config directories
   for dir in commands skills hooks rules agent_docs scripts; do
     [ -d "$CLAUDE_SRC/$dir" ] || continue
+    # Remove stale directory-level symlink from previous install
+    [ -L "$CLAUDE_DST/$dir" ] && rm "$CLAUDE_DST/$dir"
     mkdir -p "$CLAUDE_DST/$dir"
     for item in "$CLAUDE_SRC/$dir"/*; do
       [ -e "$item" ] || continue

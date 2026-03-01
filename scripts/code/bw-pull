@@ -61,6 +61,20 @@ for i in "${!SSH_BW_NAMES[@]}"; do
 
     if ! get_ssh_key "$bw_name" &>/dev/null; then
         echo "❌ '$bw_name' not found in Bitwarden"
+        echo ""
+        # Discovery: list SSH-related items to help user fix the name
+        ssh_items=$(rbw list 2>/dev/null | grep -i ssh || true)
+        if [[ -n "$ssh_items" ]]; then
+            echo "  Available SSH-related items in vault:"
+            echo "$ssh_items" | while read -r item; do echo "    - $item"; done
+            echo ""
+            echo "  To map: add to ~/.env then re-run bw-pull:"
+            echo "    export SSH_BW_NAME_RODLC=\"<item name>\""
+            echo "    export SSH_BW_NAME_RODLCMAGIC=\"<item name>\""
+        else
+            echo "  No SSH-related items found in vault."
+            echo "  Create one in Bitwarden (type: SSH Key) named '$bw_name'"
+        fi
     else
         bw_key=$(get_ssh_key "$bw_name")
 
