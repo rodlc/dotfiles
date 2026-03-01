@@ -41,6 +41,11 @@
     "expand_edit_card": true
   },
   "agent_servers": {
+    "claude": {
+      "default_config_options": {
+        "mode": "plan"
+      }
+    },
     "claude-acp": {
       "type": "registry",
       "default_mode": "plan",
