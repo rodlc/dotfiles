@@ -8,22 +8,22 @@ Personal development environment configuration for macOS. Originally inspired by
 cd ~/Code
 git clone git@github.com:rodlc/dotfiles.git
 cd dotfiles
-./install.sh            # min: standalone machine
-./install.sh claude     # + Claude Code + workspace
-./install.sh full       # + MCP servers + launchd + memory
+./install.sh            # dotfiles: standalone machine
+./install.sh workspace  # + Claude Code + workspace
+./install.sh mcp        # + MCP servers + launchd + memory
 ```
 
 ## Install Tiers
 
 | Tier | What | Use case |
 |------|------|----------|
-| `min` | Shell + Git + Zed + Brew + SSH | One-off machine, no dependencies |
-| `claude` | + Claude Code CLI + workspace clone + config symlinks | Temporary machine |
-| `full` | + MCP servers + launchd services + memory hooks | Permanent machine |
+| `dotfiles` | Shell + Git + Zed + Brew + SSH | One-off machine, no dependencies |
+| `workspace` | + Claude Code CLI + workspace clone + config symlinks | Temporary machine |
+| `mcp` | + MCP servers + launchd services + memory hooks | Permanent machine |
 
 Each tier includes the previous. Re-run anytime (idempotent).
 
-**Tier min** installs:
+**Tier dotfiles** installs:
 - Homebrew + packages (Brewfile)
 - Language runtimes via mise (Node, Python, Ruby, Go, Bun)
 - Shell config (zsh, starship prompt, aliases)
@@ -32,13 +32,13 @@ Each tier includes the previous. Re-run anytime (idempotent).
 - Pre-commit hooks (Gitleaks) + global git hook
 - macOS defaults (optional prompt)
 
-**Tier claude** adds:
+**Tier workspace** adds:
 - Claude Code CLI
 - Bitwarden setup + secrets sync (`~/.env`, SSH keys)
 - Workspace clone (private repo with Claude config)
 - Symlinks: CLAUDE.md, settings, commands, hooks, rules, skills
 
-**Tier full** adds:
+**Tier mcp** adds:
 - MCP server builds (Notion, Gmail, Memory, Raycast)
 - MCP config expansion (template → `~/.claude.json`)
 - Launchd services (memory HTTP server, backup)
@@ -49,23 +49,28 @@ Each tier includes the previous. Re-run anytime (idempotent).
 
 ```
 dotfiles/
-├── install.sh              # Tiered installer (min|claude|full)
+├── install.sh              # Tiered installer (dotfiles|workspace|mcp)
 ├── .env.example            # Secrets template (→ ~/.env)
 ├── .git-hooks/             # Global git hook (dotfiles reminder)
-├── git/config              # Git config (identity generated at install)
-├── ssh/config              # SSH config
-├── zshrc, zprofile         # Shell entry points
-├── zsh/                    # Aliases, plugins, conf.d modules
-├── starship.toml           # Prompt config
-├── zed/                    # Zed editor settings + keymap
-├── mise/                   # Language runtime versions
+├── config/                 # → ~/.config/ (XDG app configs)
+│   ├── git/config          #   Git aliases, push, identity includes
+│   ├── mise/config.toml    #   Language runtime versions
+│   ├── pry/pryrc           #   Pry custom prompt
+│   ├── starship.toml       #   Prompt config
+│   ├── zed/                #   Zed editor settings + keymap
+│   └── zsh/                #   Aliases, plugins, conf.d modules, scripts
+├── home/                   # → ~/.<name> (home dir dotfiles)
+│   ├── finicky.js          #   Browser router
+│   ├── irbrc, rspec        #   Ruby config
+│   ├── ssh/config          #   Multi-identity SSH
+│   ├── zprofile            #   Login shell (brew + mise shims)
+│   └── zshrc               #   Main shell config
 ├── scripts/                # Utility scripts
-│   ├── code/               # Bitwarden tools (bw-pull, bw-push)
-│   └── system/             # System maintenance (brew, cleanup)
-├── launchd/                # System launchd plists (Ollama)
+│   ├── code/               #   Bitwarden tools, git fetch
+│   ├── productivity/       #   MCP memory HTTP
+│   └── system/             #   Brew, cleanup, backup
+├── launchd/                # Ollama plist
 ├── Brewfile                # Homebrew packages
-├── ruby/                   # Ruby config (irbrc, rspec, pryrc)
-├── finicky.js              # Browser router
 ├── terminal/               # Terminal.app profile
 └── macos.sh                # macOS defaults
 ```

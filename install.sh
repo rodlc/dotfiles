@@ -2,7 +2,7 @@
 set -e
 
 DOTFILES_DIR="$PWD"
-TIER="${1:-min}"  # min | claude | full
+TIER="${1:-dotfiles}"  # dotfiles | workspace | mcp
 
 echo "=====> Installing dotfiles (tier: $TIER)"
 
@@ -32,10 +32,10 @@ symlink() {
 }
 
 # ══════════════════════════════════════════════════════════════════
-# TIER: min — Shell + Git + Zed + Brew (standalone machine)
+# TIER: dotfiles — Shell + Git + Zed + Brew (standalone machine)
 # ══════════════════════════════════════════════════════════════════
 
-install_min() {
+install_dotfiles() {
   # Homebrew
   if ! command -v brew &> /dev/null; then
     echo "=====> Installing Homebrew"
@@ -61,26 +61,30 @@ install_min() {
 
   echo "=====> Creating symlinks"
 
-  # Shell config (home directory)
+  # home/ → ~/.<name>
   for name in zprofile zshrc; do
     backup "$HOME/.$name"
-    symlink "$DOTFILES_DIR/$name" "$HOME/.$name"
+    symlink "$DOTFILES_DIR/home/$name" "$HOME/.$name"
   done
-
-  # Ruby config
   backup "$HOME/.irbrc"
-  symlink "$DOTFILES_DIR/ruby/irbrc" "$HOME/.irbrc"
+  symlink "$DOTFILES_DIR/home/irbrc" "$HOME/.irbrc"
   backup "$HOME/.rspec"
-  symlink "$DOTFILES_DIR/ruby/rspec" "$HOME/.rspec"
-  mkdir -p "$HOME/.config/pry"
-  symlink "$DOTFILES_DIR/ruby/pryrc" "$HOME/.config/pry/pryrc"
+  symlink "$DOTFILES_DIR/home/rspec" "$HOME/.rspec"
+  backup "$HOME/.finicky.js"
+  symlink "$DOTFILES_DIR/home/finicky.js" "$HOME/.finicky.js"
+  mkdir -p "$HOME/.ssh"
+  backup "$HOME/.ssh/config"
+  symlink "$DOTFILES_DIR/home/ssh/config" "$HOME/.ssh/config"
+  ssh-add --apple-use-keychain ~/.ssh/id_ed25519_rodlc 2>/dev/null || true
 
-  # XDG config
+  # config/ → ~/.config/<app>/
+  mkdir -p "$HOME/.config/pry"
+  symlink "$DOTFILES_DIR/config/pry/pryrc" "$HOME/.config/pry/pryrc"
   mkdir -p "$HOME/.config/git" "$HOME/.config/mise"
-  symlink "$DOTFILES_DIR/mise/config.toml" "$HOME/.config/mise/config.toml"
-  symlink "$DOTFILES_DIR/git/config" "$HOME/.config/git/config"
+  symlink "$DOTFILES_DIR/config/mise/config.toml" "$HOME/.config/mise/config.toml"
+  symlink "$DOTFILES_DIR/config/git/config" "$HOME/.config/git/config"
   mkdir -p "$HOME/.config/zsh"
-  symlink "$DOTFILES_DIR/zsh/aliases" "$HOME/.config/zsh/aliases"
+  symlink "$DOTFILES_DIR/config/zsh/aliases" "$HOME/.config/zsh/aliases"
 
   # Git identity (generated from ~/.env if available)
   source "$HOME/.env" 2>/dev/null || true
@@ -101,35 +105,25 @@ EOF
     echo "-----> Generated git identity (magic)"
   fi
 
-  # SSH
-  mkdir -p "$HOME/.ssh"
-  backup "$HOME/.ssh/config"
-  symlink "$DOTFILES_DIR/ssh/config" "$HOME/.ssh/config"
-  ssh-add --apple-use-keychain ~/.ssh/id_ed25519_rodlc 2>/dev/null || true
-
   # Zed
   ZED_DIR="$HOME/.config/zed"
   mkdir -p "$ZED_DIR"
   backup "$ZED_DIR/settings.json"
-  symlink "$DOTFILES_DIR/zed/settings.json" "$ZED_DIR/settings.json"
+  symlink "$DOTFILES_DIR/config/zed/settings.json" "$ZED_DIR/settings.json"
   backup "$ZED_DIR/keymap.json"
-  symlink "$DOTFILES_DIR/zed/keymap.json" "$ZED_DIR/keymap.json"
+  symlink "$DOTFILES_DIR/config/zed/keymap.json" "$ZED_DIR/keymap.json"
 
   # Zsh modular config + Starship
   ZSH_CONFIG_DIR="$HOME/.config/zsh"
   mkdir -p "$ZSH_CONFIG_DIR/conf.d"
   backup "$ZSH_CONFIG_DIR/.zsh_plugins.txt"
-  symlink "$DOTFILES_DIR/zsh/.zsh_plugins.txt" "$ZSH_CONFIG_DIR/.zsh_plugins.txt"
-  for conf in "$DOTFILES_DIR/zsh/conf.d"/*.zsh; do
+  symlink "$DOTFILES_DIR/config/zsh/.zsh_plugins.txt" "$ZSH_CONFIG_DIR/.zsh_plugins.txt"
+  for conf in "$DOTFILES_DIR/config/zsh/conf.d"/*.zsh; do
     backup "$ZSH_CONFIG_DIR/conf.d/$(basename "$conf")"
     symlink "$conf" "$ZSH_CONFIG_DIR/conf.d/$(basename "$conf")"
   done
   backup "$HOME/.config/starship.toml"
-  symlink "$DOTFILES_DIR/starship.toml" "$HOME/.config/starship.toml"
-
-  # Finicky
-  backup "$HOME/.finicky.js"
-  symlink "$DOTFILES_DIR/finicky.js" "$HOME/.finicky.js"
+  symlink "$DOTFILES_DIR/config/starship.toml" "$HOME/.config/starship.toml"
 
   # Terminal profile
   TERMINAL_PROFILE="$DOTFILES_DIR/terminal/Pro Nord.terminal"
@@ -158,7 +152,7 @@ EOF
   fi
 
   echo ""
-  echo "✓ Tier min installed (shell, git, zed, brew)"
+  echo "✓ Tier dotfiles installed (shell, git, zed, brew)"
 
   # macOS defaults (optional)
   if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -170,10 +164,10 @@ EOF
 }
 
 # ══════════════════════════════════════════════════════════════════
-# TIER: claude — min + Claude Code + workspace config
+# TIER: workspace — dotfiles + Claude Code + workspace config
 # ══════════════════════════════════════════════════════════════════
 
-install_claude() {
+install_workspace() {
   # Install Claude Code CLI
   if ! command -v claude &> /dev/null; then
     echo "=====> Installing Claude Code"
@@ -196,7 +190,7 @@ install_claude() {
       echo "-----> Registering with Bitwarden..."
       rbw register
     else
-      echo "⚠️  Skipping Bitwarden. You can run install.sh claude again later."
+      echo "⚠️  Skipping Bitwarden. You can run install.sh workspace again later."
     fi
   fi
 
@@ -246,7 +240,7 @@ EOF
       mkdir -p "$(dirname "$WORKSPACE_DIR")"
       git clone --recurse-submodules git@github.com:rodlc/workspace.git "$WORKSPACE_DIR"
     else
-      echo "⚠️  SSH key not found. Run install.sh claude again after bw-pull."
+      echo "⚠️  SSH key not found. Run install.sh workspace again after bw-pull."
       return 0
     fi
   else
@@ -311,22 +305,22 @@ EOF
   fi
 
   echo ""
-  echo "✓ Tier claude installed (Claude Code + workspace config)"
+  echo "✓ Tier workspace installed (Claude Code + workspace config)"
   echo ""
-  echo "💡 To add MCP servers, run: ./install.sh full"
+  echo "💡 To add MCP servers, run: ./install.sh mcp"
 }
 
 # ══════════════════════════════════════════════════════════════════
-# TIER: full — claude + MCP servers + launchd + memory
+# TIER: mcp — workspace + MCP servers + launchd + memory
 # ══════════════════════════════════════════════════════════════════
 
-install_full() {
+install_mcp() {
   WORKSPACE_DIR="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}"
   source "$HOME/.env" 2>/dev/null || true
 
   # Verify workspace exists
   if [ ! -d "$WORKSPACE_DIR" ]; then
-    echo "⚠️  Workspace not found. Run: ./install.sh claude"
+    echo "⚠️  Workspace not found. Run: ./install.sh workspace"
     return 1
   fi
 
@@ -426,7 +420,7 @@ install_full() {
   fi
 
   echo ""
-  echo "✓ Tier full installed (MCP servers + launchd + memory)"
+  echo "✓ Tier mcp installed (MCP servers + launchd + memory)"
 }
 
 # ══════════════════════════════════════════════════════════════════
@@ -434,25 +428,25 @@ install_full() {
 # ══════════════════════════════════════════════════════════════════
 
 case "$TIER" in
-  min)
-    install_min
+  dotfiles)
+    install_dotfiles
     echo ""
-    echo "💡 To add Claude Code: ./install.sh claude"
+    echo "💡 To add Claude Code: ./install.sh workspace"
     ;;
-  claude)
-    install_min
-    install_claude
+  workspace)
+    install_dotfiles
+    install_workspace
     ;;
-  full)
-    install_min
-    install_claude
-    install_full
+  mcp)
+    install_dotfiles
+    install_workspace
+    install_mcp
     ;;
   *)
-    echo "Usage: ./install.sh [min|claude|full]"
-    echo "  min    — Shell + Git + Zed + Brew (standalone)"
-    echo "  claude — min + Claude Code + workspace config"
-    echo "  full   — claude + MCP servers + launchd + memory"
+    echo "Usage: ./install.sh [dotfiles|workspace|mcp]"
+    echo "  dotfiles  — Shell + Git + Zed + Brew (standalone)"
+    echo "  workspace — dotfiles + Claude Code + workspace config"
+    echo "  mcp       — workspace + MCP servers + launchd + memory"
     exit 1
     ;;
 esac

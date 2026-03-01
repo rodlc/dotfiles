@@ -23,24 +23,6 @@ Async git fetches with cache for dotfiles + workspace.
 
 ---
 
-#### df-sync-symlinks.sh
-Sync symlinks after git pull (Claude, zsh, SSH, Zed configs).
-
-**Usage:**
-```bash
-./df-sync-symlinks.sh
-```
-
-**Synced configs:**
-- `~/.claude/` → Claude Code hooks
-- `~/.zshrc` → Zsh config
-- `~/.ssh/config` → SSH config
-- `~/.config/zed/` → Zed editor
-
-**Triggered by:** Post-merge git hook in dotfiles.
-
----
-
 ### Bitwarden Credential Sync
 
 #### bw-pull
@@ -109,7 +91,6 @@ Shared functions for bw-pull/push/status.
 ### Daily (automated)
 ```bash
 git-fetch-background.sh  # Keep repos up to date
-df-sync-symlinks.sh      # Sync configs after pull
 ```
 
 ### As needed (manual)

@@ -10,7 +10,7 @@ set -euo pipefail
 # ════════════════════════════════════════════════════════════════════════════
 
 BREWFILE="${1:-$HOME/Code/rodlc/dotfiles/Brewfile}"
-ZSH_HISTORY="$HOME/.zsh_history"
+ZSH_HISTORY="$HOME/.local/state/zsh/history"
 OUTPUT_DIR="${TMPDIR:-/tmp}/brew-audit-$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$OUTPUT_DIR"
 
