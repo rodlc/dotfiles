@@ -53,7 +53,7 @@ dotfiles/
 ├── .env.example            # Secrets template (→ ~/.env)
 ├── .git-hooks/             # Global git hook (dotfiles reminder)
 ├── git/config              # Git config (identity generated at install)
-├── config                  # SSH config
+├── ssh/config              # SSH config
 ├── zshrc, zprofile         # Shell entry points
 ├── zsh/                    # Aliases, plugins, conf.d modules
 ├── starship.toml           # Prompt config
@@ -64,7 +64,7 @@ dotfiles/
 │   └── system/             # System maintenance (brew, cleanup)
 ├── launchd/                # System launchd plists (Ollama)
 ├── Brewfile                # Homebrew packages
-├── irbrc, rspec, pry/      # Ruby config
+├── ruby/                   # Ruby config (irbrc, rspec, pryrc)
 ├── finicky.js              # Browser router
 ├── terminal/               # Terminal.app profile
 └── macos.sh                # macOS defaults

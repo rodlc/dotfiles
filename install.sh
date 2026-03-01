@@ -69,11 +69,11 @@ install_min() {
 
   # Ruby config
   backup "$HOME/.irbrc"
-  symlink "$DOTFILES_DIR/irbrc" "$HOME/.irbrc"
+  symlink "$DOTFILES_DIR/ruby/irbrc" "$HOME/.irbrc"
   backup "$HOME/.rspec"
-  symlink "$DOTFILES_DIR/rspec" "$HOME/.rspec"
+  symlink "$DOTFILES_DIR/ruby/rspec" "$HOME/.rspec"
   mkdir -p "$HOME/.config/pry"
-  symlink "$DOTFILES_DIR/pry/pryrc" "$HOME/.config/pry/pryrc"
+  symlink "$DOTFILES_DIR/ruby/pryrc" "$HOME/.config/pry/pryrc"
 
   # XDG config
   mkdir -p "$HOME/.config/git" "$HOME/.config/mise"
@@ -104,7 +104,7 @@ EOF
   # SSH
   mkdir -p "$HOME/.ssh"
   backup "$HOME/.ssh/config"
-  symlink "$DOTFILES_DIR/config" "$HOME/.ssh/config"
+  symlink "$DOTFILES_DIR/ssh/config" "$HOME/.ssh/config"
   ssh-add --apple-use-keychain ~/.ssh/id_ed25519_rodlc 2>/dev/null || true
 
   # Zed
