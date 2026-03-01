@@ -60,9 +60,8 @@
 [init]
 	defaultBranch = main
 	templatedir = ~/.git-templates
-[user]
-	email = 63702959+rodlc@users.noreply.github.com
-	name = Rod Lc
+[include]
+	path = ~/.config/git/config-identity
 
 [includeIf "gitdir:~/Code/rodlcmagic/"]
-    path = ~/.config/git/config-rodlcmagic
+	path = ~/.config/git/config-identity-magic
