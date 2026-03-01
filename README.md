@@ -1,6 +1,6 @@
 # Dotfiles
 
-Personal development environment configuration for macOS. Fork of [Le Wagon dotfiles](https://github.com/lewagon/dotfiles).
+Personal development environment configuration for macOS. Originally inspired by [Le Wagon dotfiles](https://github.com/lewagon/dotfiles), now fully custom.
 
 ## Quick Start
 

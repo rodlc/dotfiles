@@ -152,7 +152,7 @@ if [[ -o login ]]; then
 
   # Dotfiles symlink health check
   check_dotfiles_symlinks() {
-    local expected="$HOME/Code/rodlc/dotfiles"
+    local expected="$HOME/Code/rodlc/workspace"
     for link in ~/.claude/settings.json ~/.claude/CLAUDE.md ~/.claude/statusline.sh ~/.claude/hooks/*.sh; do
       [[ ! -L "$link" ]] && continue
       local target=$(readlink "$link")

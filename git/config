@@ -59,7 +59,7 @@
 
 [init]
 	defaultBranch = main
-	templatedir = /Users/rodlecoent/.git-templates
+	templatedir = ~/.git-templates
 [include]
 	path = ~/.config/git/config-identity
 
