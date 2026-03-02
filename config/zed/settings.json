@@ -35,7 +35,7 @@
     "default_profile": "write",
     "default_model": {
       "provider": "copilot_chat",
-      "model": "claude-sonnet-4.5"
+      "model": "gemini-3.1-pro-preview"
     },
     "use_modifier_to_send": true,
     "expand_edit_card": true
