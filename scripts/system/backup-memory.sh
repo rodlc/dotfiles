@@ -4,8 +4,13 @@
 
 set -euo pipefail
 
-# Workspace path
-WORKSPACE_DIR="$HOME/Code/rodlc/workspace"
+# Source environment first (may define WORKSPACE_DIR + GPG_PASSPHRASE)
+if [[ -f "$HOME/.env" ]]; then
+  # shellcheck disable=SC1091
+  source "$HOME/.env"
+fi
+
+WORKSPACE_DIR="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}"
 SYNC_SCRIPT="$WORKSPACE_DIR/memory/sync-memory.sh"
 
 # Validation
@@ -18,12 +23,6 @@ fi
 if [[ ! -f "$SYNC_SCRIPT" ]]; then
   echo "⚠️  sync-memory.sh not found: $SYNC_SCRIPT" >&2
   exit 1
-fi
-
-# Source environment (GPG passphrase required)
-if [[ -f "$HOME/.env" ]]; then
-  # shellcheck disable=SC1091
-  source "$HOME/.env"
 fi
 
 if [[ -z "${GPG_PASSPHRASE:-}" ]]; then

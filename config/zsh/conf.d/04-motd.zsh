@@ -140,7 +140,7 @@ if [[ -o login ]]; then
     ) &>/dev/null
 
     check_repo_status "$HOME/Code/rodlc/dotfiles" "Dotfiles" "df-push" "df-pull"
-    check_repo_status "$HOME/Code/rodlc/workspace" "Workspace" "ws-push" "ws-pull"
+    check_repo_status "${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}" "Workspace" "ws-push" "ws-pull"
   fi
 
   # Bitwarden secrets sync check
@@ -152,7 +152,7 @@ if [[ -o login ]]; then
 
   # Dotfiles symlink health check
   check_dotfiles_symlinks() {
-    local expected="$HOME/Code/rodlc/workspace"
+    local expected="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}"
     for link in ~/.claude/settings.json ~/.claude/CLAUDE.md ~/.claude/statusline.sh ~/.claude/hooks/*.sh; do
       [[ ! -L "$link" ]] && continue
       local target=$(readlink "$link")

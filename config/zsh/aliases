@@ -7,11 +7,16 @@ alias fastcom="npx fast-cli --upload --verbose"  # Netflix CDN (download/upload/
 # Open current directory in Zed
 alias z="zed ."
 
+# Git helper — default branch name
+_git_default_branch() {
+  command git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | cut -d'/' -f4
+}
+
 # Git wrapper - Alert if main is behind origin before checkout
 git() {
   if [[ "$1" =~ ^(checkout|co|switch)$ ]]; then
     command git fetch --quiet 2>/dev/null
-    local default_branch=$(command git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | cut -d'/' -f4)
+    local default_branch=$(_git_default_branch)
     default_branch=${default_branch:-main}
     local behind=$(command git rev-list --count $default_branch..origin/$default_branch 2>/dev/null)
     [[ "$behind" -gt 0 ]] && echo "⚠️  \033[1;33m$default_branch\033[0m behind by \033[1;31m$behind\033[0m"
@@ -21,12 +26,12 @@ git() {
 
 # Checkout main (uses wrapper with alert)
 gm() {
-  git checkout "$(command git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | cut -d'/' -f4 || echo main)"
+  git checkout "$(_git_default_branch || echo main)"
 }
 
 # Clean merged branches
 gcleanup() {
-  local db=$(command git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | cut -d'/' -f4)
+  local db=$(_git_default_branch)
   db="${db:-main}"
   git checkout "$db" && git pull origin "$db" && git fetch -p && \
     command git branch --merged | grep -vE "^\*|$db" | xargs -n1 git branch -d
@@ -34,7 +39,7 @@ gcleanup() {
 
 # Full cleanup: merged branches + gone remotes
 gpurge() {
-  local db=$(command git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | cut -d'/' -f4)
+  local db=$(_git_default_branch)
   db="${db:-main}"
   git checkout "$db" && git pull origin "$db" && git fetch -p && \
     command git branch --merged | grep -vE "^\*|$db" | xargs -n1 git branch -d && \
@@ -98,22 +103,21 @@ alias bw-status='~/Code/rodlc/dotfiles/scripts/code/bw-status'
 # ============================================================================
 # Workspace (Memory + Plans + AI Context)
 # ============================================================================
-alias ws-push='~/Code/rodlc/workspace/scripts/context-sync push'
-alias ws-pull='~/Code/rodlc/workspace/scripts/context-sync pull'
-alias ws-status='~/Code/rodlc/workspace/scripts/context-sync status'
+ws-push()   { "$WORKSPACE_DIR/scripts/context-sync" push; }
+ws-pull()   { "$WORKSPACE_DIR/scripts/context-sync" pull; }
+ws-status() { "$WORKSPACE_DIR/scripts/context-sync" status; }
 
-alias memory-export='~/Code/rodlc/workspace/memory/sync-memory.sh export'
-alias memory-import='~/Code/rodlc/workspace/memory/sync-memory.sh import'
-alias plans-sync='~/Code/rodlc/workspace/scripts/plans-sync'
+memory-export() { "$WORKSPACE_DIR/memory/sync-memory.sh" export; }
+memory-import() { "$WORKSPACE_DIR/memory/sync-memory.sh" import; }
+alias plans-sync='$WORKSPACE_DIR/scripts/plans-sync'
 
 # ============================================================================
 # System Maintenance
 # ============================================================================
-alias cleanup-caches='~/Code/rodlc/dotfiles/scripts/system/cleanup-caches.sh'
 alias cleanup-home='~/Code/rodlc/dotfiles/scripts/system/cleanup-home.sh'
 
 # Homebrew multi-user permissions fix
 alias brew-fix='~/Code/rodlc/dotfiles/scripts/system/brew-fix-permissions'
 
 # Zsh history sync to workspace
-alias zsh-history-sync='cp "$HISTFILE" ~/Code/rodlc/workspace/shell/zsh_history && echo "✅ zsh_history synced to workspace"'
+zsh-history-sync() { cp "$HISTFILE" "$WORKSPACE_DIR/shell/zsh_history" && echo "✅ zsh_history synced to workspace"; }

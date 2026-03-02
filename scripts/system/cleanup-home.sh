@@ -163,6 +163,44 @@ done < <(find "$HOME" -maxdepth 1 -type d -empty -print0 2>/dev/null)
 echo ""
 
 # ════════════════════════════════════════════════════════════════
+# Section 6 — Dev artifacts + Docker
+# ════════════════════════════════════════════════════════════════
+echo "── Dev artifacts ──"
+_dev_count=0
+
+# Node modules >180 days
+while IFS= read -r -d '' dir; do
+  _dev_count=$((_dev_count + 1))
+  remove_item "$dir" "node_modules >180 days"
+done < <(find "$HOME/Code" -type d -name "node_modules" -mtime +180 -print0 2>/dev/null)
+
+# Python cache
+while IFS= read -r -d '' dir; do
+  _dev_count=$((_dev_count + 1))
+  remove_item "$dir" "__pycache__"
+done < <(find "$HOME/Code" -type d -name "__pycache__" -print0 2>/dev/null)
+
+# Ruby bundle cache
+while IFS= read -r -d '' dir; do
+  _dev_count=$((_dev_count + 1))
+  remove_item "$dir" ".bundle/cache"
+done < <(find "$HOME/Code" -type d -name "cache" -path "*/.bundle/*" -print0 2>/dev/null)
+
+[[ $_dev_count -eq 0 ]] && echo "  (none)"
+echo ""
+
+if command -v docker &>/dev/null; then
+  echo "── Docker ──"
+  if $DRY_RUN; then
+    echo "  docker system prune -af --volumes  (skipped in dry-run)"
+  else
+    docker system prune -af --volumes 2>/dev/null || true
+    echo "  🗑  Docker pruned"
+  fi
+  echo ""
+fi
+
+# ════════════════════════════════════════════════════════════════
 # Report
 # ════════════════════════════════════════════════════════════════
 echo "════════════════════════════════════════════════════════════"

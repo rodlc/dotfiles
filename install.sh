@@ -31,6 +31,28 @@ symlink() {
   [ ! -e "$link" ] && ln -s "$source" "$link" && echo "-----> Linked $link" || true
 }
 
+generate_git_identities() {
+  source "$HOME/.env" 2>/dev/null || true
+  if [[ -n "${GIT_USER_NAME:-}" && -n "${GIT_USER_EMAIL:-}" ]]; then
+    mkdir -p "$HOME/.config/git"
+    cat > "$HOME/.config/git/config-identity" <<EOF
+[user]
+  email = $GIT_USER_EMAIL
+  name = $GIT_USER_NAME
+EOF
+    echo "-----> Generated git identity"
+  fi
+  if [[ -n "${GIT_USER_EMAIL_MAGIC:-}" ]]; then
+    mkdir -p "$HOME/.config/git"
+    cat > "$HOME/.config/git/config-identity-magic" <<EOF
+[user]
+  email = $GIT_USER_EMAIL_MAGIC
+  name = ${GIT_USER_NAME:-}
+EOF
+    echo "-----> Generated git identity (magic)"
+  fi
+}
+
 # ══════════════════════════════════════════════════════════════════
 # TIER: dotfiles — Shell + Git + Zed + Brew (standalone machine)
 # ══════════════════════════════════════════════════════════════════
@@ -87,23 +109,7 @@ install_dotfiles() {
   symlink "$DOTFILES_DIR/config/zsh/aliases" "$HOME/.config/zsh/aliases"
 
   # Git identity (generated from ~/.env if available)
-  source "$HOME/.env" 2>/dev/null || true
-  if [[ -n "${GIT_USER_NAME:-}" && -n "${GIT_USER_EMAIL:-}" ]]; then
-    cat > "$HOME/.config/git/config-identity" <<EOF
-[user]
-  email = $GIT_USER_EMAIL
-  name = $GIT_USER_NAME
-EOF
-    echo "-----> Generated git identity"
-  fi
-  if [[ -n "${GIT_USER_EMAIL_MAGIC:-}" ]]; then
-    cat > "$HOME/.config/git/config-identity-magic" <<EOF
-[user]
-  email = $GIT_USER_EMAIL_MAGIC
-  name = ${GIT_USER_NAME:-}
-EOF
-    echo "-----> Generated git identity (magic)"
-  fi
+  generate_git_identities
 
   # Zed
   ZED_DIR="$HOME/.config/zed"
@@ -213,24 +219,7 @@ install_workspace() {
   fi
 
   # Re-generate git identity now that ~/.env may have been populated
-  source "$HOME/.env" 2>/dev/null || true
-  if [[ -n "${GIT_USER_NAME:-}" && -n "${GIT_USER_EMAIL:-}" ]]; then
-    mkdir -p "$HOME/.config/git"
-    cat > "$HOME/.config/git/config-identity" <<EOF
-[user]
-  email = $GIT_USER_EMAIL
-  name = $GIT_USER_NAME
-EOF
-    echo "-----> Generated git identity"
-  fi
-  if [[ -n "${GIT_USER_EMAIL_MAGIC:-}" ]]; then
-    cat > "$HOME/.config/git/config-identity-magic" <<EOF
-[user]
-  email = $GIT_USER_EMAIL_MAGIC
-  name = ${GIT_USER_NAME:-}
-EOF
-    echo "-----> Generated git identity (magic)"
-  fi
+  generate_git_identities
 
   # Clone workspace if not present
   WORKSPACE_DIR="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}"
