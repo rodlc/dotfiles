@@ -58,5 +58,5 @@ cd ~/Code
 
 export PATH="$HOME/.local/bin:$PATH"
 
-# bun completions
-[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
+# bun completions (mise-managed)
+source <(bun completions)
