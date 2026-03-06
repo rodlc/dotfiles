@@ -51,7 +51,7 @@ done
 [[ -f "$HOME/.config/zsh/aliases" ]] && source "$HOME/.config/zsh/aliases"
 
 # Default working directory
-cd ~/Code
+cd ~/Code/rodlc/workspace
 
 # Load local env if exists (optional personal config)
 [[ -f "$HOME/.local/bin/env" ]] && . "$HOME/.local/bin/env"
