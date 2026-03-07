@@ -196,7 +196,7 @@ if [[ -o login ]]; then
       (
         setopt LOCAL_OPTIONS NO_MONITOR
         (
-          local fetched=$(timeout 3 npm view @anthropic-ai/claude-code version 2>/dev/null)
+          local fetched=$(npm view @anthropic-ai/claude-code version 2>/dev/null)
           [[ -n "$fetched" ]] && echo "$fetched" > "$cache_file.tmp" && mv -f "$cache_file.tmp" "$cache_file"
         ) &
       ) &>/dev/null
