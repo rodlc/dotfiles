@@ -174,8 +174,8 @@ if [[ -o login ]]; then
   check_dotfiles_symlinks
 
   check_cc_version() {
-    command -v claude &>/dev/null || return 0
-    local current=$(claude --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+    local claude_bin=$(command -v claude 2>/dev/null)
+    local current=$(basename "$(readlink "$claude_bin" 2>/dev/null)" 2>/dev/null)
     [[ -z "$current" ]] && return 0
 
     local cache_file="$HOME/.cache/cc-latest-version"
