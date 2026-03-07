@@ -172,4 +172,42 @@ if [[ -o login ]]; then
     done
   }
   check_dotfiles_symlinks
+
+  check_cc_version() {
+    command -v claude &>/dev/null || return 0
+    local current=$(claude --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+    [[ -z "$current" ]] && return 0
+
+    local cache_file="$HOME/.cache/cc-latest-version"
+    local cache_ttl=86400  # 24h
+    local latest=""
+
+    # Read cache if fresh
+    if [[ -f "$cache_file" ]]; then
+      local file_time=$(stat -f %m "$cache_file" 2>/dev/null || echo 0)
+      local age=$(( $(date +%s) - file_time ))
+      if [[ $age -lt $cache_ttl ]]; then
+        latest=$(cat "$cache_file" 2>/dev/null)
+      fi
+    fi
+
+    # Refresh in background if stale/missing
+    if [[ -z "$latest" ]]; then
+      (
+        setopt LOCAL_OPTIONS NO_MONITOR
+        (
+          local fetched=$(timeout 3 npm view @anthropic-ai/claude-code version 2>/dev/null)
+          [[ -n "$fetched" ]] && echo "$fetched" > "$cache_file.tmp" && mv -f "$cache_file.tmp" "$cache_file"
+        ) &
+      ) &>/dev/null
+      # Use stale cache if exists
+      [[ -f "$cache_file" ]] && latest=$(cat "$cache_file" 2>/dev/null)
+    fi
+
+    # Alert if outdated
+    if [[ -n "$latest" && "$current" != "$latest" ]]; then
+      echo "🤖 Claude Code v${current} → v${latest} (claude update)"
+    fi
+  }
+  check_cc_version
 fi
