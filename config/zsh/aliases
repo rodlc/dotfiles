@@ -112,6 +112,12 @@ memory-import() { "$WORKSPACE_DIR/memory/sync-memory.sh" import; }
 alias plans-sync='$WORKSPACE_DIR/scripts/plans-sync'
 
 # ============================================================================
+# Branch protection toggle (hotfix escape hatch)
+# ============================================================================
+alias hotfix-unlock='gh api -X DELETE repos/rodlc/konsigo/branches/main/protection/enforce_admins && echo "⚠ Admin bypass ON — relock after push"'
+alias hotfix-lock='gh api -X POST repos/rodlc/konsigo/branches/main/protection/enforce_admins && echo "✓ Admin bypass OFF"'
+
+# ============================================================================
 # System Maintenance
 # ============================================================================
 alias cleanup-home='~/Code/rodlc/dotfiles/scripts/system/cleanup-home.sh'
