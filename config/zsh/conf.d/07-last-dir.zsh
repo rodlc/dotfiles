@@ -14,7 +14,7 @@ add-zsh-hook chpwd chpwd_last_working_dir
 if [[ -r "$__LAST_DIR_FILE" ]]; then
   local _last_dir
   _last_dir=$(<"$__LAST_DIR_FILE")
-  [[ -d "$_last_dir" ]] && cd "$_last_dir" || cd ~/Code
+  [[ -d "$_last_dir" && "$_last_dir" != "$HOME" ]] && cd "$_last_dir" || cd ~/Code
 else
   cd ~/Code
 fi
