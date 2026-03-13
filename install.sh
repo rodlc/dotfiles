@@ -84,7 +84,7 @@ install_dotfiles() {
   echo "=====> Creating symlinks"
 
   # home/ → ~/.<name>
-  for name in zprofile zshrc; do
+  for name in zshenv zprofile zshrc; do
     backup "$HOME/.$name"
     symlink "$DOTFILES_DIR/home/$name" "$HOME/.$name"
   done
