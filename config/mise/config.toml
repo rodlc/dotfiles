@@ -3,6 +3,7 @@ trusted_config_paths = ["~/Code/rodlc/konsigo"]
 
 [tools]
 bun = "latest"
+claude-code = "latest"
 go = "1.26"
 node = "24"
 python = "3.13"
