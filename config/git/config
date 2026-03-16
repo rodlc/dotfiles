@@ -57,7 +57,7 @@
 	defaultBranch = main
 	templatedir = /Users/rodlecoent/.git-templates
 [include]
-	path = ~/.config/git/config-identity
+	path = ~/.config/git/config-identity-rodlc
 
 [includeIf "gitdir:~/Code/rodlcmagic/"]
-	path = ~/.config/git/config-identity-magic
+	path = ~/.config/git/config-identity-rodlcmagic
