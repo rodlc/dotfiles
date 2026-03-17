@@ -153,7 +153,7 @@ if [[ -o login ]]; then
   # Dotfiles symlink health check
   check_dotfiles_symlinks() {
     local expected="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}"
-    for link in ~/.claude/settings.json ~/.claude/CLAUDE.md ~/.claude/statusline.sh ~/.claude/hooks/*.sh; do
+    for link in ~/.claude/settings.json ~/.claude/CLAUDE.md ~/.claude/statusline.sh ~/.claude/hooks/*.sh ~/.claude/hooks/core; do
       [[ ! -L "$link" ]] && continue
       local target=$(readlink "$link")
       # Broken or points to wrong user
@@ -223,7 +223,7 @@ if [[ -o login ]]; then
       [[ -z "$expanded" || -z "$current" ]] && echo 0 && return
       diff <(echo "$expanded") <(echo "$current") 2>/dev/null | grep -c '^[<>]' || echo 0
     )
-    [[ "$count" -gt 0 ]] && echo "🌊 MCP drift (${count} lines) → mcp-sync.sh diff"
+    [[ "$count" =~ ^[0-9]+$ && "$count" -gt 0 ]] && echo "🌊 MCP drift (${count} lines) → mcp-sync.sh diff"
   }
   check_mcp_drift
 
@@ -234,7 +234,8 @@ if [[ -o login ]]; then
     for sub in "$mcp_dir"/*/; do
       [[ -d "$sub/.git" ]] || continue
       local name=$(basename "$sub")
-      local last_fetch=$(cd "$sub" && git reflog show upstream/main --format='%ct' -1 2>/dev/null || echo "0")
+      local fetch_head="$sub/.git/FETCH_HEAD"
+      local last_fetch=$([[ -f "$fetch_head" ]] && stat -f %m "$fetch_head" 2>/dev/null || echo "0")
       [[ "$last_fetch" = "0" ]] && continue
       local age_days=$(( (now - last_fetch) / 86400 ))
       (( age_days > stale_days )) && echo "📦 $name stale (${age_days}d) → mcp-update-upstream.sh --check $name"
