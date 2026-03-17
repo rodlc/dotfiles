@@ -58,3 +58,6 @@ export PATH="$HOME/.local/bin:$PATH"
 
 # bun completions (mise-managed)
 source <(bun completions)
+
+# bun global bin (clasp, etc.)
+export PATH="$HOME/.cache/.bun/bin:$PATH"
