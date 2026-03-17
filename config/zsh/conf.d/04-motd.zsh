@@ -210,4 +210,35 @@ if [[ -o login ]]; then
     fi
   }
   check_cc_version
+
+  check_mcp_drift() {
+    local template="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}/.claude/.mcp.json"
+    local live="$HOME/.claude.json"
+    [[ ! -f "$template" || ! -f "$live" ]] && return 0
+    # Subshell: source .env stays contained, secrets never leak to login env
+    local count=$(
+      set -a; source "$HOME/.env" 2>/dev/null; set +a
+      local expanded=$(envsubst < "$template" 2>/dev/null | jq -S '.mcpServers' 2>/dev/null)
+      local current=$(jq -S '.mcpServers' "$live" 2>/dev/null)
+      [[ -z "$expanded" || -z "$current" ]] && echo 0 && return
+      diff <(echo "$expanded") <(echo "$current") 2>/dev/null | grep -c '^[<>]' || echo 0
+    )
+    [[ "$count" -gt 0 ]] && echo "🌊 MCP drift (${count} lines) → mcp-sync.sh diff"
+  }
+  check_mcp_drift
+
+  check_mcp_upstream() {
+    local mcp_dir="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}/mcp-servers"
+    local stale_days=30
+    local now=$(date +%s)
+    for sub in "$mcp_dir"/*/; do
+      [[ -d "$sub/.git" ]] || continue
+      local name=$(basename "$sub")
+      local last_fetch=$(cd "$sub" && git reflog show upstream/main --format='%ct' -1 2>/dev/null || echo "0")
+      [[ "$last_fetch" = "0" ]] && continue
+      local age_days=$(( (now - last_fetch) / 86400 ))
+      (( age_days > stale_days )) && echo "📦 $name stale (${age_days}d) → mcp-update-upstream.sh --check $name"
+    done
+  }
+  check_mcp_upstream
 fi
