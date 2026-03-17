@@ -30,3 +30,6 @@ export HOMEBREW_NO_ANALYTICS=1
 
 # Workspace path (fallback if not set via ~/.env by install.sh workspace)
 export WORKSPACE_DIR="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}"
+
+# Claude Code — 1M context on Max plan (bypasses client-side s1mAccessCache bug)
+export ANTHROPIC_DEFAULT_OPUS_MODEL='claude-opus-4-6[1m]'
