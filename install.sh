@@ -245,16 +245,17 @@ install_workspace() {
 
   # Symlink Claude config from workspace → ~/.claude/
   echo "=====> Linking Claude Code config from workspace"
-  CLAUDE_SRC="$WORKSPACE_DIR/.claude"
+  CLAUDE_SRC="$WORKSPACE_DIR/claude-config"
   CLAUDE_DST="$HOME/.claude"
   mkdir -p "$CLAUDE_DST"
 
-  # Top-level files
-  for f in CLAUDE.md settings.json statusline.sh; do
+  # Top-level files (CLAUDE.md + statusline.sh from claude-config)
+  for f in CLAUDE.md statusline.sh; do
     [ -f "$CLAUDE_SRC/$f" ] || continue
     backup "$CLAUDE_DST/$f"
     symlink "$CLAUDE_SRC/$f" "$CLAUDE_DST/$f"
   done
+  # settings.json stays in .claude/ (Claude Code requirement — not symlinked)
 
   # Config directories
   for dir in commands skills hooks rules agent_docs scripts; do
@@ -315,16 +316,16 @@ install_mcp() {
 
   # Build MCP servers
   echo "=====> Building MCP servers"
-  if [ -x "$WORKSPACE_DIR/.claude/install-mcp-servers.sh" ]; then
-    "$WORKSPACE_DIR/.claude/install-mcp-servers.sh"
+  if [ -x "$WORKSPACE_DIR/claude-config/install-mcp-servers.sh" ]; then
+    "$WORKSPACE_DIR/claude-config/install-mcp-servers.sh"
   else
     echo "⚠️  install-mcp-servers.sh not found in workspace"
   fi
 
   # Configure MCPs (expand template → ~/.claude.json)
   echo "=====> Configuring MCP servers"
-  if [ -x "$WORKSPACE_DIR/.claude/mcp-sync.sh" ]; then
-    "$WORKSPACE_DIR/.claude/mcp-sync.sh" install
+  if [ -x "$WORKSPACE_DIR/claude-config/mcp-sync.sh" ]; then
+    "$WORKSPACE_DIR/claude-config/mcp-sync.sh" install
   fi
 
   # Launchd services (MCP memory + backup)
@@ -334,7 +335,7 @@ install_mcp() {
   if [ -d "$MCP_MEMORY_SERVICE" ]; then
     mkdir -p "$HOME/Library/LaunchAgents"
 
-    LAUNCHD_SRC="$WORKSPACE_DIR/.claude/launchd"
+    LAUNCHD_SRC="$WORKSPACE_DIR/claude-config/launchd"
     if [ -d "$LAUNCHD_SRC" ]; then
       for plist in "$LAUNCHD_SRC"/*.plist; do
         [ -f "$plist" ] || continue
