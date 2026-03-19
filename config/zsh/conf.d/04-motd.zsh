@@ -152,6 +152,7 @@ if [[ -o login ]]; then
 
   # Dotfiles symlink health check
   check_dotfiles_symlinks() {
+    setopt LOCAL_OPTIONS NULL_GLOB
     local expected="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}"
     for link in ~/.claude/settings.json ~/.claude/CLAUDE.md ~/.claude/statusline.sh ~/.claude/hooks/*.sh ~/.claude/hooks/core; do
       [[ ! -L "$link" ]] && continue
