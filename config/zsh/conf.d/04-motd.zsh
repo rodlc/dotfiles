@@ -172,7 +172,7 @@ if [[ -o login ]]; then
     done
 
     # Orphan detection: real files in managed dirs
-    for entry in ~/.claude/rules/* ~/.claude/commands/*; do
+    for entry in ~/.claude/rules/* ~/.claude/commands/* ~/.claude/agent_docs/* ~/.claude/hooks/*.sh ~/.claude/hooks/*.js ~/.claude/hooks/*.json ~/.claude/hooks/core/*; do
       [[ ! -e "$entry" ]] && continue
       if [[ ! -L "$entry" ]]; then
         echo "🌊 Orphan: $(basename "$entry") is not a symlink. Run: df-install"
