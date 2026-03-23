@@ -185,8 +185,8 @@ if [[ -o login ]]; then
 
   check_cc_version() {
     local claude_bin=$(command -v claude 2>/dev/null)
-    local current=$(basename "$(readlink "$claude_bin" 2>/dev/null)" 2>/dev/null)
-    [[ -z "$current" ]] && return 0
+    [[ -z "$claude_bin" ]] && return 0
+    local current=$("$claude_bin" --version 2>/dev/null | awk '{print $1}')
 
     local cache_file="$HOME/.cache/cc-latest-version"
     local cache_ttl=86400  # 24h
