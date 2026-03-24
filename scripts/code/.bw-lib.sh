@@ -19,6 +19,7 @@ ensure_rbw() {
         echo "🔐 rbw locked. Unlocking..."
         rbw unlock
     fi
+    rbw sync 2>/dev/null || true
 }
 
 # Fetch SSH private key from BW (SSH Key items → fallback Secure Notes)

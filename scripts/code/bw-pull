@@ -35,13 +35,14 @@ else
         local_content=$(cat "$ENV_FILE")
         if [[ "$bw_content" == "$local_content" ]]; then
             echo "✅ .env in sync"
+            touch "$HOME/.env.bw-synced"
         else
             echo "┌─────────────────────────────────────────────────────────────┐"
             echo "│ ⚠️  .env : Bitwarden ≠ local                                │"
             echo "└─────────────────────────────────────────────────────────────┘"
             echo ""
             echo "Diff (local vs Bitwarden):"
-            diff -u <(echo "$local_content") <(echo "$bw_content") || true
+            diff -u <(echo "$local_content" | sed 's/=.*/=****/') <(echo "$bw_content" | sed 's/=.*/=****/') || true
             echo ""
             echo "► Action required:"
             echo "  1. Review the changes in your editor"
@@ -143,5 +144,3 @@ done
 echo ""
 echo "✅ Status check complete"
 
-# Update marker for MOTD (indicates last sync check)
-touch "$HOME/.env.bw-synced"
