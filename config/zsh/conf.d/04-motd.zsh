@@ -220,7 +220,9 @@ if [[ -o login ]]; then
 
     # Alert if outdated
     if [[ -n "$latest" && "$current" != "$latest" ]]; then
-      echo "🤖 Claude Code v${current} → v${latest} (claude update)"
+      local update_cmd="claude update"
+      [[ "$claude_bin" == *"/mise/"* ]] && update_cmd="mise upgrade claude-code"
+      echo "🤖 Claude Code v${current} → v${latest} (${update_cmd})"
     fi
   }
   check_cc_version
