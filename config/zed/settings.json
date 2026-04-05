@@ -29,8 +29,13 @@
   "relative_line_numbers": "disabled",
   "cursor_blink_mode": "terminal",
   "agent": {
+    "default_model": {
+      "provider": "copilot_chat",
+      "model": "gemini-3.1-pro-preview",
+      "enable_thinking": true,
+      "effort": "high"
+    },
     "favorite_models": [],
-    "default_profile": "write",
     "model_parameters": []
   },
   "agent_servers": {
