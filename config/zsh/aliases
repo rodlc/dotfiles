@@ -78,7 +78,7 @@ wt-clean() {
 # ============================================================================
 # Claude Code Monitoring
 # ============================================================================
-alias cc='claude'
+alias cc='claude -w'
 alias cc-global='npx ccusage@latest'
 alias cc-live='npx ccusage blocks --live'
 alias cc-daily='npx ccusage daily'
