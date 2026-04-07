@@ -34,3 +34,6 @@ export WORKSPACE_DIR="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}"
 # Claude Code
 export CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=95
 export CLAUDE_CODE_SESSIONEND_HOOKS_TIMEOUT_MS=15000
+
+# MCP servers paths
+export MCP_NOTION_SERVER_PATH="${WORKSPACE_DIR}/mcp-servers/mcp-notion-server/build/index.js"
