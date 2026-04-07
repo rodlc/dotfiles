@@ -83,6 +83,7 @@ alias cc-global='npx ccusage@latest'
 alias cc-live='npx ccusage blocks --live'
 alias cc-daily='npx ccusage daily'
 alias cc-monthly='npx ccusage monthly'
+alias ccost='npx ccusage daily --breakdown'
 
 # ============================================================================
 # Dotfiles Management
