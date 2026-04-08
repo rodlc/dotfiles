@@ -86,6 +86,7 @@ ccw() {
   repo=$(basename "$(git rev-parse --show-toplevel 2>/dev/null || pwd)")
   local adjs=(aqua azure bold bright calm clean clear cool coral crisp dark deep dense dry fast firm flat free glad gold grand grey hard high hot huge icy jade jolly keen kind lazy lime lush mild mute neat new pale pink pure red rich rose royal safe sage sharp slim slow soft stark still swift teal trim vast vivid warm wide wild wise)
   local nouns=(ant ape ark bat bay bee brook cat cave cliff cod cove crab cub dale doe dune eel elk fell fen finch fly ford fox glen gnu gorge grove hawk hen hill ibis isle jay kite knoll lake lamb lark ledge loch marsh mere mole moor newt nook owl ox peak pig pond pup ram rat reef ridge rock seal shoal sky slope swan toad tor vale vole wren yak zebra)
+  # NOTE: zsh 1-indexed arrays — not bash-compatible
   adj=${adjs[$((RANDOM % ${#adjs[@]} + 1))]}
   noun=${nouns[$((RANDOM % ${#nouns[@]} + 1))]}
   claude -w "${repo}-${adj}-${noun}" --name "${repo}" "$@"
