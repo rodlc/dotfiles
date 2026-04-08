@@ -46,7 +46,8 @@ gpurge() {
     command git branch -vv | grep ': gone]' | awk '{sub(/^[+* ]/, ""); print $1}' | xargs -r git branch -D
 }
 
-# Git worktree - Work on multiple branches in parallel
+# Git worktree — Shell-only aliases (parallel branches in separate dirs)
+# Claude uses EnterWorktree instead → .claude/worktrees/ (branch-aware, named)
 wt-new() {
   [[ -z "$1" ]] && echo "Usage: wt-new <branch>" && return 1
   local repo=$(basename "$(git rev-parse --show-toplevel)")

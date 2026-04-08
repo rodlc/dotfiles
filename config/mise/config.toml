@@ -1,5 +1,5 @@
 [settings]
-trusted_config_paths = ["~/Code/rodlc/konsigo"]
+trusted_config_paths = ["~/Code/rodlc"]
 
 [tools]
 bun = "latest"
