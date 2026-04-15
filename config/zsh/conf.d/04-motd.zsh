@@ -161,7 +161,7 @@ if [[ -o login ]]; then
       local target=$(readlink "$link")
       # Broken or points to wrong user
       if [[ ! -e "$link" ]] || [[ "$target" != "$expected"* ]]; then
-        echo "🌊 Drifting symlinks. Run: df-install"
+        echo "🌊 Drifting symlinks. Run: df-install workspace"
         return
       fi
     done
@@ -169,7 +169,7 @@ if [[ -o login ]]; then
     for entry in ~/.claude/skills/*; do
       [[ ! -e "$entry" ]] && continue
       if [[ ! -L "$entry" ]]; then
-        echo "🌊 Skill drift: $(basename "$entry") is not a symlink. Run: df-install"
+        echo "🌊 Skill drift: $(basename "$entry") is not a symlink. Run: df-install workspace"
         return
       fi
     done
@@ -180,7 +180,7 @@ if [[ -o login ]]; then
       # Skip entries inside symlinked parent dirs (managed by the parent symlink)
       [[ -L "$(dirname "$entry")" ]] && continue
       if [[ ! -L "$entry" ]]; then
-        echo "🌊 Orphan: $(basename "$entry") is not a symlink. Run: df-install"
+        echo "🌊 Orphan: $(basename "$entry") is not a symlink. Run: df-install workspace"
         return
       fi
     done

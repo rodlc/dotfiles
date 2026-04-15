@@ -4,6 +4,16 @@ set -e
 DOTFILES_DIR="$PWD"
 TIER="${1:-dotfiles}"  # dotfiles | workspace | mcp
 
+cat <<EOF
+╔═══════════════════════════════════════════════════════════════╗
+║  Dotfiles installer — tier: $TIER
+╠═══════════════════════════════════════════════════════════════╣
+║  dotfiles  — Shell + Git + Zed + Brew (standalone)
+║  workspace — dotfiles + Claude Code + workspace config
+║  mcp       — workspace + MCP servers + launchd + memory
+╚═══════════════════════════════════════════════════════════════╝
+
+EOF
 echo "=====> Installing dotfiles (tier: $TIER)"
 
 # ══════════════════════════════════════════════════════════════════
