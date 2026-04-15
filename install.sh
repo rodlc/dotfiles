@@ -144,11 +144,14 @@ install_dotfiles() {
   # Terminal profile
   TERMINAL_PROFILE="$DOTFILES_DIR/terminal/Pro Nord.terminal"
   if [ -f "$TERMINAL_PROFILE" ]; then
-    echo "=====> Importing Terminal profile"
-    open "$TERMINAL_PROFILE"
-    sleep 1
-    defaults write com.apple.Terminal "Default Window Settings" -string "Pro Nord"
-    defaults write com.apple.Terminal "Startup Window Settings" -string "Pro Nord"
+    CURRENT_DEFAULT=$(defaults read com.apple.Terminal "Default Window Settings" 2>/dev/null || echo "")
+    if [[ "$CURRENT_DEFAULT" != "Pro Nord" ]]; then
+      echo "=====> Importing Terminal profile"
+      open "$TERMINAL_PROFILE"
+      sleep 1
+      defaults write com.apple.Terminal "Default Window Settings" -string "Pro Nord"
+      defaults write com.apple.Terminal "Startup Window Settings" -string "Pro Nord"
+    fi
   fi
 
   # Pre-commit hooks (Gitleaks)
@@ -211,13 +214,15 @@ install_workspace() {
   fi
 
   if [ -f "$RBW_CONFIG" ]; then
-    if ! rbw unlocked 2>/dev/null; then
-      echo "-----> Unlocking vault..."
-      rbw unlock
-    fi
     if rbw unlocked 2>/dev/null; then
       echo "-----> Syncing secrets from Bitwarden..."
       "$DOTFILES_DIR/scripts/code/bw-pull"
+    elif [ ! -f "$HOME/.ssh/id_ed25519_rodlc" ]; then
+      # First install: SSH key missing → unlock required
+      echo "-----> Unlocking vault (SSH key missing)..."
+      rbw unlock && "$DOTFILES_DIR/scripts/code/bw-pull"
+    else
+      echo "-----> Bitwarden vault locked — skipping sync. Run 'bw-pull' to force refresh."
     fi
   fi
 
@@ -452,4 +457,4 @@ case "$TIER" in
 esac
 
 echo ""
-exec zsh
+exec zsh -l
