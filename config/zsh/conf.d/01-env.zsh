@@ -34,11 +34,10 @@ export WORKSPACE_DIR="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}"
 # Claude Code
 export CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=95
 export CLAUDE_CODE_SESSIONEND_HOOKS_TIMEOUT_MS=15000
-# NOTE: MAX_THINKING_TOKENS + CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING
-# effectifs UNIQUEMENT sur Opus/Sonnet 4.6. Opus 4.7+ = adaptive-only,
-# ces vars sont ignorées. Contrôle effort via /effort ou CLAUDE_CODE_EFFORT_LEVEL.
-export MAX_THINKING_TOKENS=16000
-export CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING=1
+# NOTE: Opus 4.7+ is adaptive-only. Pin effort to max as an anti-nerf
+# safety net (Laurenzo analysis, 6852 AMD sessions, Feb-Mar 2026:
+# default silently lowered to medium, -67% reasoning tokens).
+export CLAUDE_CODE_EFFORT_LEVEL=max
 export CLAUDE_CODE_SUBAGENT_MODEL=sonnet
 
 # MCP servers paths
