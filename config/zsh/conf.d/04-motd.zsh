@@ -184,6 +184,16 @@ if [[ -o login ]]; then
         return
       fi
     done
+
+    # Settings.json project-scope drift (should all be in claude-config user-scope)
+    local ws="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}"
+    if [[ -f "$ws/.claude/settings.json" ]]; then
+      echo "🌊 Drift: workspace/.claude/settings.json shouldn't exist (canonical = claude-config/settings.json). Run: rm $ws/.claude/settings.json"
+    fi
+    local wt_drift=$(find "$ws/.claude/worktrees" -path "*/.claude/settings.json" 2>/dev/null | head -1)
+    if [[ -n "$wt_drift" ]]; then
+      echo "🌊 Drift: worktree settings.json detected ($wt_drift) — user-scope canonical only"
+    fi
   }
   check_dotfiles_symlinks
 
@@ -191,6 +201,15 @@ if [[ -o login ]]; then
     local claude_bin=$(command -v claude 2>/dev/null)
     [[ -z "$claude_bin" ]] && return 0
     local current=$("$claude_bin" --version 2>/dev/null | awk '{print $1}')
+
+    # CVE-2025-54794 — minimum patched version
+    local min_version="2.1.90"
+    if [[ -n "$current" ]]; then
+      local sorted_first=$(printf '%s\n%s\n' "$min_version" "$current" | sort -V | head -1)
+      if [[ "$sorted_first" != "$min_version" ]]; then
+        echo "🛡️  Claude Code v${current} < v${min_version} — CVE-2025-54794 vulnerable. Run: claude update"
+      fi
+    fi
 
     local cache_file="$HOME/.cache/cc-latest-version"
     local cache_ttl=86400  # 24h
