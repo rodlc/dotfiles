@@ -152,8 +152,8 @@ if [[ -o login ]]; then
     fi
   fi
 
-  # Dotfiles symlink health check
-  check_dotfiles_symlinks() {
+  # Claude config symlink health check
+  check_claude_symlinks() {
     setopt LOCAL_OPTIONS NULL_GLOB
     local expected="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}"
     for link in ~/.claude/settings.json ~/.claude/CLAUDE.md ~/.claude/statusline.sh ~/.claude/hooks/*.sh ~/.claude/hooks/core; do
@@ -194,8 +194,41 @@ if [[ -o login ]]; then
     if [[ -n "$wt_drift" ]]; then
       echo "🌊 Drift: worktree settings.json detected ($wt_drift) — user-scope canonical only"
     fi
+
+    # Skills symlink chain health
+    local cc="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}/claude-config"
+    local agents_skills="$ws/.agents/skills"
+    if [[ -L "$agents_skills" ]]; then
+      local target=$(readlink "$agents_skills")
+      [[ "$target" != *claude-config/skills* ]] && [[ "$target" != ../claude-config/skills ]] && \
+        echo "🌊 .agents/skills points to unexpected target: $target. Run: df-install workspace"
+    elif [[ -e "$agents_skills" ]]; then
+      echo "🌊 .agents/skills is not a symlink — should point to claude-config/skills. Run: df-install workspace"
+    else
+      echo "🌊 .agents/skills missing. Run: df-install workspace"
+    fi
+
+    local lock_sym="$ws/skills-lock.json"
+    if [[ -L "$lock_sym" ]]; then
+      local target=$(readlink "$lock_sym")
+      [[ "$target" != *claude-config/skills-lock.json ]] && [[ "$target" != claude-config/skills-lock.json ]] && \
+        echo "🌊 skills-lock.json → unexpected target: $target. Run: df-install workspace"
+    elif [[ -e "$lock_sym" ]]; then
+      echo "🌊 skills-lock.json is not a symlink — should point to claude-config/skills-lock.json. Run: df-install workspace"
+    else
+      echo "🌊 skills-lock.json missing. Run: df-install workspace"
+    fi
+
+    # claude-config uncommitted changes
+    if [[ -d "$cc" ]]; then
+      local dirty=$(git -C "$ws" diff --name-only -- claude-config/ 2>/dev/null | head -1)
+      local staged=$(git -C "$ws" diff --cached --name-only -- claude-config/ 2>/dev/null | head -1)
+      if [[ -n "$dirty" || -n "$staged" ]]; then
+        echo "🌊 claude-config has uncommitted changes. Run: cd $ws && git add claude-config/ && git commit"
+      fi
+    fi
   }
-  check_dotfiles_symlinks
+  check_claude_symlinks
 
   check_cc_version() {
     local claude_bin=$(command -v claude 2>/dev/null)
