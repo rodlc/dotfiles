@@ -197,17 +197,6 @@ if [[ -o login ]]; then
 
     # Skills symlink chain health
     local cc="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}/claude-config"
-    local agents_skills="$ws/.agents/skills"
-    if [[ -L "$agents_skills" ]]; then
-      local target=$(readlink "$agents_skills")
-      [[ "$target" != *claude-config/skills* ]] && [[ "$target" != ../claude-config/skills ]] && \
-        echo "🌊 .agents/skills points to unexpected target: $target. Run: df-install workspace"
-    elif [[ -e "$agents_skills" ]]; then
-      echo "🌊 .agents/skills is not a symlink — should point to claude-config/skills. Run: df-install workspace"
-    else
-      echo "🌊 .agents/skills missing. Run: df-install workspace"
-    fi
-
     local lock_sym="$ws/skills-lock.json"
     if [[ -L "$lock_sym" ]]; then
       local target=$(readlink "$lock_sym")
