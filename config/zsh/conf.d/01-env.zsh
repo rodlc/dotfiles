@@ -32,6 +32,7 @@ export HOMEBREW_NO_ANALYTICS=1
 export WORKSPACE_DIR="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}"
 
 # Claude Code
+export ANTHROPIC_DEFAULT_OPUS_MODEL='claude-opus-4-6[1m]'
 export CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=95
 # NOTE: Opus 4.7+ is adaptive-only. Pin effort to max as an anti-nerf
 # safety net (Laurenzo analysis, 6852 AMD sessions, Feb-Mar 2026:
