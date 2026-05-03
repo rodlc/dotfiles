@@ -1,5 +1,8 @@
 SHELL_SESSIONS_DISABLE=1
 
+# mise shims — active pour toutes les sessions zsh (interactives ET non-interactives)
+export PATH="$HOME/.local/share/mise/shims:$PATH"
+
 # Claude Code — privacy hardening
 export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1
 export DISABLE_BUG_COMMAND=1
