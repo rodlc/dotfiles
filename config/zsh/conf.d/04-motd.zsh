@@ -146,9 +146,9 @@ if [[ -o login ]]; then
   # Bitwarden secrets sync check
   if [[ -f "$HOME/.env" ]]; then
     if [[ ! -f "$HOME/.env.bw-synced" ]]; then
-      echo "⚠️  Secrets never synced. Run: bw-push"
+      echo "🔐  Secrets never synced. Run: bw-push"
     elif [[ "$HOME/.env" -nt "$HOME/.env.bw-synced" ]]; then
-      echo "⚠️  Secrets modified locally. Run: bw-push"
+      echo "🔐  Secrets modified locally. Run: bw-push"
     fi
   fi
 

@@ -37,7 +37,11 @@ check_and_cache_repo() {
 
         # Check uncommitted changes
         if [[ -n "$(git status --porcelain 2>/dev/null)" ]]; then
-            output+="⚠️  $repo_name has uncommitted changes. Run: $alias_push"$'\n'
+            if [[ "$repo_name" == "Dotfiles" ]]; then
+                output+="📁  $repo_name has uncommitted changes. Run: $alias_push"$'\n'
+            else
+                output+="🗄️  $repo_name has uncommitted changes. Run: $alias_push"$'\n'
+            fi
         fi
 
         # Check if behind remote
