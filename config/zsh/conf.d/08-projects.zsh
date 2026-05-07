@@ -10,3 +10,16 @@ chpwd_traxyo_creds() {
 
 chpwd_functions+=(chpwd_traxyo_creds)
 chpwd_traxyo_creds
+
+chpwd_posthog_creds() {
+  if [[ "$PWD" == */Code/rodlcmagic/submagic* ]]; then
+    [[ -n "$POSTHOG_SUBMAGIC_KEY" ]] && export POSTHOG_CLI_API_KEY="$POSTHOG_SUBMAGIC_KEY"
+    export POSTHOG_CLI_PROJECT_ID=48392
+  else
+    [[ "$POSTHOG_CLI_API_KEY" == "$POSTHOG_SUBMAGIC_KEY" ]] && unset POSTHOG_CLI_API_KEY
+    unset POSTHOG_CLI_PROJECT_ID
+  fi
+}
+
+chpwd_functions+=(chpwd_posthog_creds)
+chpwd_posthog_creds
