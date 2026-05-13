@@ -259,11 +259,14 @@ if [[ -o login ]]; then
       [[ -f "$cache_file" ]] && latest=$(cat "$cache_file" 2>/dev/null)
     fi
 
-    # Alert if outdated
+    # Alert only if latest > current (ignore stale cache where current > latest)
     if [[ -n "$latest" && "$current" != "$latest" ]]; then
-      local update_cmd="claude update"
-      [[ "$claude_bin" == *"/mise/"* ]] && update_cmd="mise upgrade claude-code"
-      echo "🤖 Claude Code v${current} → v${latest} (${update_cmd})"
+      local sorted_min=$(printf '%s\n%s\n' "$current" "$latest" | sort -V | head -1)
+      if [[ "$sorted_min" == "$current" ]]; then
+        local update_cmd="claude update"
+        [[ "$claude_bin" == *"/mise/"* ]] && update_cmd="mise upgrade claude-code"
+        echo "🤖 Claude Code v${current} → v${latest} (${update_cmd})"
+      fi
     fi
   }
   check_cc_version
