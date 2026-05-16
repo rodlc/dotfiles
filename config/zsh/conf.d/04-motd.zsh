@@ -152,20 +152,22 @@ if [[ -o login ]]; then
     fi
   fi
 
-  # Claude config symlink health check
-  check_claude_symlinks() {
+  check_drift() {
     setopt LOCAL_OPTIONS NULL_GLOB
-    local expected="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}"
+    local ws="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}"
+    local cc="$ws/claude-config"
+
+    # Symlink health
     for link in ~/.claude/settings.json ~/.claude/CLAUDE.md ~/.claude/statusline.sh ~/.claude/hooks/*.sh ~/.claude/hooks/core; do
       [[ ! -L "$link" ]] && continue
       local target=$(readlink "$link")
-      # Broken or points to wrong user
-      if [[ ! -e "$link" ]] || [[ "$target" != "$expected"* ]]; then
+      if [[ ! -e "$link" ]] || [[ "$target" != "$ws"* ]]; then
         echo "🌊 Drifting symlinks. Run: df-install workspace"
         return
       fi
     done
-    # Skills drift check: detect non-symlink entries
+
+    # Skills drift
     for entry in ~/.claude/skills/*; do
       [[ ! -e "$entry" ]] && continue
       if [[ ! -L "$entry" ]]; then
@@ -174,10 +176,9 @@ if [[ -o login ]]; then
       fi
     done
 
-    # Orphan detection: real files in managed dirs
+    # Orphan detection
     for entry in ~/.claude/rules/* ~/.claude/commands/* ~/.claude/agent_docs/* ~/.claude/hooks/*.sh ~/.claude/hooks/*.js ~/.claude/hooks/*.json ~/.claude/hooks/core/*; do
       [[ ! -e "$entry" ]] && continue
-      # Skip entries inside symlinked parent dirs (managed by the parent symlink)
       [[ -L "$(dirname "$entry")" ]] && continue
       if [[ ! -L "$entry" ]]; then
         echo "🌊 Orphan: $(basename "$entry") is not a symlink. Run: df-install workspace"
@@ -185,25 +186,21 @@ if [[ -o login ]]; then
       fi
     done
 
-    # Settings.json project-scope drift (should all be in claude-config user-scope)
-    local ws="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}"
+    # Settings.json scope drift
     if [[ -f "$ws/.claude/settings.json" ]]; then
-      echo "🌊 Drift: workspace/.claude/settings.json shouldn't exist (canonical = claude-config/settings.json). Run: rm $ws/.claude/settings.json"
+      echo "🌊 Drift: workspace/.claude/settings.json shouldn't exist. Run: rm $ws/.claude/settings.json"
     fi
     local wt_drift=$(find "$ws/.claude/worktrees" -path "*/.claude/settings.json" 2>/dev/null | head -1)
-    if [[ -n "$wt_drift" ]]; then
-      echo "🌊 Drift: worktree settings.json detected ($wt_drift) — user-scope canonical only"
-    fi
+    [[ -n "$wt_drift" ]] && echo "🌊 Drift: worktree settings.json detected ($wt_drift) — user-scope canonical only"
 
-    # Skills symlink chain health
-    local cc="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}/claude-config"
+    # skills-lock.json symlink
     local lock_sym="$ws/skills-lock.json"
     if [[ -L "$lock_sym" ]]; then
       local target=$(readlink "$lock_sym")
       [[ "$target" != *claude-config/skills-lock.json ]] && [[ "$target" != claude-config/skills-lock.json ]] && \
         echo "🌊 skills-lock.json → unexpected target: $target. Run: df-install workspace"
     elif [[ -e "$lock_sym" ]]; then
-      echo "🌊 skills-lock.json is not a symlink — should point to claude-config/skills-lock.json. Run: df-install workspace"
+      echo "🌊 skills-lock.json is not a symlink. Run: df-install workspace"
     else
       echo "🌊 skills-lock.json missing. Run: df-install workspace"
     fi
@@ -212,12 +209,24 @@ if [[ -o login ]]; then
     if [[ -d "$cc" ]]; then
       local dirty=$(git -C "$ws" diff --name-only -- claude-config/ 2>/dev/null | head -1)
       local staged=$(git -C "$ws" diff --cached --name-only -- claude-config/ 2>/dev/null | head -1)
-      if [[ -n "$dirty" || -n "$staged" ]]; then
-        echo "🌊 claude-config has uncommitted changes. Run: cd $ws && git add claude-config/ && git commit"
-      fi
+      [[ -n "$dirty" || -n "$staged" ]] && echo "🌊 claude-config has uncommitted changes. Run: cd $ws && git add claude-config/ && git commit"
+    fi
+
+    # MCP config drift
+    local template="$ws/.claude/.mcp.json"
+    local live="$HOME/.claude.json"
+    if [[ -f "$template" && -f "$live" ]]; then
+      local count=$(
+        set -a; source "$HOME/.env" 2>/dev/null; set +a
+        local expanded=$(envsubst < "$template" 2>/dev/null | jq -S '.mcpServers' 2>/dev/null)
+        local current=$(jq -S '.mcpServers' "$live" 2>/dev/null)
+        [[ -z "$expanded" || -z "$current" ]] && echo 0 && return
+        diff <(echo "$expanded") <(echo "$current") 2>/dev/null | grep -c '^[<>]' || echo 0
+      )
+      [[ "$count" =~ ^[0-9]+$ && "$count" -gt 0 ]] && echo "🌊 MCP drift (${count} lines) → mcp-sync.sh diff"
     fi
   }
-  check_claude_symlinks
+  check_drift
 
   check_cc_version() {
     local claude_bin=$(command -v claude 2>/dev/null)
@@ -273,35 +282,4 @@ if [[ -o login ]]; then
   }
   check_cc_version
 
-  check_mcp_drift() {
-    local template="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}/.claude/.mcp.json"
-    local live="$HOME/.claude.json"
-    [[ ! -f "$template" || ! -f "$live" ]] && return 0
-    # Subshell: source .env stays contained, secrets never leak to login env
-    local count=$(
-      set -a; source "$HOME/.env" 2>/dev/null; set +a
-      local expanded=$(envsubst < "$template" 2>/dev/null | jq -S '.mcpServers' 2>/dev/null)
-      local current=$(jq -S '.mcpServers' "$live" 2>/dev/null)
-      [[ -z "$expanded" || -z "$current" ]] && echo 0 && return
-      diff <(echo "$expanded") <(echo "$current") 2>/dev/null | grep -c '^[<>]' || echo 0
-    )
-    [[ "$count" =~ ^[0-9]+$ && "$count" -gt 0 ]] && echo "🌊 MCP drift (${count} lines) → mcp-sync.sh diff"
-  }
-  check_mcp_drift
-
-  check_mcp_upstream() {
-    local mcp_dir="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}/mcp-servers"
-    local stale_days=30
-    local now=$(date +%s)
-    for sub in "$mcp_dir"/*/; do
-      [[ -d "$sub/.git" ]] || continue
-      local name=$(basename "$sub")
-      local fetch_head="$sub/.git/FETCH_HEAD"
-      local last_fetch=$([[ -f "$fetch_head" ]] && stat -f %m "$fetch_head" 2>/dev/null || echo "0")
-      [[ "$last_fetch" = "0" ]] && continue
-      local age_days=$(( (now - last_fetch) / 86400 ))
-      (( age_days > stale_days )) && echo "📦 $name stale (${age_days}d) → mcp-update-upstream.sh --check $name"
-    done
-  }
-  check_mcp_upstream
 fi
