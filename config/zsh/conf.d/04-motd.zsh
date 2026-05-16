@@ -52,8 +52,11 @@ check_repo_status() {
 
         local content=$(cat "$cache_file" 2>/dev/null)
         if [[ -n "$content" ]]; then
+            local last_line=$(echo "$content" | tail -1)
             echo "$content" | while IFS= read -r line; do
-                [[ -n "$line" ]] && echo "$line [$age_display]"
+                if [[ -n "$line" ]]; then
+                    [[ "$line" == "$last_line" ]] && echo "$line [$age_display]" || echo "$line"
+                fi
             done
         fi
     fi
@@ -177,7 +180,7 @@ if [[ -o login ]]; then
     done
 
     # Orphan detection
-    for entry in ~/.claude/rules/* ~/.claude/commands/* ~/.claude/agent_docs/* ~/.claude/hooks/*.sh ~/.claude/hooks/*.js ~/.claude/hooks/*.json ~/.claude/hooks/core/*; do
+    for entry in ~/.claude/rules/* ~/.claude/commands/* ~/.claude/agent_docs/* ~/.claude/hooks/*.sh ~/.claude/hooks/*.js ~/.claude/hooks/*.json ~/.claude/hooks/core/* ~/.claude/hooks/utilities/*; do
       [[ ! -e "$entry" ]] && continue
       [[ -L "$(dirname "$entry")" ]] && continue
       if [[ ! -L "$entry" ]]; then
@@ -213,14 +216,14 @@ if [[ -o login ]]; then
     fi
 
     # MCP config drift
-    local template="$ws/.claude/.mcp.json"
+    local template="$ws/.claude/mcp-template.json"
     local live="$HOME/.claude.json"
     if [[ -f "$template" && -f "$live" ]]; then
       local count=$(
         set -a; source "$HOME/.env" 2>/dev/null; set +a
-        local expanded=$(envsubst < "$template" 2>/dev/null | jq -S '.mcpServers' 2>/dev/null)
-        local current=$(jq -S '.mcpServers' "$live" 2>/dev/null)
-        [[ -z "$expanded" || -z "$current" ]] && echo 0 && return
+        local expanded=$(envsubst < "$template" 2>/dev/null | jq -S '.mcpServers' 2>/dev/null) || { echo 0; return; }
+        local current=$(jq -S '.mcpServers' "$live" 2>/dev/null) || { echo 0; return; }
+        [[ -z "$expanded" || -z "$current" ]] && { echo 0; return; }
         diff <(echo "$expanded") <(echo "$current") 2>/dev/null | grep -c '^[<>]' || echo 0
       )
       [[ "$count" =~ ^[0-9]+$ && "$count" -gt 0 ]] && echo "🌊 MCP drift (${count} lines) → mcp-sync.sh diff"
@@ -275,7 +278,7 @@ if [[ -o login ]]; then
         local update_cmd="claude update"
         [[ "$claude_bin" == *"/mise/"* ]] && update_cmd="mise upgrade claude-code"
         local age_display=""
-        [[ -n "$age" ]] && age_display=" [$(format_cache_age $age)]"
+        [[ -n "$age" && $age -lt $cache_ttl ]] && age_display=" [$(format_cache_age $age)]"
         echo "🤖 Claude Code v${current} → v${latest} (${update_cmd})${age_display}"
       fi
     fi
