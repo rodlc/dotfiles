@@ -74,9 +74,7 @@ show_system_info() {
     fi
 
     if [[ $cache_age -lt $cache_ttl ]]; then
-        local age_display=$(format_cache_age $cache_age)
-        local content=$(cat "$cache_file" 2>/dev/null)
-        [[ -n "$content" ]] && echo "$content [$age_display]"
+        cat "$cache_file" 2>/dev/null
         return 0
     fi
 
