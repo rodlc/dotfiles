@@ -74,7 +74,9 @@ show_system_info() {
     fi
 
     if [[ $cache_age -lt $cache_ttl ]]; then
-        cat "$cache_file" 2>/dev/null
+        local age_display=$(format_cache_age $cache_age)
+        local content=$(cat "$cache_file" 2>/dev/null)
+        [[ -n "$content" ]] && echo "$content [$age_display]"
         return 0
     fi
 
@@ -265,7 +267,9 @@ if [[ -o login ]]; then
       if [[ "$sorted_min" == "$current" ]]; then
         local update_cmd="claude update"
         [[ "$claude_bin" == *"/mise/"* ]] && update_cmd="mise upgrade claude-code"
-        echo "🤖 Claude Code v${current} → v${latest} (${update_cmd})"
+        local age_display=""
+        [[ -n "$age" ]] && age_display=" [$(format_cache_age $age)]"
+        echo "🤖 Claude Code v${current} → v${latest} (${update_cmd})${age_display}"
       fi
     fi
   }
