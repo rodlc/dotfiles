@@ -206,6 +206,7 @@ install_workspace() {
     if [[ -n "$bw_email" ]]; then
       rbw config set email "$bw_email"
       rbw config set base_url https://api.bitwarden.eu/
+      rbw config set pinentry pinentry-mac
       echo "-----> Registering with Bitwarden..."
       rbw register
     else
