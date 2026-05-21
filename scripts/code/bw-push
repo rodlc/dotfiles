@@ -98,7 +98,7 @@ for i in "${!SSH_BW_NAMES[@]}"; do
             local_key=$(cat "$ssh_key")
 
             if [[ "$bw_key" == "$local_key" ]]; then
-                local pub_file="${ssh_key}.pub"
+                pub_file="${ssh_key}.pub"
                 if [[ -f "$pub_file" ]]; then
                     bw_pub=$(get_ssh_pub "$bw_name" 2>/dev/null || true)
                     local_pub=$(cat "$pub_file")
