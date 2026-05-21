@@ -38,16 +38,16 @@ check_and_cache_repo() {
         # Check uncommitted changes
         if [[ -n "$(git status --porcelain 2>/dev/null)" ]]; then
             if [[ "$repo_name" == "Dotfiles" ]]; then
-                output+="📁  $repo_name has uncommitted changes. Run: $alias_push"$'\n'
+                output+="📁 $repo_name uncommitted ⇒ $alias_push"$'\n'
             else
-                output+="🗄️  $repo_name has uncommitted changes. Run: $alias_push"$'\n'
+                output+="🗄️ $repo_name uncommitted ⇒ $alias_push"$'\n'
             fi
         fi
 
         # Check if behind remote
         local behind=$(git rev-list HEAD..origin/main --count 2>/dev/null)
         if [[ "$behind" != "0" && -n "$behind" ]]; then
-            output+="🔄 $repo_name outdated ($behind commits). Run: $alias_pull"$'\n'
+            output+="🔄 $repo_name behind ($behind) ⇒ $alias_pull"$'\n'
         fi
 
         # Write to cache atomically

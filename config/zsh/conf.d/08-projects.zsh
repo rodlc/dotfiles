@@ -23,3 +23,14 @@ chpwd_posthog_creds() {
 
 chpwd_functions+=(chpwd_posthog_creds)
 chpwd_posthog_creds
+
+chpwd_stripe_creds() {
+  if [[ "$PWD" == */Code/rodlcmagic/submagic* ]]; then
+    [[ -n "$STRIPE_SUBMAGIC_KEY" ]] && export STRIPE_API_KEY="$STRIPE_SUBMAGIC_KEY"
+  else
+    [[ "$STRIPE_API_KEY" == "$STRIPE_SUBMAGIC_KEY" ]] && unset STRIPE_API_KEY
+  fi
+}
+
+chpwd_functions+=(chpwd_stripe_creds)
+chpwd_stripe_creds

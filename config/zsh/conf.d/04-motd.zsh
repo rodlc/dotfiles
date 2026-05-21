@@ -18,16 +18,16 @@ check_ssh_status() {
 
     # Check if SSH agent has keys loaded
     if ssh-add -l &>/dev/null; then
-        echo "🔑 SSH key loaded. Fetching git status..."
+        echo "🔑 SSH key loaded, fetching git..."
         return 0
     fi
 
     # Agent empty - check if key exists
     if [[ ! -f "$ssh_key" ]]; then
-        echo "🔑 SSH key missing. Run: bw-pull"
+        echo "🔑 SSH key missing ⇒ bw-pull"
         return 2
     else
-        echo "🔑 SSH key not loaded. Run: bw-pull"
+        echo "🔑 SSH key not loaded ⇒ bw-pull"
         return 1
     fi
 }
@@ -149,9 +149,9 @@ if [[ -o login ]]; then
   # Bitwarden secrets sync check
   if [[ -f "$HOME/.env" ]]; then
     if [[ ! -f "$HOME/.env.bw-synced" ]]; then
-      echo "🔐  Secrets never synced. Run: bw-push"
+      echo "🔐 Secrets never synced ⇒ bw-push"
     elif [[ "$HOME/.env" -nt "$HOME/.env.bw-synced" ]]; then
-      echo "🔐  Secrets modified locally. Run: bw-push"
+      echo "🔐 Secrets modified locally ⇒ bw-push"
     fi
   fi
 
@@ -159,74 +159,78 @@ if [[ -o login ]]; then
     setopt LOCAL_OPTIONS NULL_GLOB
     local ws="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}"
     local cc="$ws/claude-config"
+    local -a labels fixes
+    local fatal=0
 
-    # Symlink health
+    # Fatal: symlink health
     for link in ~/.claude/settings.json ~/.claude/CLAUDE.md ~/.claude/statusline.sh ~/.claude/hooks/*.sh ~/.claude/hooks/core; do
       [[ ! -L "$link" ]] && continue
       local target=$(readlink "$link")
       if [[ ! -e "$link" ]] || [[ "$target" != "$ws"* ]]; then
-        echo "🌊 Drifting symlinks. Run: df-install workspace"
-        return
+        labels+=("drifting symlinks"); fixes+=("df-install workspace"); fatal=1; break
       fi
     done
 
-    # Skills drift
-    for entry in ~/.claude/skills/*; do
-      [[ ! -e "$entry" ]] && continue
-      if [[ ! -L "$entry" ]]; then
-        echo "🌊 Skill drift: $(basename "$entry") is not a symlink. Run: df-install workspace"
-        return
+    # Fatal: skills drift
+    if (( ! fatal )); then
+      for entry in ~/.claude/skills/*; do
+        [[ ! -e "$entry" ]] && continue
+        if [[ ! -L "$entry" ]]; then
+          labels+=("skill not symlinked"); fixes+=("df-install workspace"); fatal=1; break
+        fi
+      done
+    fi
+
+    # Fatal: orphan detection
+    if (( ! fatal )); then
+      for entry in ~/.claude/rules/* ~/.claude/commands/* ~/.claude/agent_docs/* ~/.claude/hooks/*.sh ~/.claude/hooks/*.js ~/.claude/hooks/*.json ~/.claude/hooks/core/* ~/.claude/hooks/utilities/*; do
+        [[ ! -e "$entry" ]] && continue
+        [[ -L "$(dirname "$entry")" ]] && continue
+        if [[ ! -L "$entry" ]]; then
+          labels+=("orphan detected"); fixes+=("df-install workspace"); fatal=1; break
+        fi
+      done
+    fi
+
+    if (( ! fatal )); then
+      [[ -f "$ws/.claude/settings.json" ]] && labels+=("settings.json scope drift") && fixes+=("rm $ws/.claude/settings.json")
+      local wt_drift=$(find "$ws/.claude/worktrees" -path "*/.claude/settings.json" 2>/dev/null | head -1)
+      [[ -n "$wt_drift" ]] && labels+=("worktree settings.json") && fixes+=("rm $wt_drift")
+
+      local lock_sym="$ws/skills-lock.json"
+      if [[ -L "$lock_sym" ]]; then
+        local target=$(readlink "$lock_sym")
+        [[ "$target" != *claude-config/skills-lock.json ]] && [[ "$target" != claude-config/skills-lock.json ]] && \
+          labels+=("skills-lock bad target") && fixes+=("df-install workspace")
+      elif [[ -e "$lock_sym" ]]; then
+        labels+=("skills-lock not symlinked") && fixes+=("df-install workspace")
+      else
+        labels+=("skills-lock missing") && fixes+=("df-install workspace")
       fi
-    done
 
-    # Orphan detection
-    for entry in ~/.claude/rules/* ~/.claude/commands/* ~/.claude/agent_docs/* ~/.claude/hooks/*.sh ~/.claude/hooks/*.js ~/.claude/hooks/*.json ~/.claude/hooks/core/* ~/.claude/hooks/utilities/*; do
-      [[ ! -e "$entry" ]] && continue
-      [[ -L "$(dirname "$entry")" ]] && continue
-      if [[ ! -L "$entry" ]]; then
-        echo "🌊 Orphan: $(basename "$entry") is not a symlink. Run: df-install workspace"
-        return
+      if [[ -d "$cc" ]]; then
+        local dirty=$(git -C "$ws" diff --name-only -- claude-config/ 2>/dev/null | head -1)
+        local staged=$(git -C "$ws" diff --cached --name-only -- claude-config/ 2>/dev/null | head -1)
+        [[ -n "$dirty" || -n "$staged" ]] && labels+=("uncommitted") && fixes+=("ws-push")
       fi
-    done
 
-    # Settings.json scope drift
-    if [[ -f "$ws/.claude/settings.json" ]]; then
-      echo "🌊 Drift: workspace/.claude/settings.json shouldn't exist. Run: rm $ws/.claude/settings.json"
-    fi
-    local wt_drift=$(find "$ws/.claude/worktrees" -path "*/.claude/settings.json" 2>/dev/null | head -1)
-    [[ -n "$wt_drift" ]] && echo "🌊 Drift: worktree settings.json detected ($wt_drift) — user-scope canonical only"
-
-    # skills-lock.json symlink
-    local lock_sym="$ws/skills-lock.json"
-    if [[ -L "$lock_sym" ]]; then
-      local target=$(readlink "$lock_sym")
-      [[ "$target" != *claude-config/skills-lock.json ]] && [[ "$target" != claude-config/skills-lock.json ]] && \
-        echo "🌊 skills-lock.json → unexpected target: $target. Run: df-install workspace"
-    elif [[ -e "$lock_sym" ]]; then
-      echo "🌊 skills-lock.json is not a symlink. Run: df-install workspace"
-    else
-      echo "🌊 skills-lock.json missing. Run: df-install workspace"
+      local template="$ws/.claude/mcp-template.json"
+      local live="$HOME/.claude.json"
+      if [[ -f "$template" && -f "$live" ]]; then
+        local count=$(
+          set -a; source "$HOME/.env" 2>/dev/null; set +a
+          local expanded=$(envsubst < "$template" 2>/dev/null | jq -S '.mcpServers' 2>/dev/null) || { echo 0; return; }
+          local current=$(jq -S '.mcpServers' "$live" 2>/dev/null) || { echo 0; return; }
+          [[ -z "$expanded" || -z "$current" ]] && { echo 0; return; }
+          diff <(echo "$expanded") <(echo "$current") 2>/dev/null | grep -c '^[<>]' || echo 0
+        )
+        [[ "$count" =~ ^[0-9]+$ && "$count" -gt 0 ]] && labels+=("MCP stale (${count}Δ)") && fixes+=("mcp-sync.sh diff")
+      fi
     fi
 
-    # claude-config uncommitted changes
-    if [[ -d "$cc" ]]; then
-      local dirty=$(git -C "$ws" diff --name-only -- claude-config/ 2>/dev/null | head -1)
-      local staged=$(git -C "$ws" diff --cached --name-only -- claude-config/ 2>/dev/null | head -1)
-      [[ -n "$dirty" || -n "$staged" ]] && echo "🌊 claude-config has uncommitted changes. Run: cd $ws && git add claude-config/ && git commit"
-    fi
-
-    # MCP config drift
-    local template="$ws/.claude/mcp-template.json"
-    local live="$HOME/.claude.json"
-    if [[ -f "$template" && -f "$live" ]]; then
-      local count=$(
-        set -a; source "$HOME/.env" 2>/dev/null; set +a
-        local expanded=$(envsubst < "$template" 2>/dev/null | jq -S '.mcpServers' 2>/dev/null) || { echo 0; return; }
-        local current=$(jq -S '.mcpServers' "$live" 2>/dev/null) || { echo 0; return; }
-        [[ -z "$expanded" || -z "$current" ]] && { echo 0; return; }
-        diff <(echo "$expanded") <(echo "$current") 2>/dev/null | grep -c '^[<>]' || echo 0
-      )
-      [[ "$count" =~ ^[0-9]+$ && "$count" -gt 0 ]] && echo "🌊 MCP drift (${count} lines) → mcp-sync.sh diff"
+    if (( ${#labels} )); then
+      local -aU uf=("${fixes[@]}")
+      echo "🌊 claude-config ${(j:, :)labels} ⇒ ${(j:, :)uf}"
     fi
   }
   check_drift
@@ -241,7 +245,7 @@ if [[ -o login ]]; then
     if [[ -n "$current" ]]; then
       local sorted_first=$(printf '%s\n%s\n' "$min_version" "$current" | sort -V | head -1)
       if [[ "$sorted_first" != "$min_version" ]]; then
-        echo "🛡️  Claude Code v${current} < v${min_version} — CVE-2025-54794 vulnerable. Run: claude update"
+        echo "🛡️ Claude Code v${current} < v${min_version} (CVE-2025-54794) ⇒ claude update"
       fi
     fi
 
@@ -279,7 +283,7 @@ if [[ -o login ]]; then
         [[ "$claude_bin" == *"/mise/"* ]] && update_cmd="mise upgrade claude-code"
         local age_display=""
         [[ -n "$age" && $age -lt $cache_ttl ]] && age_display=" [$(format_cache_age $age)]"
-        echo "🤖 Claude Code v${current} → v${latest} (${update_cmd})${age_display}"
+        echo "🤖 Claude Code v${current} → v${latest} ⇒ ${update_cmd}${age_display}"
       fi
     fi
   }
