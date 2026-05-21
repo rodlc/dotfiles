@@ -29,6 +29,8 @@ else
         echo ""
         ${EDITOR:-nano} "$ENV_FILE"
     else
+        # Sync rbw cache before comparing (covers manual edits via desktop app)
+        rbw sync &>/dev/null || true
         # Compare local vs Bitwarden
         bw_content=$(rbw get "$BW_ITEM_SECRETS" 2>/dev/null)
         local_content=$(cat "$ENV_FILE")
