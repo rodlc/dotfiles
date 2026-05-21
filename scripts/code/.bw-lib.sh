@@ -19,17 +19,24 @@ ensure_rbw() {
         echo "🔐 rbw locked. Unlocking..."
         rbw unlock
     fi
-    rbw sync 2>/dev/null || true
+    local sync_err
+    if ! sync_err=$(rbw sync 2>&1); then
+        echo "⚠ rbw sync failed: $sync_err" >&2
+        return 1
+    fi
 }
 
 # Fetch SSH private key from BW (SSH Key items → fallback Secure Notes)
 # Returns: 0 on success, 1 if not found, 2 if multiple entries exist
 get_ssh_key() {
-    local err
     rbw get --field=private_key "$1" 2>/dev/null && return 0
-    err=$(rbw get "$1" 2>&1) && { echo "$err"; return 0; }
-    [[ "$err" == *"multiple entries"* ]] && return 2
-    return 1
+    local err
+    err=$(rbw get "$1" 2>&1) || {
+        [[ "$err" == *"multiple entries"* ]] && return 2
+        return 1
+    }
+    echo "$err"
+    return 0
 }
 
 # Fetch SSH public key from BW SSH Key item

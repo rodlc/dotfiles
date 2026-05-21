@@ -147,12 +147,12 @@ if [[ -o login ]]; then
   fi
 
   # Bitwarden secrets sync check
-  if [[ -f "$HOME/.env" ]]; then
-    if [[ ! -f "$HOME/.env.bw-synced" ]]; then
-      echo "🔐 Secrets never synced ⇒ bw-push"
-    elif [[ "$HOME/.env" -nt "$HOME/.env.bw-synced" ]]; then
-      echo "🔐 Secrets modified locally ⇒ bw-push"
-    fi
+  if [[ ! -f "$HOME/.env" ]]; then
+    echo "🔐 ~/.env missing ⇒ bw-pull"
+  elif [[ ! -f "$HOME/.env.bw-synced" ]]; then
+    echo "🔐 Secrets never synced ⇒ bw-push"
+  elif [[ "$HOME/.env" -nt "$HOME/.env.bw-synced" ]]; then
+    echo "🔐 Secrets modified locally ⇒ bw-push"
   fi
 
   check_drift() {
@@ -218,7 +218,7 @@ if [[ -o login ]]; then
       local live="$HOME/.claude.json"
       if [[ -f "$template" && -f "$live" ]]; then
         local count=$(
-          set -a; source "$HOME/.env" 2>/dev/null; set +a
+          set -a; source "$HOME/.env" 2>/dev/null || { echo 0; return; }; set +a
           local expanded=$(envsubst < "$template" 2>/dev/null | jq -S '.mcpServers' 2>/dev/null) || { echo 0; return; }
           local current=$(jq -S '.mcpServers' "$live" 2>/dev/null) || { echo 0; return; }
           [[ -z "$expanded" || -z "$current" ]] && { echo 0; return; }

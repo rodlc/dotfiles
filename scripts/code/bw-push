@@ -29,9 +29,7 @@ else
         echo ""
         ${EDITOR:-nano} "$ENV_FILE"
     else
-        # Sync rbw cache before comparing (covers manual edits via desktop app)
-        rbw sync &>/dev/null || true
-        # Compare local vs Bitwarden
+        # Compare local vs Bitwarden (rbw sync already called by ensure_rbw above)
         bw_content=$(rbw get "$BW_ITEM_SECRETS" 2>/dev/null)
         local_content=$(cat "$ENV_FILE")
 
@@ -100,7 +98,18 @@ for i in "${!SSH_BW_NAMES[@]}"; do
             local_key=$(cat "$ssh_key")
 
             if [[ "$bw_key" == "$local_key" ]]; then
-                echo "✅ $bw_name in sync"
+                local pub_file="${ssh_key}.pub"
+                if [[ -f "$pub_file" ]]; then
+                    bw_pub=$(get_ssh_pub "$bw_name" 2>/dev/null || true)
+                    local_pub=$(cat "$pub_file")
+                    if [[ -n "$bw_pub" && "$bw_pub" != "$local_pub" ]]; then
+                        echo "⚠️  $bw_name : public key diverged in Bitwarden"
+                    else
+                        echo "✅ $bw_name in sync"
+                    fi
+                else
+                    echo "✅ $bw_name in sync"
+                fi
             else
                 local_fp=$(ssh-keygen -lf "$ssh_key" 2>/dev/null | awk '{print $2}' || true)
                 if [[ -n "$bw_key" ]]; then
