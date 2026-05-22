@@ -105,3 +105,5 @@ cask "finicky"
 # Encryption tools
 cask "veracrypt"
 cask "macfuse"
+# E-book manager and converter
+cask "calibre"
