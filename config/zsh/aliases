@@ -96,6 +96,9 @@ alias cc-live='npx ccusage blocks --live'
 alias cc-daily='npx ccusage daily'
 alias cc-monthly='npx ccusage monthly'
 alias ccost='npx ccusage daily --breakdown'
+alias ccc='claude --continue'
+alias ccr='claude --resume'
+alias ccp='claude -p'
 
 # ============================================================================
 # Dotfiles Management
