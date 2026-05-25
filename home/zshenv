@@ -6,3 +6,6 @@ export PATH="$HOME/.local/share/mise/shims:$PATH"
 # Claude Code — privacy hardening
 export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1
 export DISABLE_BUG_COMMAND=1
+
+# Playwright — Brave as default browser (playwright-cli + MCP)
+export PLAYWRIGHT_MCP_EXECUTABLE_PATH="/Applications/Brave Browser.app/Contents/MacOS/Brave Browser"
