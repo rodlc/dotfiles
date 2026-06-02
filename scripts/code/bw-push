@@ -50,6 +50,16 @@ else
             echo "  3. Open Bitwarden app → '$BW_ITEM_SECRETS' → paste"
             echo ""
             ${EDITOR:-nano} "$ENV_FILE"
+
+            rbw sync 2>/dev/null
+            bw_content_after=$(rbw get "$BW_ITEM_SECRETS" 2>/dev/null)
+            local_content_after=$(cat "$ENV_FILE")
+            if [[ "$bw_content_after" == "$local_content_after" ]]; then
+                echo "✅ .env now in sync"
+                touch "$HOME/.env.bw-synced"
+            else
+                echo "⚠️  .env still differs — re-run bw-push after updating Bitwarden"
+            fi
         fi
     fi
 fi
