@@ -127,6 +127,7 @@ show_system_info() {
 
 # Only show MOTD for login shells (not subshells)
 if [[ -o login ]]; then
+  printf '\033[0m'
   echo "Hello, world!"
   show_system_info
 
