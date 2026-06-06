@@ -82,13 +82,15 @@ install_dotfiles() {
   fi
 
   echo "=====> Installing Homebrew packages"
-  brew bundle --file="$DOTFILES_DIR/Brewfile" --no-lock 2>/dev/null || true
+  brew bundle --file="$DOTFILES_DIR/Brewfile" --no-lock || { echo "⚠️  Some brew packages failed to install"; }
 
   # mise runtimes
   echo "=====> Installing language runtimes"
   if command -v mise &>/dev/null; then
     echo "-----> Installing runtimes via mise"
     mise install
+  else
+    echo "⚠️  mise not found, skipping runtimes"
   fi
 
   echo "=====> Creating symlinks"
@@ -156,8 +158,12 @@ install_dotfiles() {
 
   # Pre-commit hooks (Gitleaks)
   if [ -f "$DOTFILES_DIR/.pre-commit-config.yaml" ]; then
-    echo "=====> Installing pre-commit hooks"
-    pre-commit install
+    if command -v pre-commit &>/dev/null; then
+      echo "=====> Installing pre-commit hooks"
+      pre-commit install
+    else
+      echo "⚠️  pre-commit not found, skipping hooks"
+    fi
   fi
 
   # Global git hook (dotfiles reminder)

@@ -91,6 +91,10 @@ brew "pre-commit"
 # Apps (Casks)
 # ════════════════════════════════════════════════════════════════════════════
 
+# Password manager
+cask "bitwarden"
+# Privacy-focused browser
+cask "brave-browser"
 # Open source IDE for exploring and testing APIs
 cask "bruno"
 cask "font-jetbrains-mono"
