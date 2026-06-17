@@ -280,7 +280,7 @@ install_workspace() {
   # settings.json stays in .claude/ (Claude Code requirement — not symlinked)
 
   # Config directories
-  for dir in commands skills hooks rules agents agent_docs scripts; do
+  for dir in commands skills hooks rules agents agent_docs scripts workflows; do
     [ -d "$CLAUDE_SRC/$dir" ] || continue
     # Remove stale directory-level symlink from previous install
     [ -L "$CLAUDE_DST/$dir" ] && rm "$CLAUDE_DST/$dir"
