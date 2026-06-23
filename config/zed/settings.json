@@ -58,7 +58,7 @@
     "claude-acp": {
       "type": "registry",
       "default_mode": "plan",
-      "default_model": "claude-opus-4-6[1m]",
+      "default_model": "claude-opus-4-8[1m]",
       "default_config_options": {
         "approval_mode": "auto-edit"
       }
