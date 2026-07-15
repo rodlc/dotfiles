@@ -51,10 +51,13 @@
       "effort": "high"
     },
     "favorite_models": [],
-    "default_profile": "write",
+    "default_profile": "ask",
     "model_parameters": []
   },
   "agent_servers": {
+    "github-copilot-cli": {
+      "type": "registry"
+    },
     "claude-acp": {
       "type": "registry",
       "default_mode": "plan",

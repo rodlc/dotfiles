@@ -34,3 +34,16 @@ chpwd_stripe_creds() {
 
 chpwd_functions+=(chpwd_stripe_creds)
 chpwd_stripe_creds
+
+chpwd_greptile_creds() {
+  if [[ "$PWD" == */Code/rodlc/traxyo* ]]; then
+    [[ -n "$GREPTILE_RODOLPHE_KEY" ]] && export GREPTILE_API_KEY="$GREPTILE_RODOLPHE_KEY"
+    [[ -n "$GITHUB_RODLC_KEY" ]] && export GITHUB_TOKEN="$GITHUB_RODLC_KEY"
+  else
+    [[ "$GREPTILE_API_KEY" == "$GREPTILE_RODOLPHE_KEY" ]] && unset GREPTILE_API_KEY
+    [[ "$GITHUB_TOKEN" == "$GITHUB_RODLC_KEY" ]] && unset GITHUB_TOKEN
+  fi
+}
+
+chpwd_functions+=(chpwd_greptile_creds)
+chpwd_greptile_creds
