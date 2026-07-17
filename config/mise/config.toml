@@ -3,7 +3,7 @@ trusted_config_paths = ["~/Code/rodlc"]
 
 [tools]
 bun = "latest"
-claude-code = "latest"
+claude-code = "2.1.195"
 go = "1.26"
 node = "24"
 "npm:pnpm" = "latest"
