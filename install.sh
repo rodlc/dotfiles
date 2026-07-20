@@ -267,39 +267,7 @@ install_workspace() {
 
   # Symlink Claude config from workspace → ~/.claude/
   echo "=====> Linking Claude Code config from workspace"
-  CLAUDE_SRC="$WORKSPACE_DIR/claude-config"
-  CLAUDE_DST="$HOME/.claude"
-  mkdir -p "$CLAUDE_DST"
-
-  # Top-level files (CLAUDE.md + statusline.sh from claude-config)
-  for f in CLAUDE.md statusline.sh; do
-    [ -f "$CLAUDE_SRC/$f" ] || continue
-    backup "$CLAUDE_DST/$f"
-    symlink "$CLAUDE_SRC/$f" "$CLAUDE_DST/$f"
-  done
-  # settings.json stays in .claude/ (Claude Code requirement — not symlinked)
-
-  # Config directories
-  for dir in commands skills hooks rules agents agent_docs scripts workflows; do
-    [ -d "$CLAUDE_SRC/$dir" ] || continue
-    # Remove stale directory-level symlink from previous install
-    [ -L "$CLAUDE_DST/$dir" ] && rm "$CLAUDE_DST/$dir"
-    mkdir -p "$CLAUDE_DST/$dir"
-    for item in "$CLAUDE_SRC/$dir"/*; do
-      [ -e "$item" ] || continue
-      local name="$(basename "$item")"
-      backup "$CLAUDE_DST/$dir/$name"
-      symlink "$item" "$CLAUDE_DST/$dir/$name"
-    done
-  done
-
-  # Shell scripts (mcp-sync, cleanup, install-mcp-servers)
-  for sh in "$CLAUDE_SRC"/*.sh; do
-    [ -f "$sh" ] || continue
-    local name="$(basename "$sh")"
-    backup "$CLAUDE_DST/$name"
-    symlink "$sh" "$CLAUDE_DST/$name"
-  done
+  "$WORKSPACE_DIR/claude-config/scripts/sync-claude-symlinks.sh" --install
 
   # Restore zsh history from workspace
   WORKSPACE_HISTORY="$WORKSPACE_DIR/shell/zsh_history"
