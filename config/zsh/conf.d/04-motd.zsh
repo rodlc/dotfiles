@@ -237,17 +237,18 @@ if [[ -o login ]]; then
   check_drift
 
   check_backup_freshness() {
+    setopt LOCAL_OPTIONS NULL_GLOB
     local backup_dir="$HOME/Library/Mobile Documents/com~apple~CloudDocs/Backup/MCP_Memory"
     local now=$(date +%s)
     local max_age=$((48 * 3600))
 
     for name in sqlite_vec typology plan-cache; do
-      local file="$backup_dir/${name}.db"
-      if [[ ! -f "$file" ]]; then
+      local -a files=("$backup_dir/$name"/${name}-*.db(NOm))
+      if [[ ${#files} -eq 0 ]]; then
         echo "⚠️  Backup missing: ${name}.db not in iCloud"
         continue
       fi
-      local mtime=$(stat -f %m "$file" 2>/dev/null || echo 0)
+      local mtime=$(stat -f %m "${files[1]}" 2>/dev/null || echo 0)
       local age=$((now - mtime))
       (( age > max_age )) && echo "⚠️  Backup stale: ${name}.db last backup $((age / 3600))h ago"
     done
