@@ -119,7 +119,11 @@ alias bw-status='~/Code/rodlc/dotfiles/scripts/code/bw-status'
 # ============================================================================
 # Workspace (Memory + Plans + AI Context)
 # ============================================================================
-ws-push()   { cd "$WORKSPACE_DIR" && git add -u && git commit -m "ws: sync" && git push; }
+ws-push() {
+  cd "$WORKSPACE_DIR" || return 1
+  "$WORKSPACE_DIR/scripts/sync-submodules.sh"
+  git add -u && git commit -m "ws: sync" && git push
+}
 ws-pull()   { cd "$WORKSPACE_DIR" && git pull; }
 ws-status() { cd "$WORKSPACE_DIR" && git status; }
 
