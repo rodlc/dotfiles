@@ -107,7 +107,10 @@ claude-jobs() {
 
   if [[ "$1" == "--log" ]]; then
     [[ -z "$2" ]] && { echo "Usage: claude-jobs --log <id>"; return 1; }
-    cat "$log_dir/$2.log" 2>/dev/null || { echo "No log for $2"; return 1; }
+    local log_file="$log_dir/$2.log"
+    [[ -f "$log_file" ]] || { echo "No log for $2"; return 1; }
+    local result=$(jq -r '.result // empty' "$log_file" 2>/dev/null)
+    [[ -n "$result" ]] && echo "$result" || cat "$log_file"
     return 0
   fi
 
