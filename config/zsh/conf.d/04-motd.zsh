@@ -262,19 +262,22 @@ if [[ -o login ]]; then
     local planned=$(jq -r '.planned // 0' "$cache_file" 2>/dev/null)
     local running=$(jq -r '.running // 0' "$cache_file" 2>/dev/null)
     local failed=$(jq -r '.failed // 0' "$cache_file" 2>/dev/null)
+    local succeeded=$(jq -r '.succeeded // 0' "$cache_file" 2>/dev/null)
     [[ -z "$planned" ]] && planned=0
     [[ -z "$running" ]] && running=0
     [[ -z "$failed" ]] && failed=0
+    [[ -z "$succeeded" ]] && succeeded=0
 
-    (( planned == 0 && running == 0 && failed == 0 )) && return 0
+    (( planned == 0 && running == 0 && failed == 0 && succeeded == 0 )) && return 0
 
     local file_time=$(stat -f %m "$cache_file" 2>/dev/null || echo 0)
     local age=$(( $(date +%s) - file_time ))
 
     local -a parts
-    (( failed > 0 ))  && parts+=("${failed} failed")
-    (( running > 0 )) && parts+=("${running} running")
-    (( planned > 0 )) && parts+=("${planned} planned")
+    (( failed > 0 ))    && parts+=("${failed} failed")
+    (( running > 0 ))   && parts+=("${running} running")
+    (( succeeded > 0 )) && parts+=("${succeeded} succeeded")
+    (( planned > 0 ))   && parts+=("${planned} planned")
 
     echo "🦾 Claude Jobs ${(j:, :)parts} ⇒ claude-jobs [$(format_cache_age $age)]"
   }
