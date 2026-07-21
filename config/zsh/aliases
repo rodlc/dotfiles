@@ -100,6 +100,28 @@ alias ccc='claude --continue'
 alias ccr='claude --resume'
 alias ccp='claude -p'
 
+# Claude Jobs — local scheduled agent registry (scripts/scheduled-tasks.json)
+claude-jobs() {
+  local tasks_file="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}/scripts/scheduled-tasks.json"
+  local log_dir="$HOME/Library/Logs/claude-scheduler"
+
+  if [[ "$1" == "--log" ]]; then
+    [[ -z "$2" ]] && { echo "Usage: claude-jobs --log <id>"; return 1; }
+    cat "$log_dir/$2.log" 2>/dev/null || { echo "No log for $2"; return 1; }
+    return 0
+  fi
+
+  [[ ! -f "$tasks_file" ]] && { echo "No scheduled-tasks.json found"; return 1; }
+  jq -r '.[] | "\(.status)\t\(.scheduled_at)\t\(.id)\t\(.prompt[0:60])"' "$tasks_file" | column -t -s $'\t'
+
+  local -a recent=("$log_dir"/*.log(Nom[1,5]))
+  if (( ${#recent[@]} )); then
+    echo ""
+    echo "Recent logs:"
+    printf '  %s\n' "${recent[@]:t}"
+  fi
+}
+
 # ============================================================================
 # Dotfiles Management
 # ============================================================================

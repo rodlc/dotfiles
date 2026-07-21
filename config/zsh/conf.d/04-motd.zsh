@@ -255,6 +255,31 @@ if [[ -o login ]]; then
   }
   check_backup_freshness
 
+  check_scheduled_agents() {
+    local cache_file="$HOME/.cache/claude-jobs"
+    [[ ! -f "$cache_file" ]] && return 0
+
+    local planned=$(jq -r '.planned // 0' "$cache_file" 2>/dev/null)
+    local running=$(jq -r '.running // 0' "$cache_file" 2>/dev/null)
+    local failed=$(jq -r '.failed // 0' "$cache_file" 2>/dev/null)
+    [[ -z "$planned" ]] && planned=0
+    [[ -z "$running" ]] && running=0
+    [[ -z "$failed" ]] && failed=0
+
+    (( planned == 0 && running == 0 && failed == 0 )) && return 0
+
+    local file_time=$(stat -f %m "$cache_file" 2>/dev/null || echo 0)
+    local age=$(( $(date +%s) - file_time ))
+
+    local -a parts
+    (( failed > 0 ))  && parts+=("${failed} failed")
+    (( running > 0 )) && parts+=("${running} running")
+    (( planned > 0 )) && parts+=("${planned} planned")
+
+    echo "🦾 Claude Jobs ${(j:, :)parts} ⇒ claude-jobs [$(format_cache_age $age)]"
+  }
+  check_scheduled_agents
+
   check_cc_version() {
     local claude_bin=$(command -v claude 2>/dev/null)
     [[ -z "$claude_bin" ]] && return 0
