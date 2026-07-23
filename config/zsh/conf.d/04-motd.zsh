@@ -241,17 +241,20 @@ if [[ -o login ]]; then
     local backup_dir="$HOME/Library/Mobile Documents/com~apple~CloudDocs/Backup/MCP_Memory"
     local now=$(date +%s)
     local max_age=$((48 * 3600))
+    local -a parts
 
     for name in sqlite_vec typology plan-cache; do
-      local -a files=("$backup_dir/$name"/${name}-*.db(NOm))
+      local -a files=("$backup_dir/$name"/${name}-*.db(Nom))
       if [[ ${#files} -eq 0 ]]; then
-        echo "⚠️  Backup missing: ${name}.db not in iCloud"
+        parts+=("${name}.db missing")
         continue
       fi
       local mtime=$(stat -f %m "${files[1]}" 2>/dev/null || echo 0)
       local age=$((now - mtime))
-      (( age > max_age )) && echo "⚠️  Backup stale: ${name}.db last backup $((age / 3600))h ago"
+      (( age > max_age )) && parts+=("${name}.db $((age / 3600))h")
     done
+
+    (( ${#parts} )) && echo "📦  Backup stale ${(j:, :)parts} ⇒ mcp-backup"
   }
   check_backup_freshness
 

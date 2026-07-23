@@ -153,6 +153,7 @@ ws-pull()   { cd "$WORKSPACE_DIR" && git pull; }
 ws-status() { cd "$WORKSPACE_DIR" && git status; }
 
 alias plans-sync='$WORKSPACE_DIR/scripts/plans-sync'
+alias mcp-backup='$WORKSPACE_DIR/memory/backup-memory.sh backup'  # sqlite_vec + typology + plan-cache → iCloud
 
 # ============================================================================
 # Branch protection toggle (hotfix escape hatch)
