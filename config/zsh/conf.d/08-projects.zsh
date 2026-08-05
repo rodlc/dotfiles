@@ -3,8 +3,10 @@
 chpwd_traxyo_creds() {
   if [[ "$PWD" == */Code/rodlc/traxyo* || "$PWD" == */Code/rodlcmagic/traxyo* ]]; then
     [[ -n "$TRAXYO_RAILS_KEY" ]] && export RAILS_MASTER_KEY="$TRAXYO_RAILS_KEY"
+    [[ -n "$POSTMARK_RODXYO_KEY" ]] && export POSTMARK_SERVER_TOKEN="$POSTMARK_RODXYO_KEY"
   else
     [[ "$RAILS_MASTER_KEY" == "$TRAXYO_RAILS_KEY" ]] && unset RAILS_MASTER_KEY
+    [[ "$POSTMARK_SERVER_TOKEN" == "$POSTMARK_RODXYO_KEY" ]] && unset POSTMARK_SERVER_TOKEN
   fi
 }
 
