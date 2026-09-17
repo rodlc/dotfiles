@@ -156,52 +156,73 @@ if [[ -o login ]]; then
     echo "🔐 Secrets modified locally ⇒ bw-push"
   fi
 
-  check_drift() {
-    setopt LOCAL_OPTIONS NULL_GLOB
-    local ws="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}"
-    local cc="$ws/claude-config"
-    local -a labels fixes
+  # Drift check → background cache for SessionStart (~/.cache/claude-drift)
+  (
+    setopt LOCAL_OPTIONS NO_MONITOR NULL_GLOB
+    (
+      local ws="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}"
+      local cc="$ws/claude-config"
+      local cache="$HOME/.cache/claude-drift"
+      local -a labels fixes
 
-    [[ -f "$ws/.claude/settings.json" ]] && labels+=("settings.json scope drift") && fixes+=("rm $ws/.claude/settings.json")
-    local wt_drift=$(find "$ws/.claude/worktrees" -path "*/.claude/settings.json" 2>/dev/null | head -1)
-    [[ -n "$wt_drift" ]] && labels+=("worktree settings.json") && fixes+=("rm $wt_drift")
+      for link in ~/.claude/settings.json ~/.claude/CLAUDE.md ~/.claude/statusline.sh ~/.claude/hooks/*.sh ~/.claude/hooks/core; do
+        [[ ! -L "$link" ]] && continue
+        local target=$(readlink "$link")
+        if [[ ! -e "$link" ]] || [[ "$target" != "$ws"* ]]; then
+          labels+=("drifting symlinks"); fixes+=("df-install workspace"); break
+        fi
+      done
 
-    local lock_sym="$ws/skills-lock.json"
-    if [[ -L "$lock_sym" ]]; then
-      local target=$(readlink "$lock_sym")
-      [[ "$target" != *claude-config/skills-lock.json ]] && [[ "$target" != claude-config/skills-lock.json ]] && \
-        labels+=("skills-lock bad target") && fixes+=("df-install workspace")
-    elif [[ -e "$lock_sym" ]]; then
-      labels+=("skills-lock not symlinked") && fixes+=("df-install workspace")
-    else
-      labels+=("skills-lock missing") && fixes+=("df-install workspace")
-    fi
+      for entry in ~/.claude/skills/*; do
+        [[ ! -e "$entry" ]] && continue
+        if [[ ! -L "$entry" ]]; then
+          labels+=("skill not symlinked"); fixes+=("df-install workspace"); break
+        fi
+      done
 
-    if [[ -d "$cc" ]]; then
-      local dirty=$(git -C "$ws" diff --name-only -- claude-config/ 2>/dev/null | head -1)
-      local staged=$(git -C "$ws" diff --cached --name-only -- claude-config/ 2>/dev/null | head -1)
-      [[ -n "$dirty" || -n "$staged" ]] && labels+=("uncommitted") && fixes+=("ws-push")
-    fi
+      [[ -f "$ws/.claude/settings.json" ]] && labels+=("settings.json scope drift") && fixes+=("rm $ws/.claude/settings.json")
+      local wt_drift=$(find "$ws/.claude/worktrees" -path "*/.claude/settings.json" 2>/dev/null | head -1)
+      [[ -n "$wt_drift" ]] && labels+=("worktree settings.json") && fixes+=("rm $wt_drift")
 
-    local template="$ws/.claude/mcp-template.json"
-    local live="$HOME/.claude.json"
-    if [[ -f "$template" && -f "$live" ]]; then
-      local count=$(
-        set -a; source "$HOME/.env" 2>/dev/null || { echo 0; return; }; set +a
-        local expanded=$(envsubst < "$template" 2>/dev/null | jq -S '.mcpServers' 2>/dev/null) || { echo 0; return; }
-        local current=$(jq -S '.mcpServers' "$live" 2>/dev/null) || { echo 0; return; }
-        [[ -z "$expanded" || -z "$current" ]] && { echo 0; return; }
-        diff <(echo "$expanded") <(echo "$current") 2>/dev/null | grep -c '^[<>]' || echo 0
-      )
-      [[ "$count" =~ ^[0-9]+$ && "$count" -gt 0 ]] && labels+=("MCP stale (${count}Δ)") && fixes+=("mcp-sync.sh diff")
-    fi
+      local lock_sym="$ws/skills-lock.json"
+      if [[ -L "$lock_sym" ]]; then
+        local target=$(readlink "$lock_sym")
+        [[ "$target" != *claude-config/skills-lock.json ]] && [[ "$target" != claude-config/skills-lock.json ]] && \
+          labels+=("skills-lock bad target") && fixes+=("df-install workspace")
+      elif [[ -e "$lock_sym" ]]; then
+        labels+=("skills-lock not symlinked") && fixes+=("df-install workspace")
+      else
+        labels+=("skills-lock missing") && fixes+=("df-install workspace")
+      fi
 
-    if (( ${#labels} )); then
-      local -aU uf=("${fixes[@]}")
-      echo "🌊 claude-config ${(j:, :)labels} ⇒ ${(j:, :)uf}"
-    fi
-  }
-  check_drift
+      if [[ -d "$cc" ]]; then
+        local dirty=$(git -C "$ws" diff --name-only -- claude-config/ 2>/dev/null | head -1)
+        local staged=$(git -C "$ws" diff --cached --name-only -- claude-config/ 2>/dev/null | head -1)
+        [[ -n "$dirty" || -n "$staged" ]] && labels+=("uncommitted") && fixes+=("ws-push")
+      fi
+
+      local template="$ws/.claude/mcp-template.json"
+      local live="$HOME/.claude.json"
+      if [[ -f "$template" && -f "$live" ]]; then
+        local count=$(
+          set -a; source "$HOME/.env" 2>/dev/null || { echo 0; return; }; set +a
+          local expanded=$(envsubst < "$template" 2>/dev/null | jq -S '.mcpServers' 2>/dev/null) || { echo 0; return; }
+          local current=$(jq -S '.mcpServers' "$live" 2>/dev/null) || { echo 0; return; }
+          [[ -z "$expanded" || -z "$current" ]] && { echo 0; return; }
+          diff <(echo "$expanded") <(echo "$current") 2>/dev/null | grep -c '^[<>]' || echo 0
+        )
+        [[ "$count" =~ ^[0-9]+$ && "$count" -gt 0 ]] && labels+=("MCP stale (${count}Δ)") && fixes+=("mcp-sync.sh diff")
+      fi
+
+      if (( ${#labels} )); then
+        local -aU uf=("${fixes[@]}")
+        echo "🌊 claude-config ${(j:, :)labels} ⇒ ${(j:, :)uf}" > "$cache.tmp"
+      else
+        : > "$cache.tmp"
+      fi
+      mv -f "$cache.tmp" "$cache"
+    ) &
+  ) &>/dev/null
 
   check_backup_freshness() {
     setopt LOCAL_OPTIONS NULL_GLOB
