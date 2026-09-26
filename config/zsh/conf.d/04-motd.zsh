@@ -175,6 +175,8 @@ if [[ -o login ]]; then
 
       for entry in ~/.claude/skills/*; do
         [[ ! -e "$entry" ]] && continue
+        # synced/ is managed by Claude Code (claude.ai skills), never a claude-config symlink
+        [[ "${entry:t}" == synced ]] && continue
         if [[ ! -L "$entry" ]]; then
           labels+=("skill not symlinked"); fixes+=("df-install workspace"); break
         fi
