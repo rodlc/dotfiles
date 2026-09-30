@@ -175,7 +175,7 @@ install_dotfiles() {
     echo "=====> Installing global dotfiles reminder hook"
     cp "$DOTFILES_DIR/.git-hooks/pre-commit" "$GLOBAL_HOOKS_DIR/pre-commit"
     chmod +x "$GLOBAL_HOOKS_DIR/pre-commit"
-    git config --global init.templatedir "$HOME/.git-templates"
+    # init.templatedir is versioned in config/git/config; git config --global would rewrite that tracked file
   fi
 
   echo ""
