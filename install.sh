@@ -307,6 +307,17 @@ install_mcp() {
   echo "=====> Installing launchd services"
   MCP_MEMORY_SERVICE="$WORKSPACE_DIR/mcp-servers/mcp-memory-service"
 
+  # Single-instance services run on the reference machine only; the others reach it over Tailscale
+  local reference_only=(claude-scheduler mcp-backup mcp-consolidation mcp-memory-http mcp-typology whatsapp-bridge)
+  local role_file="$HOME/.config/dotfiles/role"
+  if [[ ! -f "$role_file" ]]; then
+    read "is_ref?Is this the reference machine (scheduler, memory server, backups, WhatsApp)? [y/N] "
+    mkdir -p "${role_file:h}"
+    [[ "$is_ref" =~ ^[Yy]$ ]] && echo reference > "$role_file" || echo client > "$role_file"
+  fi
+  local role=$(<"$role_file")
+  echo "-----> Machine role: $role (change: edit $role_file)"
+
   if [ -d "$MCP_MEMORY_SERVICE" ]; then
     mkdir -p "$HOME/Library/LaunchAgents"
 
@@ -315,23 +326,27 @@ install_mcp() {
       for plist in "$LAUNCHD_SRC"/*.plist; do
         [ -f "$plist" ] || continue
         local name="$(basename "$plist")"
+        local service="${${name%.plist}#com.rodlecoent.}"
+        if [[ "$role" != "reference" ]] && (( ${reference_only[(Ie)$service]} )); then
+          echo "-----> Skipped $service (reference machine only)"
+          continue
+        fi
         backup "$HOME/Library/LaunchAgents/$name"
         sed "s|__HOME__|$HOME|g" "$plist" > "$HOME/Library/LaunchAgents/$name"
-
-        local label="${name%.plist}"
         launchctl unload "$HOME/Library/LaunchAgents/$name" 2>/dev/null || true
         launchctl load "$HOME/Library/LaunchAgents/$name" 2>/dev/null || true
       done
       echo "-----> Launchd services installed and loaded"
     fi
 
-    # Wait for memory server
-    echo "-----> Waiting for memory server..."
-    sleep 5
-    if curl -s --max-time 2 http://127.0.0.1:4242/api/health > /dev/null 2>&1; then
-      echo "-----> ✓ HTTP server running on port 4242"
-    else
-      echo "-----> ⚠️  HTTP server not responding (check: ~/Library/Logs/mcp-memory-http.log)"
+    if [[ "$role" == "reference" ]]; then
+      echo "-----> Waiting for memory server..."
+      sleep 5
+      if curl -s --max-time 2 http://127.0.0.1:4242/api/health > /dev/null 2>&1; then
+        echo "-----> ✓ HTTP server running on port 4242"
+      else
+        echo "-----> ⚠️  HTTP server not responding (check: ~/Library/Logs/mcp-memory-http.log)"
+      fi
     fi
 
     # Memory hooks
