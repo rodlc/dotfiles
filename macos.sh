@@ -81,13 +81,15 @@ echo "✅ macOS defaults configured (some changes require logout)"
 echo ""
 echo "⚙️  Security hardening (asks only when a setting differs)..."
 
-if [[ "$(/usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate)" == *enabled* ]]; then
-  echo "✓ Firewall on"
+FW=/usr/libexec/ApplicationFirewall/socketfilterfw
+if [[ "$($FW --getglobalstate)" == *enabled* && "$($FW --getstealthmode)" == *"is on"* ]]; then
+  echo "✓ Firewall on, stealth mode"
 else
-  read "fw_choice?Enable firewall? [y/N] "
+  read "fw_choice?Enable firewall with stealth mode (no reply to ping or probes)? [y/N] "
   if [[ "$fw_choice" =~ ^[Yy]$ ]]; then
-    sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on
-    echo "✅ Firewall enabled"
+    sudo $FW --setglobalstate on
+    sudo $FW --setstealthmode on
+    echo "✅ Firewall enabled, stealth mode on"
   fi
 fi
 
@@ -124,9 +126,8 @@ else
 fi
 
 # ════════════════════════════════════════════
-# Machine naming (interactive)
+# Machine naming: ComputerName "Rod <Model>", LocalHostName = HostName "rod-<model>"
 # ════════════════════════════════════════════
-# Convention: ComputerName "Rod <Model>", LocalHostName = HostName "rod-<model>"
 echo ""
 computer_name=$(scutil --get ComputerName 2>/dev/null || echo "")
 local_host=$(scutil --get LocalHostName 2>/dev/null || echo "")
