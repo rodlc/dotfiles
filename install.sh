@@ -1,7 +1,7 @@
 #!/bin/zsh
 set -e
 
-DOTFILES_DIR="$PWD"
+DOTFILES_DIR="${0:A:h}"  # script's own directory, whatever the caller's cwd
 TIER="${1:-dotfiles}"  # dotfiles | workspace | mcp
 
 cat <<EOF
@@ -39,28 +39,6 @@ symlink() {
   fi
 
   [ ! -e "$link" ] && ln -s "$source" "$link" && echo "-----> Linked $link" || true
-}
-
-generate_git_identities() {
-  source "$HOME/.env" 2>/dev/null || true
-  if [[ -n "${GIT_USER_NAME:-}" && -n "${GIT_USER_EMAIL:-}" ]]; then
-    mkdir -p "$HOME/.config/git"
-    cat > "$HOME/.config/git/config-identity" <<EOF
-[user]
-  email = $GIT_USER_EMAIL
-  name = $GIT_USER_NAME
-EOF
-    echo "-----> Generated git identity"
-  fi
-  if [[ -n "${GIT_USER_EMAIL_MAGIC:-}" ]]; then
-    mkdir -p "$HOME/.config/git"
-    cat > "$HOME/.config/git/config-identity-magic" <<EOF
-[user]
-  email = $GIT_USER_EMAIL_MAGIC
-  name = ${GIT_USER_NAME:-}
-EOF
-    echo "-----> Generated git identity (magic)"
-  fi
 }
 
 # ══════════════════════════════════════════════════════════════════
@@ -121,9 +99,6 @@ install_dotfiles() {
   mkdir -p "$HOME/.config/zsh"
   symlink "$DOTFILES_DIR/config/zsh/aliases" "$HOME/.config/zsh/aliases"
 
-  # Git identity (generated from ~/.env if available)
-  generate_git_identities
-
   # Zed
   ZED_DIR="$HOME/.config/zed"
   mkdir -p "$ZED_DIR"
@@ -181,11 +156,14 @@ install_dotfiles() {
   echo ""
   echo "✓ Tier dotfiles installed (shell, git, zed, brew)"
 
-  # macOS defaults (optional)
+  # macOS defaults: rerun only when macos.sh changed, so a rerun does not ask again or restart Finder
   if [[ "$OSTYPE" == "darwin"* ]]; then
-    read "macos_choice?Configure macOS defaults? (Dock, Finder, keyboard...) [y/N] "
-    if [[ "$macos_choice" =~ ^[Yy]$ ]]; then
-      zsh "$DOTFILES_DIR/macos.sh"
+    local stamp="$HOME/.local/state/dotfiles/macos.sha"
+    local current=$(shasum "$DOTFILES_DIR/macos.sh" | cut -d' ' -f1)
+    if [[ "$current" != "$(cat "$stamp" 2>/dev/null)" ]]; then
+      zsh "$DOTFILES_DIR/macos.sh" && mkdir -p "${stamp:h}" && echo "$current" > "$stamp"
+    else
+      echo "✓ macOS defaults already applied (rerun: zsh macos.sh)"
     fi
   fi
 }
@@ -205,12 +183,12 @@ install_workspace() {
     echo "=====> Claude Code already installed"
   fi
 
-  # Bitwarden setup (SSH key needed to clone workspace)
+  # Bitwarden holds ~/.env (API tokens)
   echo "=====> Bitwarden secrets setup"
   RBW_CONFIG="$HOME/Library/Application Support/rbw/config.json"
   if [ ! -f "$RBW_CONFIG" ]; then
     echo ""
-    echo "Bitwarden setup required for secrets (SSH key, API tokens)."
+    echo "Bitwarden setup required for secrets (~/.env API tokens)."
     echo ""
     read "bw_email?Enter your Bitwarden email (or press Enter to skip): "
     if [[ -n "$bw_email" ]]; then
@@ -243,9 +221,6 @@ install_workspace() {
     touch "$HOME/.env"
     chmod 600 "$HOME/.env"
   fi
-
-  # Re-generate git identity now that ~/.env may have been populated
-  generate_git_identities
 
   # GitHub over HTTPS: one gh token per machine, revocable alone, no SSH key
   if ! gh auth token &>/dev/null; then
