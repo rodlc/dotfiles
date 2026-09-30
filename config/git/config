@@ -56,11 +56,13 @@
 [init]
 	defaultBranch = main
 	templatedir = ~/.git-templates
-[include]
-	path = ~/.config/git/config-identity-rodlc
+# GitHub noreply addresses: public by design, so versioned here
+[user]
+	email = 63702959+rodlc@users.noreply.github.com
+	name = Rod Lc
 
 [includeIf "gitdir:~/Code/rodlcmagic/"]
-	path = ~/.config/git/config-identity-rodlcmagic
+	path = ~/Code/rodlc/dotfiles/config/git/identity-rodlcmagic
 # GitHub over HTTPS with gh as credential helper: no SSH key to manage, existing SSH remotes rewritten
 [url "https://github.com/"]
 	insteadOf = git@github.com:
