@@ -97,7 +97,7 @@ for i in "${!SSH_BW_NAMES[@]}"; do
             mkdir -p "$HOME/.ssh" && chmod 700 "$HOME/.ssh"
             echo "$bw_key" > "$ssh_key"
             chmod 600 "$ssh_key"
-            local pub=$(get_ssh_pub "$bw_name")
+            pub=$(get_ssh_pub "$bw_name")
             if [[ -n "$pub" ]]; then
                 echo "$pub" > "${ssh_key}.pub"
                 chmod 644 "${ssh_key}.pub"
@@ -128,7 +128,7 @@ for i in "${!SSH_BW_NAMES[@]}"; do
                 cp "$ssh_key" "$ssh_key.backup.$(date +%Y%m%d)" 2>/dev/null || true
                 echo "$bw_key" > "$ssh_key"
                 chmod 600 "$ssh_key"
-                local pub=$(get_ssh_pub "$bw_name")
+                pub=$(get_ssh_pub "$bw_name")
                 if [[ -n "$pub" ]]; then
                     echo "$pub" > "${ssh_key}.pub"
                     chmod 644 "${ssh_key}.pub"

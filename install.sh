@@ -82,7 +82,7 @@ install_dotfiles() {
   fi
 
   echo "=====> Installing Homebrew packages"
-  brew bundle --file="$DOTFILES_DIR/Brewfile" --no-lock || { echo "⚠️  Some brew packages failed to install"; }
+  brew bundle --file="$DOTFILES_DIR/Brewfile" || { echo "⚠️  Some brew packages failed to install"; }
 
   # mise runtimes
   echo "=====> Installing language runtimes"
@@ -183,7 +183,7 @@ install_dotfiles() {
   if [[ "$OSTYPE" == "darwin"* ]]; then
     read "macos_choice?Configure macOS defaults? (Dock, Finder, keyboard...) [y/N] "
     if [[ "$macos_choice" =~ ^[Yy]$ ]]; then
-      bash "$DOTFILES_DIR/macos.sh"
+      zsh "$DOTFILES_DIR/macos.sh"
     fi
   fi
 }
@@ -193,8 +193,10 @@ install_dotfiles() {
 # ══════════════════════════════════════════════════════════════════
 
 install_workspace() {
-  # Install Claude Code CLI
-  if ! command -v claude &> /dev/null; then
+  # Install Claude Code CLI (mise pins claude-code in config/mise/config.toml)
+  if command -v mise &>/dev/null && mise which claude &>/dev/null; then
+    echo "=====> Claude Code provided by mise"
+  elif ! command -v claude &> /dev/null; then
     echo "=====> Installing Claude Code"
     curl -fsSL https://claude.ai/install.sh | bash
   else
@@ -306,16 +308,16 @@ install_mcp() {
 
   # Build MCP servers
   echo "=====> Building MCP servers"
-  if [ -x "$WORKSPACE_DIR/claude-config/install-mcp-servers.sh" ]; then
-    "$WORKSPACE_DIR/claude-config/install-mcp-servers.sh"
+  if [ -x "$WORKSPACE_DIR/claude-config/scripts/install-mcp-servers.sh" ]; then
+    "$WORKSPACE_DIR/claude-config/scripts/install-mcp-servers.sh"
   else
     echo "⚠️  install-mcp-servers.sh not found in workspace"
   fi
 
   # Configure MCPs (expand template → ~/.claude.json)
   echo "=====> Configuring MCP servers"
-  if [ -x "$WORKSPACE_DIR/claude-config/mcp-sync.sh" ]; then
-    "$WORKSPACE_DIR/claude-config/mcp-sync.sh" install
+  if [ -x "$WORKSPACE_DIR/claude-config/scripts/mcp-sync.sh" ]; then
+    "$WORKSPACE_DIR/claude-config/scripts/mcp-sync.sh" install
   fi
 
   # Launchd services (MCP memory + backup)

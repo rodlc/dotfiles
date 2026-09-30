@@ -75,6 +75,11 @@ brew "pygments"
 
 # Local LLM runtime (delegates token-heavy tasks from Claude Code)
 brew "ollama"
+# Token-compressing proxy used by the rtk hook in claude-config/settings.json
+tap "rtk-ai/tap"
+brew "rtk-ai/tap/rtk"
+# Terminal multiplexer (remote sessions on the Mac Studio)
+brew "tmux"
 
 # ════════════════════════════════════════════════════════════════════════════
 # Utilities
@@ -93,6 +98,8 @@ brew "pre-commit"
 
 # Password manager
 cask "bitwarden"
+# Claude desktop app
+cask "claude"
 # Privacy-focused browser
 cask "brave-browser"
 # Open source IDE for exploring and testing APIs

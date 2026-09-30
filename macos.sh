@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/zsh
 # macos.sh — macOS system preferences (idempotent)
 # Run after fresh install. Requires logout/restart for some changes.
 set -euo pipefail
