@@ -441,5 +441,7 @@ case "$TIER" in
     ;;
 esac
 
+[[ "$TIER" != "dotfiles" ]] && { "$DOTFILES_DIR/scripts/system/claude-handoff" || true; }
+
 echo ""
 exec zsh -l
