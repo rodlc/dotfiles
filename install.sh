@@ -269,6 +269,14 @@ install_workspace() {
     echo "-----> zsh_history already exists"
   fi
 
+  # Custom Raycast extensions (CCode Launcher, clipboard): launchd keeps them in ray develop (mcp tier)
+  for ext in "$WORKSPACE_DIR"/raycast-extensions/*/; do
+    if [[ -f "$ext/package-lock.json" && ! -d "$ext/node_modules" ]]; then
+      echo "-----> Installing Raycast extension $(basename "$ext")"
+      npm ci --prefix "$ext" --silent
+    fi
+  done
+
   echo ""
   echo "✓ Tier workspace installed (Claude Code + workspace config)"
   echo ""

@@ -23,5 +23,5 @@ claude "This Mac ($machine) was just bootstrapped with dotfiles install.sh. Fini
 1. Health: SMART status, kernel panics over 7 days, pmset -g log, profiles status -type enrollment (no MDM expected).
 2. Validate the install: brew bundle check, bw-status, gh auth status, git config user.email, rtk --version, Terminal default profile, MOTD warnings. Report what failed.
 3. Ask me whether to install the MCP tier (./install.sh mcp) and whether this is the reference machine (single-instance services: scheduler, memory HTTP server, backups, WhatsApp).
-4. Then look for a setup plan in .claude/plans naming this machine and execute its next unchecked actions.
+4. Then look for a setup plan in .claude/plans naming this machine and continue it (its next unchecked actions); never start a second plan for the same machine.
 Ask me before any step that needs sudo, a password, a browser login or another machine."
