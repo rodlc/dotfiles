@@ -82,6 +82,8 @@ install_dotfiles() {
   fi
 
   echo "=====> Installing Homebrew packages"
+  # Homebrew 7 refuses formulae from untrusted taps
+  brew tap rtk-ai/tap && brew trust --formula rtk-ai/tap/rtk
   brew bundle --file="$DOTFILES_DIR/Brewfile" || { echo "⚠️  Some brew packages failed to install"; }
 
   # mise runtimes
@@ -146,13 +148,14 @@ install_dotfiles() {
   # Terminal profile
   TERMINAL_PROFILE="$DOTFILES_DIR/terminal/Pro Nord.terminal"
   if [ -f "$TERMINAL_PROFILE" ]; then
-    CURRENT_DEFAULT=$(defaults read com.apple.Terminal "Default Window Settings" 2>/dev/null || echo "")
+    # Terminal rewrites its prefs on quit, so defaults write is lost when run from Terminal itself
+    CURRENT_DEFAULT=$(osascript -e 'tell application "Terminal" to get name of default settings' 2>/dev/null || echo "")
     if [[ "$CURRENT_DEFAULT" != "Pro Nord" ]]; then
       echo "=====> Importing Terminal profile"
       open "$TERMINAL_PROFILE"
       sleep 1
-      defaults write com.apple.Terminal "Default Window Settings" -string "Pro Nord"
-      defaults write com.apple.Terminal "Startup Window Settings" -string "Pro Nord"
+      osascript -e 'tell application "Terminal" to set default settings to settings set "Pro Nord"' \
+                -e 'tell application "Terminal" to set startup settings to settings set "Pro Nord"'
     fi
   fi
 
@@ -216,7 +219,8 @@ install_workspace() {
       rbw config set base_url https://api.bitwarden.eu/
       rbw config set pinentry pinentry-mac
       echo "-----> Registering with Bitwarden..."
-      rbw register
+      # A failed register leaves config.json, which would skip this block on rerun
+      rbw register || { rm -f "$RBW_CONFIG"; echo "⚠️  rbw register failed, rerun install.sh workspace"; exit 1; }
     else
       echo "⚠️  Skipping Bitwarden. You can run install.sh workspace again later."
     fi
