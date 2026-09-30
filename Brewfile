@@ -118,3 +118,5 @@ cask "veracrypt"
 cask "macfuse"
 # E-book manager and converter
 cask "calibre"
+# Mesh VPN between machines; tailnet DNS 1.1.1.1 is encrypted (DoH), replaces WARP
+cask "tailscale-app"

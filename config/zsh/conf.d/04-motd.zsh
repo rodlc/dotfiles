@@ -1,4 +1,4 @@
-# MOTD - SSH-aware Git Status with Background Fetch
+# MOTD - GitHub-auth-aware Git Status with Background Fetch
 
 # Format cache age for display
 format_cache_age() {
@@ -12,24 +12,14 @@ format_cache_age() {
     fi
 }
 
-# Check SSH agent status
-check_ssh_status() {
-    local ssh_key="$HOME/.ssh/id_ed25519_rodlc"
-
-    # Check if SSH agent has keys loaded
-    if ssh-add -l &>/dev/null; then
-        echo "🔑 SSH key loaded, fetching git..."
+# GitHub goes over HTTPS through gh; gh auth token is local, no network call
+check_github_auth() {
+    if gh auth token &>/dev/null; then
+        echo "🔑 GitHub authenticated, fetching git..."
         return 0
     fi
-
-    # Agent empty - check if key exists
-    if [[ ! -f "$ssh_key" ]]; then
-        echo "🔑 SSH key missing ⇒ bw-pull"
-        return 2
-    else
-        echo "🔑 SSH key not loaded ⇒ bw-pull"
-        return 1
-    fi
+    echo "🔑 GitHub not authenticated ⇒ gh auth login -h github.com -p https -w"
+    return 1
 }
 
 check_repo_status() {
@@ -131,13 +121,8 @@ if [[ -o login ]]; then
   echo "Hello, world!"
   show_system_info
 
-  # Run SSH check first
-  ssh_status_code=0
-  check_ssh_status
-  ssh_status_code=$?
-
-  # Only run git checks if SSH is OK
-  if [[ $ssh_status_code -eq 0 ]]; then
+  # Only run git checks if GitHub auth is OK
+  if check_github_auth; then
     (
       setopt LOCAL_OPTIONS NO_MONITOR
       "$HOME/Code/rodlc/dotfiles/scripts/code/git-fetch-background.sh" &

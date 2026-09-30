@@ -111,7 +111,6 @@ install_dotfiles() {
   mkdir -p "$HOME/.ssh"
   backup "$HOME/.ssh/config"
   symlink "$DOTFILES_DIR/home/ssh/config" "$HOME/.ssh/config"
-  ssh-add --apple-use-keychain ~/.ssh/id_ed25519_rodlc 2>/dev/null || true
 
   # config/ → ~/.config/<app>/
   mkdir -p "$HOME/.config/pry"
@@ -230,9 +229,8 @@ install_workspace() {
     if rbw unlocked 2>/dev/null; then
       echo "-----> Syncing secrets from Bitwarden..."
       "$DOTFILES_DIR/scripts/code/bw-pull"
-    elif [ ! -f "$HOME/.ssh/id_ed25519_rodlc" ]; then
-      # First install: SSH key missing → unlock required
-      echo "-----> Unlocking vault (SSH key missing)..."
+    elif [ ! -f "$HOME/.env" ]; then
+      echo "-----> Unlocking vault (~/.env missing)..."
       rbw unlock && "$DOTFILES_DIR/scripts/code/bw-pull"
     else
       echo "-----> Bitwarden vault locked — skipping sync. Run 'bw-pull' to force refresh."
@@ -249,15 +247,21 @@ install_workspace() {
   # Re-generate git identity now that ~/.env may have been populated
   generate_git_identities
 
+  # GitHub over HTTPS: one gh token per machine, revocable alone, no SSH key
+  if ! gh auth token &>/dev/null; then
+    echo "=====> GitHub login (HTTPS, browser)"
+    gh auth login -h github.com -p https -w
+  fi
+
   # Clone workspace if not present
   WORKSPACE_DIR="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}"
   if [ ! -d "$WORKSPACE_DIR" ]; then
-    if [ -f "$HOME/.ssh/id_ed25519_rodlc" ]; then
+    if gh auth token &>/dev/null; then
       echo "-----> Cloning workspace repository"
       mkdir -p "$(dirname "$WORKSPACE_DIR")"
-      git clone --recurse-submodules git@github.com:rodlc/workspace.git "$WORKSPACE_DIR"
+      git clone --recurse-submodules https://github.com/rodlc/workspace.git "$WORKSPACE_DIR"
     else
-      echo "⚠️  SSH key not found. Run install.sh workspace again after bw-pull."
+      echo "⚠️  GitHub not authenticated. Run install.sh workspace again after gh auth login."
       return 0
     fi
   else

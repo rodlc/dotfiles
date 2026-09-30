@@ -61,8 +61,13 @@
 
 [includeIf "gitdir:~/Code/rodlcmagic/"]
 	path = ~/.config/git/config-identity-rodlcmagic
+# GitHub over HTTPS with gh as credential helper: no SSH key to manage, existing SSH remotes rewritten
+[url "https://github.com/"]
+	insteadOf = git@github.com:
+	insteadOf = git@github.com-rodlc:
+	insteadOf = git@github.com-rodlcmagic:
 [credential "https://github.com"]
-	helper = 
+	helper =
 	helper = !/opt/homebrew/bin/gh auth git-credential
 [credential "https://gist.github.com"]
 	helper = 

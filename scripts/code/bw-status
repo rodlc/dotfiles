@@ -40,35 +40,6 @@ fi
 
 printf "│ %-12s │ %-14s │ %-14s │ %-8s │\n" ".env" "$bw_env" "$local_env" "$sync_env"
 
-# === SSH Keys ===
-for i in "${!SSH_BW_NAMES[@]}"; do
-    bw_name="${SSH_BW_NAMES[$i]}"
-    ssh_key="${SSH_LOCAL_PATHS[$i]}"
-    bw_ssh="no"
-    local_ssh="no"
-    sync_ssh="n/a"
-
-    if get_ssh_key "$bw_name" &>/dev/null; then
-        bw_ssh="yes"
-    fi
-
-    if [[ -f "$ssh_key" ]]; then
-        local_ssh="yes"
-    fi
-
-    if [[ "$bw_ssh" == "yes" && "$local_ssh" == "yes" ]]; then
-        bw_key=$(get_ssh_key "$bw_name")
-        local_key=$(cat "$ssh_key")
-        if [[ "$bw_key" == "$local_key" ]]; then
-            sync_ssh="ok"
-        else
-            sync_ssh="DIFF"
-        fi
-    fi
-
-    printf "│ %-12s │ %-14s │ %-14s │ %-8s │\n" "$bw_name" "$bw_ssh" "$local_ssh" "$sync_ssh"
-done
-
 echo "└──────────────┴────────────────┴────────────────┴──────────┘"
 echo ""
 echo "Legend: ok = in sync  DIFF = out of sync  n/a = cannot compare"

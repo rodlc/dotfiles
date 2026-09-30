@@ -5,8 +5,9 @@ Personal development environment configuration for macOS. Originally inspired by
 ## Quick Start
 
 ```bash
-cd ~/Code
-git clone git@github.com:rodlc/dotfiles.git
+xcode-select --install
+mkdir -p ~/Code/rodlc && cd ~/Code/rodlc
+git clone https://github.com/rodlc/dotfiles.git
 cd dotfiles
 ./install.sh            # dotfiles: standalone machine
 ./install.sh workspace  # + Claude Code + workspace

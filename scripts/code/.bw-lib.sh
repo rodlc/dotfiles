@@ -7,39 +7,18 @@ BW_ITEM_SECRETS="Dotfiles Env"
 # Source env for overridable config
 source "$HOME/.env" 2>/dev/null || true
 
-# SSH keys: parallel arrays (BW item name → local file path)
-# Override names via ~/.env: SSH_BW_NAME_RODLC, SSH_BW_NAME_RODLCMAGIC
-SSH_BW_NAMES=("${SSH_BW_NAME_RODLC:-rodlc@macbookpro}")
-SSH_LOCAL_PATHS=("$HOME/.ssh/id_ed25519_rodlc")
-SSH_BW_NAMES+=("${SSH_BW_NAME_RODLCMAGIC:-rodlcmagic@macbookpro}")
-SSH_LOCAL_PATHS+=("$HOME/.ssh/id_ed25519_rodlcmagic")
-
 ensure_rbw() {
     if ! rbw unlocked &>/dev/null; then
         echo "🔐 rbw locked. Unlocking..."
         rbw unlock
     fi
     local sync_err
-    if ! sync_err=$(rbw sync 2>&1); then
-        echo "⚠ rbw sync failed: $sync_err" >&2
-        return 1
+    sync_err=$(rbw sync 2>&1) && return 0
+    # rbw reports a revoked refresh token (invalid_grant) as a missing access_token JSON field
+    if [[ "$sync_err" == *"access_token"* ]]; then
+        echo "🔄 Bitwarden session revoked. Purging local cache and logging in again..."
+        rbw purge && rbw login && sync_err=$(rbw sync 2>&1) && return 0
     fi
-}
-
-# Fetch SSH private key from BW (SSH Key items → fallback Secure Notes)
-# Returns: 0 on success, 1 if not found, 2 if multiple entries exist
-get_ssh_key() {
-    rbw get --field=private_key "$1" 2>/dev/null && return 0
-    local err
-    err=$(rbw get "$1" 2>&1) || {
-        [[ "$err" == *"multiple entries"* ]] && return 2
-        return 1
-    }
-    echo "$err"
-    return 0
-}
-
-# Fetch SSH public key from BW SSH Key item
-get_ssh_pub() {
-    rbw get --field=public_key "$1" 2>/dev/null
+    echo "⚠ rbw sync failed: $sync_err" >&2
+    return 1
 }
