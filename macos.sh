@@ -79,51 +79,71 @@ echo "✅ macOS defaults configured (some changes require logout)"
 # Security (interactive — prompt before each)
 # ════════════════════════════════════════════
 echo ""
-echo "⚙️  Security hardening (each step requires confirmation)..."
+echo "⚙️  Security hardening (asks only when a setting differs)..."
 
-read "fw_choice?Enable firewall? [y/N] "
-if [[ "$fw_choice" =~ ^[Yy]$ ]]; then
-  sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on
-  echo "✅ Firewall enabled"
+if [[ "$(/usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate)" == *enabled* ]]; then
+  echo "✓ Firewall on"
+else
+  read "fw_choice?Enable firewall? [y/N] "
+  if [[ "$fw_choice" =~ ^[Yy]$ ]]; then
+    sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on
+    echo "✅ Firewall enabled"
+  fi
 fi
 
-read "lock_choice?Require password on lock screen (5s delay)? [y/N] "
-if [[ "$lock_choice" =~ ^[Yy]$ ]]; then
-  defaults write com.apple.screensaver askForPassword -int 1
-  defaults write com.apple.screensaver askForPasswordDelay -int 300
-  echo "✅ Lock screen password enabled"
+# com.apple.screensaver askForPassword is ignored since macOS 10.13, sysadminctl is the supported path
+if [[ "$(sysadminctl -screenLock status 2>&1)" == *"delay is 5 seconds"* ]]; then
+  echo "✓ Lock screen password after 5s"
+else
+  read "lock_choice?Require password on lock screen (5s delay)? [y/N] "
+  if [[ "$lock_choice" =~ ^[Yy]$ ]]; then
+    sysadminctl -screenLock 5 -password -
+    echo "✅ Lock screen password enabled"
+  fi
 fi
 
-read "airdrop_choice?Restrict AirDrop to contacts only? [y/N] "
-if [[ "$airdrop_choice" =~ ^[Yy]$ ]]; then
-  defaults write com.apple.sharingd DiscoverableMode -string "Contacts Only"
-  echo "✅ AirDrop restricted to contacts"
+if [[ "$(defaults read com.apple.sharingd DiscoverableMode 2>/dev/null)" == "Contacts Only" ]]; then
+  echo "✓ AirDrop contacts only"
+else
+  read "airdrop_choice?Restrict AirDrop to contacts only? [y/N] "
+  if [[ "$airdrop_choice" =~ ^[Yy]$ ]]; then
+    defaults write com.apple.sharingd DiscoverableMode -string "Contacts Only"
+    echo "✅ AirDrop restricted to contacts"
+  fi
 fi
 
 fv_status=$(fdesetup status 2>/dev/null || echo "unknown")
-echo "FileVault: $fv_status"
-if [[ "$fv_status" != *"On"* ]]; then
+if [[ "$fv_status" == *"On"* ]]; then
+  echo "✓ FileVault on"
+else
   read "fv_choice?Enable FileVault? [y/N] "
   if [[ "$fv_choice" =~ ^[Yy]$ ]]; then
     sudo fdesetup enable
+    echo "⚠️  Store the recovery key in Bitwarden, never paste it elsewhere"
   fi
 fi
 
 # ════════════════════════════════════════════
 # Machine naming (interactive)
 # ════════════════════════════════════════════
+# Convention: ComputerName "Rod <Model>", LocalHostName = HostName "rod-<model>"
 echo ""
-echo "⚙️  Machine naming..."
-echo "Current: $(scutil --get ComputerName 2>/dev/null || echo 'not set')"
-
-read "name_choice?Set machine name? [y/N] "
-if [[ "$name_choice" =~ ^[Yy]$ ]]; then
-  read "computer_name?ComputerName (e.g. Rod MacBook Pro): "
-  read "local_host?LocalHostName (e.g. rod-macbook-pro): "
-  if [[ -n "$computer_name" && -n "$local_host" ]]; then
-    sudo scutil --set ComputerName "$computer_name"
-    sudo scutil --set LocalHostName "$local_host"
-    sudo scutil --set HostName "$local_host"
-    echo "✅ Machine named: $computer_name ($local_host)"
+computer_name=$(scutil --get ComputerName 2>/dev/null || echo "")
+local_host=$(scutil --get LocalHostName 2>/dev/null || echo "")
+host_name=$(scutil --get HostName 2>/dev/null || echo "")
+if [[ "$computer_name" == "Rod "* && "$local_host" == rod-* && "$host_name" == "$local_host" ]]; then
+  echo "✓ Machine named: $computer_name ($local_host)"
+else
+  echo "Current: ${computer_name:-not set} (${local_host:-not set})"
+  read "name_choice?Set machine name? [y/N] "
+  if [[ "$name_choice" =~ ^[Yy]$ ]]; then
+    read "computer_name?ComputerName (e.g. Rod MacBook Pro): "
+    read "local_host?LocalHostName (e.g. rod-macbook-pro): "
+    if [[ -n "$computer_name" && -n "$local_host" ]]; then
+      sudo scutil --set ComputerName "$computer_name"
+      sudo scutil --set LocalHostName "$local_host"
+      sudo scutil --set HostName "$local_host"
+      echo "✅ Machine named: $computer_name ($local_host)"
+    fi
   fi
 fi
