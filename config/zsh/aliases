@@ -115,7 +115,9 @@ claude-jobs() {
   fi
 
   [[ ! -f "$tasks_file" ]] && { echo "No scheduled-tasks.json found"; return 1; }
-  jq -r '.[] | "\(.status)\t\(.scheduled_at)\t\(.id)\t\(.prompt[0:60])"' "$tasks_file" | column -t -s $'\t'
+  # Merged view: runtime state (status, next cron slot) lives in a gitignored sidecar
+  "${tasks_file:h}/claude-scheduler/tasks.sh" "$tasks_file" \
+    | jq -r '.[] | "\(.status)\t\(.scheduled_at)\t\(.id)\t\(.prompt[0:60])"' | column -t -s $'\t'
 
   local -a recent=("$log_dir"/*.log(Nom[1,5]))
   if (( ${#recent[@]} )); then
