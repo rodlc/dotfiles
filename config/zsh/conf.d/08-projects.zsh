@@ -38,7 +38,7 @@ chpwd_functions+=(chpwd_stripe_creds)
 chpwd_stripe_creds
 
 chpwd_greptile_creds() {
-  if [[ "$PWD" == */Code/rodlc/traxyo* ]]; then
+  if [[ "$PWD" == */Code/rodlc/traxyo* || "$PWD" == */Code/rodlc/karkoi* ]]; then
     [[ -n "$GREPTILE_RODOLPHE_KEY" ]] && export GREPTILE_API_KEY="$GREPTILE_RODOLPHE_KEY"
     [[ -n "$GITHUB_RODLC_KEY" ]] && export GITHUB_TOKEN="$GITHUB_RODLC_KEY"
   else
