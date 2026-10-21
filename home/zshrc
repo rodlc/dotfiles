@@ -26,6 +26,9 @@ fi
 # Antidote plugin manager
 source /opt/homebrew/opt/antidote/share/antidote/antidote.zsh
 
+# Terminal composes window and tab titles from the profile; Claude Code sessions set the tab (session-title.sh)
+DISABLE_AUTO_TITLE=true
+
 # Load plugins statically (faster than dynamic)
 antidote load ${ZDOTDIR:-~}/.config/zsh/.zsh_plugins.txt
 
