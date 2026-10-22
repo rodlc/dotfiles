@@ -239,9 +239,9 @@
 	<key>FontAntialias</key>
 	<false/>
 	<key>FontWidthSpacing</key>
-	<real>0.99596774193548387</real>
+	<real>0.9959677419354839</real>
 	<key>ProfileCurrentVersion</key>
-	<real>2.0699999999999998</real>
+	<real>2.07</real>
 	<key>SelectionColor</key>
 	<data>
 	YnBsaXN0MDDUAQIDBAUGBwpYJHZlcnNpb25ZJGFyY2hpdmVyVCR0b3BYJG9iamVjdHMS
@@ -251,19 +251,25 @@
 	FhhYTlNPYmplY3QIERokKTI3SUxRU1ddZGp3fqaoqq+6w8vOAAAAAAAAAQEAAAAAAAAA
 	GQAAAAAAAAAAAAAAAAAAANc=
 	</data>
-	<key>ShowActiveProcessArgumentsInTabTitle</key>
+	<key>ShowActiveProcessArgumentsInTitle</key>
 	<false/>
 	<key>ShowActiveProcessInTabTitle</key>
 	<false/>
 	<key>ShowActiveProcessInTitle</key>
 	<true/>
+	<key>ShowCommandKeyInTitle</key>
+	<false/>
 	<key>ShowDimensionsInTitle</key>
 	<false/>
-	<key>ShowRepresentedURLInTabTitle</key>
-	<true/>
 	<key>ShowRepresentedURLInTitle</key>
 	<true/>
+	<key>ShowRepresentedURLPathInTitle</key>
+	<false/>
+	<key>ShowShellCommandInTitle</key>
+	<false/>
 	<key>ShowTTYNameInTabTitle</key>
+	<false/>
+	<key>ShowTTYNameInTitle</key>
 	<false/>
 	<key>ShowWindowSettingsNameInTitle</key>
 	<false/>
@@ -286,7 +292,7 @@
 	AAAZAAAAAAAAAAAAAAAAAAAA2Q==
 	</data>
 	<key>WindowTitle</key>
-	<string></string>
+	<string>Terminal</string>
 	<key>columnCount</key>
 	<integer>200</integer>
 	<key>name</key>

@@ -29,6 +29,17 @@ source /opt/homebrew/opt/antidote/share/antidote/antidote.zsh
 # Terminal composes window and tab titles from the profile; Claude Code sessions set the tab (session-title.sh)
 DISABLE_AUTO_TITLE=true
 
+# resume-hint.sh (Claude Code SessionEnd) leaves the resume command for this tty; a new shell drops a leftover, tty names are reused
+rm -f /tmp/.claude-resume-${TTY:t}
+_claude_resume_hint() {
+  local file=/tmp/.claude-resume-${TTY:t}
+  [[ -f $file ]] || return
+  print -r -- "$(<$file)"
+  rm -f $file
+}
+autoload -Uz add-zsh-hook
+add-zsh-hook precmd _claude_resume_hint
+
 # Load plugins statically (faster than dynamic)
 antidote load ${ZDOTDIR:-~}/.config/zsh/.zsh_plugins.txt
 
