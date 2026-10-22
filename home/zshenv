@@ -8,5 +8,7 @@ export DISABLE_ERROR_REPORTING=1
 export DISABLE_FEEDBACK_COMMAND=1
 export CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY=1
 
-# Playwright — Brave as default browser (playwright-cli + MCP)
-export PLAYWRIGHT_MCP_EXECUTABLE_PATH="/Applications/Brave Browser.app/Contents/MacOS/Brave Browser"
+# Playwright — bundled Chromium (an automated Brave holds its bundle and blocks its update, 19/10);
+# idle sessions close after 30 minutes, headed ones included (playwright-cli never idle-closes them by default)
+export PLAYWRIGHT_MCP_BROWSER=chromium
+export PLAYWRIGHT_MCP_IDLE_TIMEOUT=1800000
