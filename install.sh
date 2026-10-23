@@ -96,6 +96,7 @@ install_dotfiles() {
   mkdir -p "$HOME/.config/git" "$HOME/.config/mise"
   symlink "$DOTFILES_DIR/config/mise/config.toml" "$HOME/.config/mise/config.toml"
   symlink "$DOTFILES_DIR/config/git/config" "$HOME/.config/git/config"
+  symlink "$DOTFILES_DIR/config/git/ignore" "$HOME/.config/git/ignore"
   mkdir -p "$HOME/.config/zsh"
   symlink "$DOTFILES_DIR/config/zsh/aliases" "$HOME/.config/zsh/aliases"
 
