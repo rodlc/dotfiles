@@ -11,8 +11,9 @@ export XDG_STATE_HOME="$HOME/.local/state"
 export HISTFILE="$XDG_STATE_HOME/zsh/history"
 mkdir -p "$XDG_STATE_HOME/zsh" 2>/dev/null
 
-# Claude Code temp directory (scoped, does not affect system TMPDIR)
-export CLAUDE_CODE_TMPDIR="$HOME/.claude/tmp"
+# Claude Code temp directory (scoped, does not affect system TMPDIR); outside ~/.claude,
+# where the sensitive-file guard prompts on any scratchpad but the current one
+export CLAUDE_CODE_TMPDIR="$HOME/.cache/claude-tmp"
 mkdir -p "$CLAUDE_CODE_TMPDIR" 2>/dev/null
 
 # Initialize completions with daily cache optimization

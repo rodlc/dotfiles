@@ -62,12 +62,13 @@ if [[ -d "$HOME/.claude/backups" ]]; then
     [[ -e "$f" ]] && remove_item "$f" "Old .claude.json snapshot"
   done
 fi
-# Tmp
-if [[ -d "$HOME/.claude/tmp" ]]; then
-  for f in "$HOME/.claude/tmp"/*; do
+# Tmp: the current dir and the one before it moved out of ~/.claude
+for tmp_dir in "$HOME/.cache/claude-tmp" "$HOME/.claude/tmp"; do
+  [[ -d "$tmp_dir" ]] || continue
+  for f in "$tmp_dir"/*; do
     [[ -e "$f" ]] && remove_item "$f" "Temp file"
   done
-fi
+done
 # Debug logs older than 7 days
 if [[ -d "$HOME/.claude/debug" ]]; then
   while IFS= read -r -d '' f; do
