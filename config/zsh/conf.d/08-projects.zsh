@@ -38,11 +38,17 @@ chpwd_functions+=(chpwd_posthog_creds)
 chpwd_posthog_creds
 
 chpwd_stripe_creds() {
-  if [[ "$PWD" == */Code/rodlcmagic/submagic* ]]; then
-    [[ -n "$STRIPE_SUBMAGIC_KEY" ]] && export STRIPE_API_KEY="$STRIPE_SUBMAGIC_KEY"
-  else
-    [[ "$STRIPE_API_KEY" == "$STRIPE_SUBMAGIC_KEY" ]] && unset STRIPE_API_KEY
-  fi
+  case "$PWD" in
+    */Code/rodlcmagic/submagic*)
+      [[ -n "$STRIPE_SUBMAGIC_KEY" ]] && export STRIPE_API_KEY="$STRIPE_SUBMAGIC_KEY"
+      ;;
+    */Code/rodlc/karkoi*)
+      [[ -n "$STRIPE_KARKOI_KEY" ]] && export STRIPE_API_KEY="$STRIPE_KARKOI_KEY"
+      ;;
+    *)
+      [[ "$STRIPE_API_KEY" == "$STRIPE_SUBMAGIC_KEY" || "$STRIPE_API_KEY" == "$STRIPE_KARKOI_KEY" ]] && unset STRIPE_API_KEY
+      ;;
+  esac
 }
 
 chpwd_functions+=(chpwd_stripe_creds)
