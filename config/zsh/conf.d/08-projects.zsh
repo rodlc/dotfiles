@@ -43,10 +43,10 @@ chpwd_stripe_creds() {
       [[ -n "$STRIPE_SUBMAGIC_KEY" ]] && export STRIPE_API_KEY="$STRIPE_SUBMAGIC_KEY"
       ;;
     */Code/rodlc/karkoi*)
-      [[ -n "$STRIPE_RODOLPHE_KEY" ]] && export STRIPE_API_KEY="$STRIPE_RODOLPHE_KEY"
+      [[ -n "$STRIPE_TEST_KEY" ]] && export STRIPE_API_KEY="$STRIPE_TEST_KEY"
       ;;
     *)
-      [[ "$STRIPE_API_KEY" == "$STRIPE_SUBMAGIC_KEY" || "$STRIPE_API_KEY" == "$STRIPE_RODOLPHE_KEY" ]] && unset STRIPE_API_KEY
+      [[ "$STRIPE_API_KEY" == "$STRIPE_SUBMAGIC_KEY" || "$STRIPE_API_KEY" == "$STRIPE_TEST_KEY" ]] && unset STRIPE_API_KEY
       ;;
   esac
 }
