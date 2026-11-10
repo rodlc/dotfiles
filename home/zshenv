@@ -8,8 +8,8 @@ export DISABLE_ERROR_REPORTING=1
 export DISABLE_FEEDBACK_COMMAND=1
 export CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY=1
 
-# Playwright — bundled Chromium (an automated Brave holds its bundle and blocks its update, 19/10);
+# Playwright — Chromium is set by ~/.playwright/cli.config.json (home/playwright), not PLAYWRIGHT_MCP_BROWSER, which resolves
+# to the chrome-for-testing channel and steals focus even headless; headless then runs chrome-headless-shell, with no app
 # default idle timeout: headless sessions close after 1h, headed ones stay open for a session used by hand
-export PLAYWRIGHT_MCP_BROWSER=chromium
 # Sessions launched before 22/10 keep the Brave path and the 30 min timeout; remove after 29/10
 unset PLAYWRIGHT_MCP_EXECUTABLE_PATH PLAYWRIGHT_MCP_IDLE_TIMEOUT
