@@ -89,6 +89,9 @@ install_dotfiles() {
   mkdir -p "$HOME/.ssh"
   backup "$HOME/.ssh/config"
   symlink "$DOTFILES_DIR/home/ssh/config" "$HOME/.ssh/config"
+  mkdir -p "$HOME/.playwright"
+  backup "$HOME/.playwright/cli.config.json"
+  symlink "$DOTFILES_DIR/home/playwright/cli.config.json" "$HOME/.playwright/cli.config.json"
 
   # config/ → ~/.config/<app>/
   mkdir -p "$HOME/.config/pry"
