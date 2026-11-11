@@ -173,7 +173,7 @@ install_dotfiles() {
   if [ -f "$DOTFILES_DIR/.pre-commit-config.yaml" ]; then
     if command -v pre-commit &>/dev/null; then
       echo "=====> Installing pre-commit hooks"
-      pre-commit install
+      (cd "$DOTFILES_DIR" && pre-commit install)
     else
       echo "⚠️  pre-commit not found, skipping hooks"
     fi
