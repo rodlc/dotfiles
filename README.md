@@ -50,7 +50,10 @@ Each tier includes the previous. Re-run anytime (idempotent).
 
 ```
 dotfiles/
-├── install.sh              # Tiered installer (dotfiles|workspace|mcp)
+├── install.sh              # Tiered installer (dotfiles|workspace|mcp|doctor)
+├── doctor.sh               # Checks an installed tier
+├── lib/                    # Shared helpers (backup, symlink, machine role, launchd roles)
+├── tiers/                  # One install_<tier> function per file, plus its helpers
 ├── .env.example            # Secrets template (→ ~/.env)
 ├── .git-hooks/             # Global git hook (dotfiles reminder)
 ├── config/                 # → ~/.config/ (XDG app configs)
