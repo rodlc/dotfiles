@@ -45,6 +45,16 @@ symlink() {
 # TIER: dotfiles — Shell + Git + Zed + Brew (standalone machine)
 # ══════════════════════════════════════════════════════════════════
 
+# Their installers prompt for the admin password, which a non-interactive run cannot answer
+install_sudo_casks() {
+  if [ -t 0 ]; then
+    echo "=====> Installing casks that need sudo"
+    brew bundle --file="$DOTFILES_DIR/Brewfile.sudo" || echo "⚠️  Sudo casks failed: brew bundle --file=$DOTFILES_DIR/Brewfile.sudo"
+  else
+    echo "-----> Skipped sudo casks (veracrypt, macfuse): rerun ./install.sh in Terminal"
+  fi
+}
+
 install_dotfiles() {
   # Homebrew
   if ! command -v brew &> /dev/null; then
@@ -62,7 +72,15 @@ install_dotfiles() {
   echo "=====> Installing Homebrew packages"
   # Homebrew 7 refuses formulae from untrusted taps
   brew tap rtk-ai/tap && brew trust --formula rtk-ai/tap/rtk
-  brew bundle --file="$DOTFILES_DIR/Brewfile" || { echo "⚠️  Some brew packages failed to install"; }
+  brew bundle --file="$DOTFILES_DIR/Brewfile" || true
+  local missing=$(brew bundle check --file="$DOTFILES_DIR/Brewfile" --verbose --no-upgrade 2>/dev/null | grep '^→')
+  if [[ -n "$missing" ]]; then
+    echo ""
+    echo "⚠️  ⚠️  ⚠️  Brewfile entries still missing after brew bundle:"
+    echo "$missing"
+    echo ""
+  fi
+  install_sudo_casks
 
   # brew bundle skips a cask already in the Caskroom, even when another account installed its files
   for cask in $(brew list --cask | grep '^font-'); do

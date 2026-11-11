@@ -1,0 +1,5 @@
+# Casks whose installer asks for the admin password: install.sh runs them only from a terminal
+
+# Encryption tools
+cask "veracrypt"
+cask "macfuse"
