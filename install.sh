@@ -83,11 +83,17 @@ install_dotfiles() {
   install_sudo_casks
 
   # brew bundle skips a cask already in the Caskroom, even when another account installed its files
-  for cask in $(brew list --cask | grep '^font-'); do
-    local font=$(brew info --cask --json=v2 "$cask" | jq -r '[.casks[0].artifacts[] | .font? // empty | .[0]] | first | split("/") | last')
-    if [[ -n "$font" && ! -f "$HOME/Library/Fonts/$font" ]]; then
-      echo "-----> Reinstalling $cask (fonts missing from ~/Library/Fonts)"
-      brew reinstall --cask "$cask"
+  brew info --cask --json=v2 --installed | jq -r '
+    .casks[]
+    | ([.artifacts[] | .app? // empty] | first) as $app
+    | ([.artifacts[] | .font? // empty | .[0]] | first) as $font
+    | if $app then "\(.token)\t/Applications/\(([$app[] | objects | .target] | first) // $app[0])"
+      elif $font then "\(.token)\t\(env.HOME)/Library/Fonts/\($font | split("/") | last)"
+      else empty end' |
+  while IFS=$'\t' read -r cask artifact; do
+    if [[ ! -e "$artifact" ]]; then
+      echo "-----> Reinstalling $cask ($artifact missing)"
+      brew reinstall --cask "$cask" < /dev/null || echo "⚠️  Reinstall of $cask failed"
     fi
   done
 
