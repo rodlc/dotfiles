@@ -368,9 +368,14 @@ install_mcp() {
 
   # Memory, typology and WhatsApp servers stay bound to loopback; Tailscale opens them to the tailnet only, no API key to spread
   if [[ "$role" == "reference" ]]; then
-    for port in 4242 4243 4244; do
-      /Applications/Tailscale.app/Contents/MacOS/Tailscale serve --bg --tcp $port tcp://127.0.0.1:$port
-    done
+    local tailscale=/Applications/Tailscale.app/Contents/MacOS/Tailscale
+    if "$tailscale" status &>/dev/null; then
+      for port in 4242 4243 4244; do
+        "$tailscale" serve --bg --tcp $port tcp://127.0.0.1:$port || echo "⚠️  tailscale serve failed on port $port"
+      done
+    else
+      echo "⚠️  Tailscale not logged in: open Tailscale, log in, then rerun ./install.sh mcp"
+    fi
   fi
 
   # Launchd services (MCP memory + backup)
