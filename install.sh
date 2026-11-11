@@ -5,6 +5,8 @@ DOTFILES_DIR="${0:A:h}"  # script's own directory, whatever the caller's cwd
 TIER="${1:-dotfiles}"  # dotfiles | workspace | mcp
 source "$DOTFILES_DIR/lib/launchd-roles.zsh"
 
+[[ "$TIER" == "doctor" ]] && exec "$DOTFILES_DIR/doctor.sh" "${2:-mcp}"
+
 cat <<EOF
 ╔═══════════════════════════════════════════════════════════════╗
 ║  Dotfiles installer — tier: $TIER
@@ -503,13 +505,17 @@ case "$TIER" in
     install_mcp
     ;;
   *)
-    echo "Usage: ./install.sh [dotfiles|workspace|mcp]"
+    echo "Usage: ./install.sh [dotfiles|workspace|mcp|doctor [tier]]"
     echo "  dotfiles  — Shell + Git + Zed + Brew (standalone)"
     echo "  workspace — dotfiles + Claude Code + workspace config"
     echo "  mcp       — workspace + MCP servers + launchd + memory"
+    echo "  doctor    — check an installed tier (default: mcp)"
     exit 1
     ;;
 esac
+
+echo ""
+"$DOTFILES_DIR/doctor.sh" "$TIER" || true
 
 [[ "$TIER" != "dotfiles" ]] && { "$DOTFILES_DIR/scripts/system/claude-handoff" || true; }
 
