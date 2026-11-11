@@ -327,6 +327,7 @@ install_mcp() {
 
   # Single-instance services run on the reference machine only; the others reach it over Tailscale
   local reference_only=(claude-scheduler mcp-backup mcp-consolidation mcp-memory-http mcp-typology whatsapp-bridge)
+  local client_only=(studio-forward)
   local role_file="$HOME/.config/dotfiles/role"
   if [[ ! -f "$role_file" ]]; then
     read "is_ref?Is this the reference machine (scheduler, memory server, backups, WhatsApp)? [y/N] "
@@ -338,17 +339,17 @@ install_mcp() {
 
   # Configure MCPs (expand template → user scope of ~/.claude.json)
   echo "=====> Configuring MCP servers"
-  local memory_host=rod-mac-studio
-  [[ "$role" == "reference" ]] && memory_host=127.0.0.1
-  local expanded=$(MEMORY_URL="http://$memory_host:4242/mcp" envsubst < "$WORKSPACE_DIR/.claude/mcp-template.json")
+  local expanded=$(envsubst < "$WORKSPACE_DIR/.claude/mcp-template.json")
   for name in $(jq -r '.mcpServers | keys[]' <<< "$expanded"); do
     claude mcp remove --scope user "$name" &>/dev/null || true
     claude mcp add-json --scope user "$name" "$(jq -c --arg name "$name" '.mcpServers[$name]' <<< "$expanded")"
   done
 
-  # Memory server stays bound to loopback; Tailscale opens it to the tailnet only, no API key to spread
+  # Memory, typology and WhatsApp servers stay bound to loopback; Tailscale opens them to the tailnet only, no API key to spread
   if [[ "$role" == "reference" ]]; then
-    /Applications/Tailscale.app/Contents/MacOS/Tailscale serve --bg --tcp 4242 tcp://127.0.0.1:4242
+    for port in 4242 4243 4244; do
+      /Applications/Tailscale.app/Contents/MacOS/Tailscale serve --bg --tcp $port tcp://127.0.0.1:$port
+    done
   fi
 
   # Launchd services (MCP memory + backup)
@@ -366,6 +367,10 @@ install_mcp() {
         local service="${${name%.plist}#com.rodlecoent.}"
         if [[ "$role" != "reference" ]] && (( ${reference_only[(Ie)$service]} )); then
           echo "-----> Skipped $service (reference machine only)"
+          continue
+        fi
+        if [[ "$role" == "reference" ]] && (( ${client_only[(Ie)$service]} )); then
+          echo "-----> Skipped $service (client machines only)"
           continue
         fi
         backup "$HOME/Library/LaunchAgents/$name"
@@ -393,14 +398,6 @@ install_mcp() {
       python3 install_hooks.py --natural-triggers
       cd "$DOTFILES_DIR"
       echo "-----> Hooks installed with natural triggers"
-
-      HOOKS_CONFIG="$HOME/.claude/hooks/config.json"
-      if [ -f "$HOOKS_CONFIG" ] && grep -q '"apiKey": ""' "$HOOKS_CONFIG" 2>/dev/null; then
-        echo ""
-        echo "💡 Generate an API key for hooks authentication:"
-        echo "   export MCP_API_KEY=\"\$(openssl rand -base64 32)\""
-        echo "   # Then add it to \$HOME/.env and hooks config.json"
-      fi
     fi
   else
     echo "-----> ⚠️  mcp-memory-service not found, skipping launchd setup"

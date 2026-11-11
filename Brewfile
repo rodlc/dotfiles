@@ -20,6 +20,8 @@ brew "tree"
 brew "wget"
 # Provides envsubst
 brew "gettext"
+# Multipurpose relay (SOcket CAT)
+brew "socat"
 
 # ════════════════════════════════════════════════════════════════════════════
 # Shell Environment
