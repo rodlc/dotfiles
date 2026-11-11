@@ -3,6 +3,7 @@ set -e
 
 DOTFILES_DIR="${0:A:h}"  # script's own directory, whatever the caller's cwd
 TIER="${1:-dotfiles}"  # dotfiles | workspace | mcp
+source "$DOTFILES_DIR/lib/launchd-roles.zsh"
 
 cat <<EOF
 ╔═══════════════════════════════════════════════════════════════╗
@@ -348,10 +349,7 @@ install_mcp() {
   fi
   "$WORKSPACE_DIR/claude-config/scripts/install-mcp-servers.sh"
 
-  # Single-instance services run on the reference machine only; the others reach it over Tailscale
-  local reference_only=(claude-scheduler mcp-backup mcp-consolidation mcp-memory-http mcp-typology whatsapp-bridge)
-  local client_only=(studio-forward)
-  local role_file="$HOME/.config/dotfiles/role"
+  local role_file="$DOTFILES_ROLE_FILE"
   if [[ ! -f "$role_file" ]]; then
     read "is_ref?Is this the reference machine (scheduler, memory server, backups, WhatsApp)? [y/N] "
     mkdir -p "${role_file:h}"
@@ -377,6 +375,7 @@ install_mcp() {
 
   # Launchd services (MCP memory + backup)
   echo "=====> Installing launchd services"
+  local launchd_failed=()
   MCP_MEMORY_SERVICE="$WORKSPACE_DIR/mcp-servers/mcp-memory-service"
 
   if [ -d "$MCP_MEMORY_SERVICE" ]; then
@@ -387,21 +386,37 @@ install_mcp() {
       for plist in "$LAUNCHD_SRC"/*.plist; do
         [ -f "$plist" ] || continue
         local name="$(basename "$plist")"
-        local service="${${name%.plist}#com.rodlecoent.}"
-        if [[ "$role" != "reference" ]] && (( ${reference_only[(Ie)$service]} )); then
-          echo "-----> Skipped $service (reference machine only)"
+        local label="${name%.plist}"
+        local service="${label#com.rodlecoent.}"
+        local agent="$HOME/Library/LaunchAgents/$name"
+        local excluded="$(launchd_excluded_reason "$service" "$role")"
+        if [[ -n "$excluded" ]]; then
+          if [[ -f "$agent" ]]; then
+            launchctl bootout "gui/$UID" "$agent" 2>/dev/null || true
+            rm "$agent"
+            echo "-----> Removed $service ($excluded)"
+          else
+            echo "-----> Skipped $service ($excluded)"
+          fi
           continue
         fi
-        if [[ "$role" == "reference" ]] && (( ${client_only[(Ie)$service]} )); then
-          echo "-----> Skipped $service (client machines only)"
+        local program="$(plutil -extract ProgramArguments.0 raw "$plist" 2>/dev/null)"
+        program="${program//__HOME__/$HOME}"
+        if [[ ! -e "$program" ]]; then
+          echo "-----> Skipped $service (${program:-ProgramArguments} not found)"
           continue
         fi
-        backup "$HOME/Library/LaunchAgents/$name"
-        sed "s|__HOME__|$HOME|g" "$plist" > "$HOME/Library/LaunchAgents/$name"
-        launchctl unload "$HOME/Library/LaunchAgents/$name" 2>/dev/null || true
-        launchctl load "$HOME/Library/LaunchAgents/$name" 2>/dev/null || true
+        backup "$agent"
+        sed "s|__HOME__|$HOME|g" "$plist" > "$agent"
+        launchctl bootout "gui/$UID" "$agent" 2>/dev/null || true
+        # bootout returns before the service is gone; bootstrapping it meanwhile fails with error 5
+        for attempt in {1..20}; do
+          launchctl print "gui/$UID/$label" &>/dev/null || break
+          sleep 0.25
+        done
+        launchctl bootstrap "gui/$UID" "$agent" || launchd_failed+=("$service")
       done
-      echo "-----> Launchd services installed and loaded"
+      echo "-----> Launchd services installed"
     fi
 
     if [[ "$role" == "reference" ]]; then
@@ -457,6 +472,9 @@ install_mcp() {
   fi
 
   echo ""
+  if (( ${#launchd_failed} )); then
+    echo "✗ launchctl bootstrap failed for: ${launchd_failed[*]} (see ~/Library/Logs, then rerun ./install.sh mcp)"
+  fi
   echo "✓ Tier mcp installed (MCP servers + launchd + memory)"
 }
 
