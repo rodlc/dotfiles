@@ -54,7 +54,21 @@ install_sudo_casks() {
     echo "=====> Installing casks that need sudo"
     brew bundle --file="$DOTFILES_DIR/Brewfile.sudo" || echo "⚠️  Sudo casks failed: brew bundle --file=$DOTFILES_DIR/Brewfile.sudo"
   else
-    echo "-----> Skipped sudo casks (veracrypt, macfuse): rerun ./install.sh in Terminal"
+    local command="brew bundle --file=\"$DOTFILES_DIR/Brewfile.sudo\""
+    cat <<EOF
+
+╔═══════════════════════════════════════════════════════════════╗
+║  ACTION NEEDED: sudo casks (veracrypt, macfuse)
+║  Run in Terminal (it asks for your sudo password):
+║
+║    $command
+║
+║  The command is in your clipboard; the install keeps going
+╚═══════════════════════════════════════════════════════════════╝
+
+EOF
+    print -rn -- "$command" | pbcopy || true
+    osascript -e 'display notification "Sudo casks command in the clipboard: paste it in Terminal" with title "Dotfiles install"' || true
   fi
 }
 

@@ -43,6 +43,7 @@ tailscale_serves() {
 echo "=====> Doctor (tier: $TIER)"
 
 check "Brewfile satisfied (brew bundle check)" brew bundle check --file="$DOTFILES_DIR/Brewfile" --no-upgrade
+check "Brewfile.sudo satisfied (brew bundle check)" brew bundle check --file="$DOTFILES_DIR/Brewfile.sudo" --no-upgrade
 
 if [[ "$TIER" == "workspace" || "$TIER" == "mcp" ]]; then
   check "No dangling symlinks under ~/.claude" no_dangling_claude_links
