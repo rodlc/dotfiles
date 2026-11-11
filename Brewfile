@@ -109,6 +109,8 @@ cask "font-jetbrains-mono"
 cask "iina"
 # Keyboard/Snippets/Clipboard management
 cask "raycast"
+# Notes and tasks
+cask "notion"
 # Primary editor
 cask "zed"
 # Browser routing

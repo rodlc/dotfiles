@@ -64,6 +64,15 @@ install_dotfiles() {
   brew tap rtk-ai/tap && brew trust --formula rtk-ai/tap/rtk
   brew bundle --file="$DOTFILES_DIR/Brewfile" || { echo "⚠️  Some brew packages failed to install"; }
 
+  # brew bundle skips a cask already in the Caskroom, even when another account installed its files
+  for cask in $(brew list --cask | grep '^font-'); do
+    local font=$(brew info --cask --json=v2 "$cask" | jq -r '[.casks[0].artifacts[] | .font? // empty | .[0]] | first | split("/") | last')
+    if [[ -n "$font" && ! -f "$HOME/Library/Fonts/$font" ]]; then
+      echo "-----> Reinstalling $cask (fonts missing from ~/Library/Fonts)"
+      brew reinstall --cask "$cask"
+    fi
+  done
+
   # mise runtimes
   echo "=====> Installing language runtimes"
   if command -v mise &>/dev/null; then
@@ -281,6 +290,12 @@ install_workspace() {
     fi
   done
 
+  if [[ ! -x "$HOME/.local/bin/rayclip" ]]; then
+    echo "-----> Building rayclip"
+    mkdir -p "$HOME/.local/bin"
+    (cd "$WORKSPACE_DIR/tools/rayclip" && bun install --silent && bun run build)
+  fi
+
   echo ""
   echo "✓ Tier workspace installed (Claude Code + workspace config)"
   echo ""
@@ -293,7 +308,8 @@ install_workspace() {
 
 install_mcp() {
   WORKSPACE_DIR="${WORKSPACE_DIR:-$HOME/Code/rodlc/workspace}"
-  source "$HOME/.env" 2>/dev/null || true
+  # envsubst only sees exported variables
+  set -a; source "$HOME/.env" 2>/dev/null; set +a
 
   # Verify workspace exists
   if [ ! -d "$WORKSPACE_DIR" ]; then
@@ -309,16 +325,6 @@ install_mcp() {
     echo "⚠️  install-mcp-servers.sh not found in workspace"
   fi
 
-  # Configure MCPs (expand template → ~/.claude.json)
-  echo "=====> Configuring MCP servers"
-  if [ -x "$WORKSPACE_DIR/claude-config/scripts/mcp-sync.sh" ]; then
-    "$WORKSPACE_DIR/claude-config/scripts/mcp-sync.sh" install
-  fi
-
-  # Launchd services (MCP memory + backup)
-  echo "=====> Installing launchd services"
-  MCP_MEMORY_SERVICE="$WORKSPACE_DIR/mcp-servers/mcp-memory-service"
-
   # Single-instance services run on the reference machine only; the others reach it over Tailscale
   local reference_only=(claude-scheduler mcp-backup mcp-consolidation mcp-memory-http mcp-typology whatsapp-bridge)
   local role_file="$HOME/.config/dotfiles/role"
@@ -329,6 +335,25 @@ install_mcp() {
   fi
   local role=$(<"$role_file")
   echo "-----> Machine role: $role (change: edit $role_file)"
+
+  # Configure MCPs (expand template → user scope of ~/.claude.json)
+  echo "=====> Configuring MCP servers"
+  local memory_host=rod-mac-studio
+  [[ "$role" == "reference" ]] && memory_host=127.0.0.1
+  local expanded=$(MEMORY_URL="http://$memory_host:4242/mcp" envsubst < "$WORKSPACE_DIR/.claude/mcp-template.json")
+  for name in $(jq -r '.mcpServers | keys[]' <<< "$expanded"); do
+    claude mcp remove --scope user "$name" &>/dev/null || true
+    claude mcp add-json --scope user "$name" "$(jq -c --arg name "$name" '.mcpServers[$name]' <<< "$expanded")"
+  done
+
+  # Memory server stays bound to loopback; Tailscale opens it to the tailnet only, no API key to spread
+  if [[ "$role" == "reference" ]]; then
+    /Applications/Tailscale.app/Contents/MacOS/Tailscale serve --bg --tcp 4242 tcp://127.0.0.1:4242
+  fi
+
+  # Launchd services (MCP memory + backup)
+  echo "=====> Installing launchd services"
+  MCP_MEMORY_SERVICE="$WORKSPACE_DIR/mcp-servers/mcp-memory-service"
 
   if [ -d "$MCP_MEMORY_SERVICE" ]; then
     mkdir -p "$HOME/Library/LaunchAgents"
