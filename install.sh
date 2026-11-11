@@ -342,11 +342,11 @@ install_mcp() {
 
   # Build MCP servers
   echo "=====> Building MCP servers"
-  if [ -x "$WORKSPACE_DIR/claude-config/scripts/install-mcp-servers.sh" ]; then
-    "$WORKSPACE_DIR/claude-config/scripts/install-mcp-servers.sh"
-  else
-    echo "⚠️  install-mcp-servers.sh not found in workspace"
+  if [ ! -x "$WORKSPACE_DIR/claude-config/scripts/install-mcp-servers.sh" ]; then
+    echo "✗ install-mcp-servers.sh not found in $WORKSPACE_DIR/claude-config/scripts"
+    return 1
   fi
+  "$WORKSPACE_DIR/claude-config/scripts/install-mcp-servers.sh"
 
   # Single-instance services run on the reference machine only; the others reach it over Tailscale
   local reference_only=(claude-scheduler mcp-backup mcp-consolidation mcp-memory-http mcp-typology whatsapp-bridge)
