@@ -73,15 +73,6 @@ install_dotfiles() {
     fi
   done
 
-  # mise runtimes
-  echo "=====> Installing language runtimes"
-  if command -v mise &>/dev/null; then
-    echo "-----> Installing runtimes via mise"
-    mise install
-  else
-    echo "⚠️  mise not found, skipping runtimes"
-  fi
-
   echo "=====> Creating symlinks"
 
   # home/ → ~/.<name>
@@ -131,6 +122,14 @@ install_dotfiles() {
   done
   backup "$HOME/.config/starship.toml"
   symlink "$DOTFILES_DIR/config/starship.toml" "$HOME/.config/starship.toml"
+
+  echo "=====> Installing language runtimes"
+  if command -v mise &>/dev/null; then
+    echo "-----> Installing runtimes via mise"
+    mise install
+  else
+    echo "⚠️  mise not found, skipping runtimes"
+  fi
 
   # Terminal profile
   TERMINAL_PROFILE="$DOTFILES_DIR/terminal/Pro Nord.terminal"
