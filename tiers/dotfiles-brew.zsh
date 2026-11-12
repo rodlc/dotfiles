@@ -1,5 +1,9 @@
 # Their installers prompt for the admin password, which a non-interactive run cannot answer
 install_sudo_casks() {
+  if brew bundle check --file="$DOTFILES_DIR/Brewfile.sudo" --no-upgrade &>/dev/null; then
+    echo "✓ Sudo casks already installed"
+    return
+  fi
   if [ -t 0 ]; then
     echo "=====> Installing casks that need sudo"
     brew bundle --file="$DOTFILES_DIR/Brewfile.sudo" || echo "⚠️  Sudo casks failed: brew bundle --file=$DOTFILES_DIR/Brewfile.sudo"
