@@ -26,8 +26,8 @@ rayclip_installed() {
 }
 
 launchd_healthy() {
-  local label="$1"
-  local state="$(launchctl print "gui/$UID/$label" 2>/dev/null)" || return 1
+  local label="$1" state
+  state="$(launchctl print "gui/$UID/$label" 2>/dev/null)" || return 1
   local last_exit="$(awk -F' = ' '/^\tlast exit code/ { print $2; exit }' <<< "$state")"
   [[ -z "$last_exit" || "$last_exit" == "0" || "$last_exit" == "(never exited)" ]]
 }
