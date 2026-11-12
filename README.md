@@ -98,7 +98,7 @@ Private repo for Claude Code config, MCP servers, and encrypted memory: `rodlc/w
 │   ├── skills/             # Skills (docx, pdf, posthog...)
 │   ├── hooks/              # PreToolUse hooks
 │   ├── rules/              # Project rules
-│   └── .mcp.json           # MCP template (expanded by mcp-sync.sh)
+│   └── .mcp.json           # MCP template (expanded by ./install.sh mcp)
 ├── mcp-servers/            # MCP source code (git submodules)
 ├── memory/                 # Encrypted backups (GPG)
 └── scripts/                # Sync utilities

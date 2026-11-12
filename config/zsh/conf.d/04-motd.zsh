@@ -198,7 +198,7 @@ if [[ -o login ]]; then
           [[ -z "$expanded" || -z "$current" ]] && { echo 0; return; }
           diff <(echo "$expanded") <(echo "$current") 2>/dev/null | grep -c '^[<>]' || echo 0
         )
-        [[ "$count" =~ ^[0-9]+$ && "$count" -gt 0 ]] && labels+=("MCP stale (${count}Δ)") && fixes+=("mcp-sync.sh diff")
+        [[ "$count" =~ ^[0-9]+$ && "$count" -gt 0 ]] && labels+=("MCP stale (${count}Δ)") && fixes+=("df-install mcp")
       fi
 
       if (( ${#labels} )); then
