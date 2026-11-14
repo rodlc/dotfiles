@@ -201,6 +201,29 @@ if [[ -o login ]]; then
         [[ "$count" =~ ^[0-9]+$ && "$count" -gt 0 ]] && labels+=("MCP stale (${count}Δ)") && fixes+=("df-install mcp")
       fi
 
+      for entry in ~/.claude/{agents,commands,agent_docs,scripts,workflows}/* ~/.claude/keybindings.json; do
+        [[ ! -e "$entry" || -L "$entry" ]] && continue
+        [[ "$entry" == *.backup || "$entry" == *.bak ]] && continue
+        labels+=("not symlinked (${entry#$HOME/.claude/})"); fixes+=("df-install workspace"); break
+      done
+
+      local override_found= mcp_all_found=
+      for settings in ~/Code/rodlc/*/.claude/settings*.json; do
+        local repo="${settings:h:h:t}"
+        local settings_home="\$HOME/${settings#$HOME/}"
+        if [[ -z "$override_found" ]] && jq -e 'has("effortLevel") or has("model") or (.env | type == "object" and has("CLAUDE_CODE_EFFORT_LEVEL"))' "$settings" &>/dev/null; then
+          labels+=("project override ($repo)")
+          fixes+=("jq 'del(.effortLevel, .model, .env.CLAUDE_CODE_EFFORT_LEVEL)' $settings_home | sponge $settings_home")
+          override_found=1
+        fi
+        if [[ -z "$mcp_all_found" ]] && jq -e '.enableAllProjectMcpServers == true' "$settings" &>/dev/null; then
+          labels+=("enableAllProjectMcpServers ($repo)")
+          fixes+=("list servers in enabledMcpjsonServers, then jq del(.enableAllProjectMcpServers) $settings_home")
+          mcp_all_found=1
+        fi
+        [[ -n "$override_found" && -n "$mcp_all_found" ]] && break
+      done
+
       if (( ${#labels} )); then
         local -aU uf=("${fixes[@]}")
         echo "🌊 claude-config ${(j:, :)labels} ⇒ ${(j:, :)uf}" > "$cache.tmp"
